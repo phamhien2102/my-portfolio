@@ -1,4 +1,5 @@
 import { SITE } from "@/config/site";
+import { SettingsButton } from "@/features/settings";
 
 import { NavLinks } from "./nav-links";
 
@@ -14,6 +15,7 @@ export function SiteHeader() {
         <span className="sr-only">{SITE.name}</span>
       </a>
       <NavLinks items={SITE.nav} />
+      <SettingsButton />
     </header>
   );
 }

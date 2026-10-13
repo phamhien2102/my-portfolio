@@ -22,6 +22,11 @@ html {
   }
 }
 
+/* Don't let the page scroll behind an open modal (the settings popup). */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
