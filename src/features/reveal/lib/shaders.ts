@@ -1,0 +1,130 @@
+/** GLSL sources for the reveal effect. */
+
+export const VERTEX_SHADER = /* glsl */ `
+  varying vec2 vUv;
+  void main() { vUv = uv; gl_Position = vec4(position, 1.0); }
+`;
+
+/** Shared GLSL: noise, smooth-min and the blob signed-distance field. */
+export function buildCommon(trailLength: number, blobScale: number): string {
+  const scale = blobScale.toFixed(2);
+  return /* glsl */ `
+  precision highp float;
+  varying vec2 vUv;
+  uniform float uTime;
+  uniform float uSpeed;
+  uniform vec3  uInk;
+  uniform vec2  uResolution;
+  uniform vec2  uTrail[${trailLength}];
+  const int N = ${trailLength};
+
+  float hash(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+  float noise(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x),
+               mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
+  }
+  float smin(float a, float b, float k) {
+    float h = max(k - abs(a - b), 0.0) / k;
+    return min(a, b) - h * h * k * 0.25;
+  }
+  float map(vec2 p) {
+    float aspect = uResolution.x / uResolution.y;
+    float amp = 0.006 + 0.016 * uSpeed;
+    vec2 w = vec2(noise(p * 7.0 + uTime * 0.6),
+                  noise(p * 7.0 - uTime * 0.6 + 17.0)) - 0.5;
+    vec2 q = p + w * amp * 2.0;
+
+    float d = 1e5;
+    for (int i = 0; i < N; i++) {
+      vec2 c = uTrail[i]; c.x *= aspect;
+      float t = float(i) / float(N - 1);
+      float r = mix(0.065, 0.012, t) * ${scale};
+      d = smin(d, length(q - c) - r, 0.07 * ${scale});
+    }
+    d += (noise(p * 60.0 + uTime) - 0.5) * 0.012 * uSpeed;
+    return d;
+  }
+`;
+}
+
+/** Pass 1: accumulate the area the blob has swept into the trail buffer. */
+export const ACCUM_FRAGMENT = /* glsl */ `
+  uniform sampler2D uPrev;
+  uniform float uFade;
+  void main() {
+    float aspect = uResolution.x / uResolution.y;
+    vec2 p = vUv; p.x *= aspect;
+
+    float d = map(p);
+    float stamp = 1.0 - smoothstep(-0.01, 0.025, d);
+    vec4 prev = texture2D(uPrev, vUv);
+    // untouched areas carry the current ink; freshly swept areas are overwritten with it
+    vec3 base = prev.a > 0.02 ? prev.rgb : uInk;
+    vec3 col  = mix(base, uInk, stamp);
+    float a   = max(prev.a - uFade, stamp);
+    gl_FragColor = vec4(col, a);
+  }
+`;
+
+/** Pass 2: background + masked text + chrome blob. */
+export const FINAL_FRAGMENT = /* glsl */ `
+  uniform sampler2D uReveal;
+  uniform sampler2D uText;
+  uniform vec3 uIdle;
+  uniform vec3 uBg;
+
+  vec3 env(vec3 r) {
+    vec3 dark  = vec3(0.05, 0.14, 0.02);
+    vec3 green = vec3(0.66, 0.88, 0.12);
+    vec3 lilac = vec3(0.78, 0.72, 0.95);
+    float bands = sin(r.x * 7.0 + r.y * 5.0) * 0.5 + 0.5;
+    float g = smoothstep(0.15, 0.85, bands * 0.55 + r.y * 0.35 + 0.35);
+    vec3 col = mix(dark, green, g);
+    float k = smoothstep(0.55, 0.95, bands) * smoothstep(0.0, 0.8, -r.y + 0.3);
+    return mix(col, lilac, k * 0.55);
+  }
+
+  void main() {
+    float aspect = uResolution.x / uResolution.y;
+    vec2 p = vUv; p.x *= aspect;
+
+    vec3 bg = uBg;
+
+    // text only shows where the blob has passed; ragged edge from noise
+    vec4 rv = texture2D(uReveal, vUv);          // rgb = stroke colour, a = coverage
+    float m = smoothstep(0.42, 0.58, rv.a + (noise(p * 45.0) - 0.5) * 0.4);
+    float txt = texture2D(uText, vUv).a;
+    vec3 base = mix(bg, uIdle, txt);            // idle (white) text
+    base = mix(base, rv.rgb, txt * m);          // stroke colour where swept
+
+    // chrome blob
+    float d = map(p);
+    vec2 e = vec2(0.002, 0.0);
+    vec2 grad = vec2(map(p + e.xy) - map(p - e.xy),
+                     map(p + e.yx) - map(p - e.yx));
+    vec2 g = normalize(grad + 1e-6);
+    float depth = clamp(-d / 0.05, 0.0, 1.0);
+    vec3 n = normalize(vec3(g * sqrt(1.0 - depth * depth), depth + 0.05));
+
+    vec3 r = reflect(vec3(0.0, 0.0, -1.0), n);
+    vec3 col = env(r);
+    vec3 L = normalize(vec3(-0.4, 0.6, 0.7));
+    col += vec3(1.0) * pow(max(dot(n, L), 0.0), 48.0) * 0.9;
+    col += vec3(0.55, 0.5, 0.75) * pow(1.0 - n.z, 3.0) * 0.35;
+
+    // text seen through the blob, refracted by the normal
+    float seen = texture2D(uText, vUv + n.xy * 0.03).a;
+    col = mix(col, col * 0.3 + uInk * 0.35, seen * 0.7);
+
+    col = mix(col, vec3(0.03), smoothstep(-0.012, -0.001, d) * 0.85);
+
+    float shape = 1.0 - smoothstep(0.0, 0.004, d);
+    gl_FragColor = vec4(mix(base, col, shape), 1.0);
+  }
+`;

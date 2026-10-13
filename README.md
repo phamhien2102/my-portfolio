@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# my-portfolio
 
-## Getting Started
+Personal portfolio built with Next.js (App Router), TypeScript and Tailwind CSS v4.
 
-First, run the development server:
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+nvm use          # Node 24 (see .nvmrc)
+npm install
+npm run dev      # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Script           | Purpose                                     |
+| ---------------- | ------------------------------------------- |
+| `npm run dev`    | Start the dev server                        |
+| `npm run build`  | Production build                            |
+| `npm run check`  | Lint + typecheck + format check (run in CI) |
+| `npm run format` | Format with Prettier                        |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/                  # Routing and global styles only. Keep pages thin.
+├── config/               # Site-wide constants (name, metadata).
+├── features/             # Self-contained features, one folder each.
+│   └── reveal/
+│       ├── index.ts      # Public API: the only file others may import.
+│       ├── config.ts     # Tunable settings.
+│       ├── components/   # React components.
+│       └── lib/          # Framework-agnostic logic (WebGL scene, shaders).
+├── components/ui/        # Shared, feature-agnostic UI primitives.
+├── lib/                  # Shared utilities.
+└── types/                # Shared TypeScript types.
+```
 
-## Learn More
+### Conventions
 
-To learn more about Next.js, take a look at the following resources:
+- **Pages compose features.** `app/**` imports from `@/features/<name>`, nothing deeper.
+- **Features own their code.** Components, logic and config live together and are
+  exposed through `index.ts`.
+- **Boundaries are enforced by ESLint** (`no-restricted-imports`): deep imports into a
+  feature, or a feature importing from `app/`, fail `npm run lint`.
+- **Shared code is promoted, not pre-built.** Move something to `components/ui` or
+  `lib` only once a second feature needs it.
+- **Files are kebab-case**, components are PascalCase exports.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment (Vercel)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Vercel detects Next.js automatically, so no extra config is needed.
 
-## Deploy on Vercel
+1. Push the repo to GitHub.
+2. In Vercel: **Add New → Project**, import the repo, keep the defaults (Framework: Next.js,
+   build command `next build`, install command `npm install`).
+3. Add any variables from `.env.example` under **Settings → Environment Variables**.
+4. Deploy. Every push to `main` ships to production; every other branch and pull request
+   gets its own preview URL.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Or deploy from the terminal with the Vercel CLI:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx vercel          # preview deployment
+npx vercel --prod   # production deployment
+```
+
+Set `NEXT_PUBLIC_SITE_URL` to the production URL once you have a domain.
+
+## The reveal effect
+
+`features/reveal` renders a full-viewport WebGL canvas (Three.js). A chrome blob follows
+the pointer (or auto-sweeps on load) and reveals the word in a new colour for each
+stroke. Tune it in `src/features/reveal/config.ts`.

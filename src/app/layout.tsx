@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SITE } from "@/config/site";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,10 +16,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Raymond Pham | Portfolio",
-    template: "%s | Raymond Pham",
+    default: SITE.title,
+    template: `%s | ${SITE.name}`,
   },
-  description: "Personal portfolio of Raymond Pham.",
+  description: SITE.description,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
