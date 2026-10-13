@@ -43,7 +43,7 @@ export function BackToTop() {
       aria-label="Back to top"
       data-visible="false"
       inert
-      className="group fixed right-6 bottom-6 z-30 flex size-12 translate-y-4 items-center justify-center rounded-full border border-white/20 bg-black/50 text-white opacity-0 backdrop-blur transition-[opacity,transform,background-color,color] duration-300 hover:bg-white hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white data-[visible=true]:translate-y-0 data-[visible=true]:opacity-100 motion-reduce:transition-none sm:right-10 sm:bottom-10"
+      className="group fixed right-6 bottom-6 z-30 flex size-12 translate-y-4 items-center justify-center rounded-full border border-white/20 bg-black/50 text-white opacity-0 backdrop-blur transition-[opacity,transform,background-color,color] duration-300 hover:bg-white hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white data-[visible=true]:translate-y-0 data-[visible=true]:opacity-100 motion-reduce:transition-none sm:right-10 sm:bottom-10 print:hidden"
     >
       <svg
         aria-hidden="true"

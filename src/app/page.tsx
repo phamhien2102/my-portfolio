@@ -6,13 +6,14 @@ import { ContactSection } from "@/features/contact";
 import { ExperienceSection } from "@/features/experience";
 import { ProjectsSection } from "@/features/projects";
 import { RevealCanvas } from "@/features/reveal";
+import { Resume } from "@/features/resume";
 import { SkillsSection } from "@/features/skills";
 
 export default function Home() {
   return (
     <>
       <SiteHeader />
-      <main className="flex-1">
+      <main className="flex-1 print:hidden">
         <section id="top" className="relative h-svh">
           <RevealCanvas dockId={LOGO_DOCK_ID} />
 
@@ -34,6 +35,7 @@ export default function Home() {
         <ContactSection />
       </main>
       <SiteFooter />
+      <Resume />
     </>
   );
 }

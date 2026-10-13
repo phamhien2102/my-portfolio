@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { FadeIn } from "@/components/ui/fade-in";
 import { SITE } from "@/config/site";
 import { THEME, accentAt } from "@/config/theme";
+import { PrintResumeButton } from "@/features/resume";
 
 import { CopyEmailButton } from "./copy-email-button";
 
@@ -70,6 +71,7 @@ export function ContactSection() {
             </span>
           </a>
           <CopyEmailButton email={SITE.email} />
+          <PrintResumeButton />
         </FadeIn>
 
         <ul className="mt-20 grid gap-4 sm:grid-cols-2">
