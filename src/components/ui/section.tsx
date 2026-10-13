@@ -19,10 +19,20 @@ interface SectionProps {
    * The heading keeps its column; the content must add its own horizontal padding.
    */
   bleed?: boolean;
+  /** Use a smaller heading, for long sentences. */
+  compactHeading?: boolean;
 }
 
 /** Shared section frame: anchor, spacing, eyebrow and big heading. */
-export function Section({ id, index, label, heading, children, bleed = false }: SectionProps) {
+export function Section({
+  id,
+  index,
+  label,
+  heading,
+  children,
+  bleed = false,
+  compactHeading = false,
+}: SectionProps) {
   return (
     <section
       id={id}
@@ -36,7 +46,12 @@ export function Section({ id, index, label, heading, children, bleed = false }: 
           <p className="font-mono text-xs tracking-widest text-zinc-500 uppercase">
             {index} &mdash; {label}
           </p>
-          <h2 className="mt-6 max-w-4xl text-4xl leading-[1.05] font-black tracking-tight text-balance sm:text-6xl">
+          <h2
+            className={cn(
+              "mt-6 max-w-4xl leading-[1.05] font-black tracking-tight text-balance",
+              compactHeading ? "text-3xl sm:text-5xl" : "text-4xl sm:text-6xl",
+            )}
+          >
             {heading}
           </h2>
         </FadeIn>
