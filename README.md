@@ -22,17 +22,39 @@ npm run dev      # http://localhost:3000
 ```
 src/
 ├── app/                  # Routing and global styles only. Keep pages thin.
-├── config/               # Site-wide constants (name, metadata).
+├── config/
+│   ├── site.ts           # Name, role, email, socials, nav. Edit this first.
+│   └── theme.ts          # Colours shared by the WebGL hero and the DOM sections.
 ├── features/             # Self-contained features, one folder each.
-│   └── reveal/
-│       ├── index.ts      # Public API: the only file others may import.
-│       ├── config.ts     # Tunable settings.
-│       ├── components/   # React components.
-│       └── lib/          # Framework-agnostic logic (WebGL scene, shaders).
-├── components/ui/        # Shared, feature-agnostic UI primitives.
-├── lib/                  # Shared utilities.
+│   ├── reveal/           # Hero: WebGL blob + RAYMOND reveal.
+│   │   ├── index.ts      # Public API: the only file others may import.
+│   │   ├── config.ts     # Tunable settings.
+│   │   ├── components/   # React components.
+│   │   └── lib/          # Framework-agnostic logic (WebGL scene, shaders).
+│   ├── about/            # Each content section: index.ts + data.ts + components/.
+│   ├── projects/
+│   ├── skills/
+│   ├── experience/
+│   └── contact/
+├── components/
+│   ├── layout/           # Site header and footer.
+│   └── ui/               # Shared primitives (Section, FadeIn).
+├── lib/                  # Shared utilities (cn).
 └── types/                # Shared TypeScript types.
 ```
+
+### Editing content
+
+All copy is placeholder. Replace it in these files:
+
+| What                            | File                              |
+| ------------------------------- | --------------------------------- |
+| Name, role, email, social links | `src/config/site.ts`              |
+| About text and facts            | `src/features/about/data.ts`      |
+| Projects                        | `src/features/projects/data.ts`   |
+| Skill groups                    | `src/features/skills/data.ts`     |
+| Work history                    | `src/features/experience/data.ts` |
+| Colours                         | `src/config/theme.ts`             |
 
 ### Conventions
 
@@ -67,6 +89,11 @@ Set `NEXT_PUBLIC_SITE_URL` to the production URL once you have a domain.
 
 ## The reveal effect
 
-`features/reveal` renders a full-viewport WebGL canvas (Three.js). A chrome blob follows
-the pointer (or auto-sweeps on load) and reveals the word in a new colour for each
-stroke. Tune it in `src/features/reveal/config.ts`.
+`features/reveal` renders the hero as a WebGL canvas (Three.js) that fills its parent
+section. A chrome blob follows the pointer (or auto-sweeps on load) and reveals the word
+in a new colour for each stroke. The render loop pauses while the hero is scrolled out of
+view. Tune it in `src/features/reveal/config.ts`.
+
+Accessibility: the word is exposed as a visually hidden `<h1>`, scroll-triggered fades and
+the skills ticker are disabled under `prefers-reduced-motion`, and content is visible
+without JavaScript.

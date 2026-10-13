@@ -6,8 +6,9 @@ import { drawText } from "./draw-text";
 import { ACCUM_FRAGMENT, FINAL_FRAGMENT, VERTEX_SHADER, buildCommon } from "./shaders";
 
 /**
- * Mounts the reveal effect into `container` and returns a `dispose` function
- * that tears down the renderer, GPU resources, listeners and animation loop.
+ * Mounts the reveal effect into `container` (sized to fill it) and returns a `dispose`
+ * function that tears down the renderer, GPU resources, observers and animation loop.
+ * The render loop pauses automatically while the container is scrolled out of view.
  */
 export function createRevealScene(
   container: HTMLElement,
@@ -28,12 +29,18 @@ export function createRevealScene(
     intro,
   } = config;
 
+  const size = () => ({
+    w: Math.max(1, container.clientWidth),
+    h: Math.max(1, container.clientHeight),
+  });
+
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(size().w, size().h);
   const canvas = renderer.domElement;
   canvas.style.display = "block";
-  canvas.style.touchAction = "none";
+  // Allow vertical page scroll on touch devices; horizontal drags still drive the blob.
+  canvas.style.touchAction = "pan-y";
   container.appendChild(canvas);
 
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -46,16 +53,23 @@ export function createRevealScene(
   textTex.generateMipmaps = false;
 
   const redrawText = () => {
-    drawText(textCanvas, { word, widthRatio: textWidth, y: textY });
+    const { w, h } = size();
+    drawText(textCanvas, { word, width: w, height: h, widthRatio: textWidth, y: textY });
+    // The canvas size changes on resize, and a texture's GPU storage is fixed-size, so the old
+    // allocation must be released first or the new pixels get uploaded into the wrong-sized store.
+    textTex.dispose();
     textTex.needsUpdate = true;
   };
   redrawText();
 
   // ---------- Trail buffer (ping-pong): remembers where the blob has been ----------
-  const rtSize = () => ({
-    w: Math.max(1, Math.floor(window.innerWidth * revealScale)),
-    h: Math.max(1, Math.floor(window.innerHeight * revealScale)),
-  });
+  const rtSize = () => {
+    const { w, h } = size();
+    return {
+      w: Math.max(1, Math.floor(w * revealScale)),
+      h: Math.max(1, Math.floor(h * revealScale)),
+    };
+  };
   const makeRT = () => {
     const { w, h } = rtSize();
     return new THREE.WebGLRenderTarget(w, h, {
@@ -76,7 +90,7 @@ export function createRevealScene(
   const prevHead = initial.clone();
   let speed = 0;
   let started = intro; // is there a blob on screen yet?
-  let userControl = false; // true once the user has moved the pointer
+  let userControl = false; // true once the user has moved the pointer over the container
 
   const currentInk = hexToVec3(palette[0]);
 
@@ -84,7 +98,7 @@ export function createRevealScene(
     uInk: { value: currentInk },
     uTime: { value: 0 },
     uSpeed: { value: 0 },
-    uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    uResolution: { value: new THREE.Vector2(size().w, size().h) },
     uTrail: { value: trail },
   };
 
@@ -120,7 +134,13 @@ export function createRevealScene(
 
   // ---------- Events ----------
   const onPointerMove = (e: PointerEvent) => {
-    mouse.set(e.clientX / window.innerWidth, 1 - e.clientY / window.innerHeight);
+    // Pointer coordinates are relative to the container, and ignored outside it.
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+
+    mouse.set(x / rect.width, 1 - y / rect.height);
     userControl = true; // pointer takes over from the intro sweep
     if (!started) {
       // no intro: place the whole tail at the pointer so the blob doesn't fly in from offscreen
@@ -129,16 +149,23 @@ export function createRevealScene(
       prevHead.copy(mouse);
     }
   };
-  const onResize = () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    shared.uResolution.value.set(window.innerWidth, window.innerHeight);
-    const { w, h } = rtSize();
-    rtRead.setSize(w, h);
-    rtWrite.setSize(w, h);
-    redrawText();
-  };
   window.addEventListener("pointermove", onPointerMove);
-  window.addEventListener("resize", onResize);
+
+  let lastW = size().w;
+  let lastH = size().h;
+  const resizeObserver = new ResizeObserver(() => {
+    const { w, h } = size();
+    if (w === lastW && h === lastH) return; // ignore the initial observation
+    lastW = w;
+    lastH = h;
+    renderer.setSize(w, h);
+    shared.uResolution.value.set(w, h);
+    const rt = rtSize();
+    rtRead.setSize(rt.w, rt.h);
+    rtWrite.setSize(rt.w, rt.h);
+    redrawText();
+  });
+  resizeObserver.observe(container);
 
   // Re-draw the text once webfonts are ready so metrics are correct.
   let disposed = false;
@@ -158,7 +185,7 @@ export function createRevealScene(
     currentInk.copy(hexToVec3(palette[colorIdx]));
   };
 
-  renderer.setAnimationLoop(() => {
+  const frame = () => {
     const t = clock.getElapsedTime();
     shared.uTime.value = t;
 
@@ -203,13 +230,25 @@ export function createRevealScene(
     finalMat.uniforms.uReveal.value = rtRead.texture;
     renderer.setRenderTarget(null);
     renderer.render(finalScene, camera);
+  };
+
+  // Only render while the container is visible: saves GPU/battery once the user scrolls on.
+  const visibilityObserver = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      lastTime = performance.now(); // avoid a big dt after the pause
+      renderer.setAnimationLoop(frame);
+    } else {
+      renderer.setAnimationLoop(null);
+    }
   });
+  visibilityObserver.observe(container);
 
   return () => {
     disposed = true;
+    visibilityObserver.disconnect();
+    resizeObserver.disconnect();
     renderer.setAnimationLoop(null);
     window.removeEventListener("pointermove", onPointerMove);
-    window.removeEventListener("resize", onResize);
     rtRead.dispose();
     rtWrite.dispose();
     textTex.dispose();

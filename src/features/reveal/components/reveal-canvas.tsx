@@ -5,7 +5,10 @@ import { useEffect, useRef } from "react";
 import { REVEAL_CONFIG } from "../config";
 import { createRevealScene } from "../lib/create-reveal-scene";
 
-/** Full-viewport WebGL canvas: a chrome blob that reveals the word as it sweeps. */
+/**
+ * WebGL canvas that fills its nearest positioned ancestor: a chrome blob that reveals
+ * the word as it sweeps. Place it inside a `relative` container with a defined height.
+ */
 export function RevealCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -22,7 +25,7 @@ export function RevealCanvas() {
       <div
         ref={containerRef}
         aria-hidden="true"
-        className="fixed inset-0 overflow-hidden"
+        className="absolute inset-0 overflow-hidden"
         style={{ backgroundColor: REVEAL_CONFIG.bgColor }}
       />
     </>

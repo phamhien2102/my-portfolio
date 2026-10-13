@@ -125,6 +125,11 @@ export const FINAL_FRAGMENT = /* glsl */ `
     col = mix(col, vec3(0.03), smoothstep(-0.012, -0.001, d) * 0.85);
 
     float shape = 1.0 - smoothstep(0.0, 0.004, d);
-    gl_FragColor = vec4(mix(base, col, shape), 1.0);
+    vec3 outCol = mix(base, col, shape);
+
+    // dark-mode finish: soft vignette + animated film grain
+    float vig = 1.0 - 0.55 * smoothstep(0.25, 0.95, length((vUv - 0.5) * vec2(1.0, 0.85)));
+    float grain = (hash(vUv * uResolution + fract(uTime) * 100.0) - 0.5) * 0.05;
+    gl_FragColor = vec4(outCol * vig + grain, 1.0);
   }
 `;

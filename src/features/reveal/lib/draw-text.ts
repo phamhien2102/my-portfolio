@@ -1,6 +1,9 @@
 interface DrawTextOptions {
   word: string;
-  /** Fraction of the viewport width the word occupies. */
+  /** Size of the area to cover, in CSS pixels. */
+  width: number;
+  height: number;
+  /** Fraction of the width the word occupies. */
   widthRatio: number;
   /** Vertical position: 0 = bottom, 1 = top. */
   y: number;
@@ -8,14 +11,14 @@ interface DrawTextOptions {
 
 const FONT_FAMILY = '"Arial Black", "Helvetica Neue", Arial, sans-serif';
 
-/** Rasterises `word` into `canvas`, sized to the current viewport (alpha = glyph coverage). */
+/** Rasterises `word` into `canvas`, sized to the given area (alpha = glyph coverage). */
 export function drawText(
   canvas: HTMLCanvasElement,
-  { word, widthRatio, y }: DrawTextOptions,
+  { word, width, height, widthRatio, y }: DrawTextOptions,
 ): void {
   const dpr = Math.min(window.devicePixelRatio, 2);
-  const W = Math.floor(window.innerWidth * dpr);
-  const H = Math.floor(window.innerHeight * dpr);
+  const W = Math.max(1, Math.floor(width * dpr));
+  const H = Math.max(1, Math.floor(height * dpr));
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
