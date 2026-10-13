@@ -27,7 +27,13 @@ export function createRevealScene(
     idleColor,
     bgColor,
     intro,
+    idleDelay,
   } = config;
+
+  // Splatter is a big, sudden motion: people who ask for less motion get the gentle melt instead.
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const idleEffect =
+    prefersReducedMotion && config.idleEffect !== "none" ? "dissolve" : config.idleEffect;
 
   const size = () => ({
     w: Math.max(1, container.clientWidth),
@@ -94,12 +100,24 @@ export function createRevealScene(
 
   const currentInk = hexToVec3(palette[0]);
 
+  // Idle effect state. While `gone`, the blob has left (bursting or melting) and waits for the
+  // pointer to move again.
+  let gone = false;
+  let life = 1; // 1 = blob fully formed, 0 = melted away (drives `uLife`)
+  const prevMouse = initial.clone();
+  const scales = Array.from({ length: N }, () => 1); // per-circle size (`uScale`)
+  const velocity = Array.from({ length: N }, () => new THREE.Vector2());
+  const age = new Float32Array(N);
+  const lifespan = new Float32Array(N);
+
   const shared = {
     uInk: { value: currentInk },
     uTime: { value: 0 },
     uSpeed: { value: 0 },
     uResolution: { value: new THREE.Vector2(size().w, size().h) },
     uTrail: { value: trail },
+    uScale: { value: scales },
+    uLife: { value: life },
   };
 
   const common = buildCommon(N, blobScale);
@@ -185,6 +203,63 @@ export function createRevealScene(
     currentInk.copy(hexToVec3(palette[colorIdx]));
   };
 
+  const DROPLET_DRAG = 3; // per second: droplets lose speed quickly
+  const DROPLET_GRAVITY = 0.7; // UV heights per second squared
+
+  /** The pointer stopped: send the blob away. */
+  const leave = () => {
+    gone = true;
+    if (idleEffect !== "splatter") return; // dissolve just lowers `life`
+
+    const aspect = size().w / size().h;
+    for (let i = 0; i < N; i++) {
+      // Tail circles are the small ones: they fly fastest; the heavy head barely moves.
+      const t = i / (N - 1);
+      const angle = Math.random() * Math.PI * 2;
+      const power = (0.25 + 1.9 * Math.pow(t, 0.7)) * (0.75 + Math.random() * 0.5);
+      // Screen-space speed, converted to UV (x is stretched by the aspect ratio).
+      velocity[i].set((Math.cos(angle) * power) / aspect, Math.sin(angle) * power);
+      age[i] = 0;
+      lifespan[i] = 0.8 + Math.random() * 0.9;
+    }
+  };
+
+  /** Advance the flying droplets; once every one has vanished the blob is truly gone. */
+  const stepDroplets = (dt: number) => {
+    const drag = Math.exp(-DROPLET_DRAG * dt);
+    let alive = false;
+    for (let i = 0; i < N; i++) {
+      if (age[i] >= lifespan[i]) {
+        scales[i] = 0;
+        continue;
+      }
+      alive = true;
+      age[i] += dt;
+      velocity[i].multiplyScalar(drag);
+      velocity[i].y -= DROPLET_GRAVITY * dt;
+      trail[i].addScaledVector(velocity[i], dt);
+      // Hold full size for the first third of the flight, then shrink to nothing.
+      const k = Math.min(age[i] / lifespan[i], 1);
+      const s = Math.min(Math.max((k - 0.3) / 0.7, 0), 1);
+      scales[i] = 1 - s * s * (3 - 2 * s);
+    }
+    if (!alive) life = 0; // hides any leftovers
+  };
+
+  /** The pointer moved again: bring the blob back at the pointer. */
+  const regrow = () => {
+    gone = false;
+    if (idleEffect === "splatter") {
+      // The droplets are scattered; start a fresh blob under the pointer instead.
+      trail.forEach((p) => p.copy(mouse));
+      prevHead.copy(mouse);
+      scales.fill(1);
+      speed = 0;
+      life = 0;
+    }
+    // dissolve: the tail is still in place, `life` simply climbs back up.
+  };
+
   const frame = () => {
     const t = clock.getElapsedTime();
     shared.uTime.value = t;
@@ -203,22 +278,44 @@ export function createRevealScene(
     const f = (a: number) => 1 - Math.pow(1 - a, dt * 60);
 
     if (started) {
-      prevHead.copy(trail[0]);
-      trail[0].lerp(mouse, f(0.25));
-      for (let i = 1; i < N; i++) trail[i].lerp(trail[i - 1], f(0.35));
-      const v = Math.min((trail[0].distanceTo(prevHead) / Math.max(dt, 1e-3)) * (40 / 60), 1);
-      speed += (v - speed) * f(0.08);
+      const mouseDelta = mouse.distanceTo(prevMouse);
+      prevMouse.copy(mouse);
+
+      let moving: boolean;
+      if (!gone) {
+        prevHead.copy(trail[0]);
+        trail[0].lerp(mouse, f(0.25));
+        for (let i = 1; i < N; i++) trail[i].lerp(trail[i - 1], f(0.35));
+        const v = Math.min((trail[0].distanceTo(prevHead) / Math.max(dt, 1e-3)) * (40 / 60), 1);
+        speed += (v - speed) * f(0.08);
+        moving = v > 0.04;
+      } else {
+        // The blob isn't following the pointer any more, so judge movement from the pointer itself.
+        speed += (0 - speed) * f(0.08);
+        moving = mouseDelta > 0.0012;
+      }
       shared.uSpeed.value = speed;
 
       // Moving after a long enough pause = a new stroke -> next colour
-      if (v > 0.04) {
+      if (moving) {
         if (hasMoved && idle > strokeGap) nextColor();
         idle = 0;
         hasMoved = true;
+        if (gone) regrow();
       } else {
         idle += dt;
+        if (!gone && idleEffect !== "none" && idle > idleDelay) leave();
       }
     }
+
+    // Drive the idle effect, then upload its state.
+    if (gone) {
+      if (idleEffect === "splatter") stepDroplets(dt);
+      else life = Math.max(0, life - dt / 2.2); // slow melt
+    } else {
+      life += (1 - life) * f(0.1); // grow back out of nothing
+    }
+    shared.uLife.value = life;
 
     // Pass 1: write trail into the buffer, then swap read/write
     accumMat.uniforms.uPrev.value = rtRead.texture;

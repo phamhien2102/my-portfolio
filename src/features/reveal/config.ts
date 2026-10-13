@@ -1,5 +1,13 @@
 import { THEME } from "@/config/theme";
 
+/**
+ * What the blob does once the pointer comes to rest:
+ * - `splatter`: bursts into droplets that fly apart, shrink and vanish
+ * - `dissolve`: melts away slowly in place
+ * - `none`: stays put
+ */
+export type IdleEffect = "splatter" | "dissolve" | "none";
+
 /** Tunable settings for the RAYMOND reveal effect. */
 export const REVEAL_CONFIG = {
   word: "RAYMOND",
@@ -7,6 +15,10 @@ export const REVEAL_CONFIG = {
   palette: THEME.palette,
   /** Seconds the pointer must rest before the next movement counts as a new stroke. */
   strokeGap: 0.5,
+  /** Effect played when the pointer stops (reduced-motion users always get `dissolve`). */
+  idleEffect: "splatter" as IdleEffect,
+  /** Seconds the pointer must rest before the blob leaves. */
+  idleDelay: 0.7,
   /** Vertical text position: 0 = bottom, 1 = top. */
   textY: 0.5,
   /** Fraction of the viewport width the word occupies. */

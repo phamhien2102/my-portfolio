@@ -16,6 +16,10 @@ export function buildCommon(trailLength: number, blobScale: number): string {
   uniform vec3  uInk;
   uniform vec2  uResolution;
   uniform vec2  uTrail[${trailLength}];
+  /* Per-circle size multiplier: lets droplets shrink away individually when the blob bursts. */
+  uniform float uScale[${trailLength}];
+  /* 1 = blob fully formed, 0 = melted away. */
+  uniform float uLife;
   const int N = ${trailLength};
 
   float hash(vec2 p) {
@@ -44,10 +48,16 @@ export function buildCommon(trailLength: number, blobScale: number): string {
     for (int i = 0; i < N; i++) {
       vec2 c = uTrail[i]; c.x *= aspect;
       float t = float(i) / float(N - 1);
-      float r = mix(0.065, 0.012, t) * ${scale};
+      float r = mix(0.065, 0.012, t) * ${scale} * uScale[i];
       d = smin(d, length(q - c) - r, 0.07 * ${scale});
     }
     d += (noise(p * 60.0 + uTime) - 0.5) * 0.012 * uSpeed;
+
+    // Melt-away: push the whole field outwards until nothing is left below zero. The noise
+    // term makes the edge ragged while it shrinks. Offsets are sized so the resting blob
+    // (merged tail, roughly -0.2 at its core) is fully gone at uLife = 0.
+    float gone = 1.0 - uLife;
+    d += gone * 0.45 + (noise(p * 28.0 + uTime * 0.4) - 0.5) * gone * 0.2;
     return d;
   }
 `;
