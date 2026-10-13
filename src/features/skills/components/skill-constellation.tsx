@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 
 import { FadeIn } from "@/components/ui/fade-in";
 import { accentAt } from "@/config/theme";
@@ -8,6 +8,8 @@ import { cn } from "@/lib/cn";
 
 import { SKILL_GROUPS, levelLabel } from "../data";
 import { RINGS, STARS, constellationPoints, type Star } from "../lib/constellation";
+import { GroupFilter } from "./group-filter";
+import { SkillList } from "./skill-list";
 
 /**
  * Skills as a night sky. Distance from the centre encodes proficiency (stronger = closer),
@@ -21,32 +23,7 @@ export function SkillConstellation() {
 
   return (
     <div>
-      <div role="group" aria-label="Highlight a skill group" className="flex flex-wrap gap-2">
-        {SKILL_GROUPS.map((group, i) => {
-          const isPinned = pinned === group.title;
-          return (
-            <button
-              key={group.title}
-              type="button"
-              aria-pressed={isPinned}
-              onClick={() => setPinned(isPinned ? null : group.title)}
-              style={{ "--accent": accentAt(i + 1) } as CSSProperties}
-              className={cn(
-                "flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-xs tracking-widest uppercase transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
-                isPinned
-                  ? "border-(--accent) bg-(--accent) text-black"
-                  : "border-white/15 text-zinc-400 hover:border-white/40 hover:text-white",
-              )}
-            >
-              <span
-                aria-hidden="true"
-                className={cn("size-2 rounded-full", isPinned ? "bg-black" : "bg-(--accent)")}
-              />
-              {group.title}
-            </button>
-          );
-        })}
-      </div>
+      <GroupFilter pinned={pinned} onPin={setPinned} />
 
       <p className="mt-4 font-mono text-[11px] tracking-widest text-zinc-600 uppercase">
         <span className="hidden md:inline">Closer to the centre = stronger · hover a star</span>
@@ -209,28 +186,7 @@ export function SkillConstellation() {
       </FadeIn>
 
       {/* Mobile: labels would be too small around a circle, so list the same data. */}
-      <div className="mt-8 grid gap-8 sm:grid-cols-2 md:hidden">
-        {SKILL_GROUPS.map((group, i) => (
-          <section key={group.title} style={{ "--accent": accentAt(i + 1) } as CSSProperties}>
-            <h3 className="flex items-center gap-2 font-mono text-xs tracking-widest text-zinc-500 uppercase">
-              <span aria-hidden="true" className="size-2 rounded-full bg-(--accent)" />
-              {group.title}
-            </h3>
-            <ul className="mt-3 divide-y divide-white/10 border-y border-white/10">
-              {[...group.items]
-                .sort((a, b) => b.level - a.level)
-                .map((skill) => (
-                  <li key={skill.name} className="flex items-baseline justify-between py-3">
-                    <span className="text-lg font-bold tracking-tight">{skill.name}</span>
-                    <span className="font-mono text-[11px] tracking-widest text-(--accent) uppercase">
-                      {levelLabel(skill.level)}
-                    </span>
-                  </li>
-                ))}
-            </ul>
-          </section>
-        ))}
-      </div>
+      <SkillList className="mt-8 md:hidden" />
     </div>
   );
 }

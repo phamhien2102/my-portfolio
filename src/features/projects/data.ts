@@ -4,6 +4,11 @@ export interface Project {
   tags: readonly string[];
   year: string;
   href: string;
+  /**
+   * Optional preview image, e.g. "/projects/alpha.png" (file in `public/projects/`, ~16:10).
+   * Without it the card shows a generated gradient backdrop.
+   */
+  image?: string;
 }
 
 // PLACEHOLDER content: replace with your real projects and links.

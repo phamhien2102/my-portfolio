@@ -1,9 +1,9 @@
-/** One way of presenting the Experience section. */
-export interface ExperienceEffectOption {
+/** One choice in a settings group. */
+export interface SettingOption {
   id: string;
   label: string;
   description: string;
-  /** Needs WebGL, a wide screen and motion allowed; otherwise the plain timeline is shown. */
+  /** Needs a wide screen and motion allowed (and WebGL for some); otherwise a plain fallback is shown. */
   immersive: boolean;
 }
 
@@ -44,18 +44,64 @@ export const EXPERIENCE_EFFECTS = [
     description: "A calm vertical timeline. No 3D, lightest on the device.",
     immersive: false,
   },
-] as const satisfies readonly ExperienceEffectOption[];
+] as const satisfies readonly SettingOption[];
 
 export type ExperienceEffect = (typeof EXPERIENCE_EFFECTS)[number]["id"];
 
+export const SKILLS_VIEWS = [
+  {
+    id: "constellation",
+    label: "Constellation",
+    description: "A night sky: the closer to the centre, the stronger the skill.",
+    immersive: false,
+  },
+  {
+    id: "solar",
+    label: "Solar system",
+    description: "Each group orbits as its own ring; planet size shows proficiency.",
+    immersive: true,
+  },
+] as const satisfies readonly SettingOption[];
+
+export type SkillsView = (typeof SKILLS_VIEWS)[number]["id"];
+
+export const PROJECTS_VIEWS = [
+  {
+    id: "cards",
+    label: "Tilt cards",
+    description: "A grid of cards that lean toward your pointer.",
+    immersive: false,
+  },
+  {
+    id: "gallery",
+    label: "3D gallery",
+    description: "A curved wall of floating screens over a neon floor: drag or use the arrows.",
+    immersive: true,
+  },
+] as const satisfies readonly SettingOption[];
+
+export type ProjectsView = (typeof PROJECTS_VIEWS)[number]["id"];
+
 export interface Settings {
   experienceEffect: ExperienceEffect;
+  skillsView: SkillsView;
+  projectsView: ProjectsView;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   experienceEffect: "flythrough",
+  skillsView: "constellation",
+  projectsView: "cards",
 };
 
 export function isExperienceEffect(value: unknown): value is ExperienceEffect {
   return EXPERIENCE_EFFECTS.some((option) => option.id === value);
+}
+
+export function isSkillsView(value: unknown): value is SkillsView {
+  return SKILLS_VIEWS.some((option) => option.id === value);
+}
+
+export function isProjectsView(value: unknown): value is ProjectsView {
+  return PROJECTS_VIEWS.some((option) => option.id === value);
 }

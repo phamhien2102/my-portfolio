@@ -2,8 +2,16 @@
 
 import { useId, useRef } from "react";
 
-import { EXPERIENCE_EFFECTS, isExperienceEffect } from "../config";
+import {
+  EXPERIENCE_EFFECTS,
+  PROJECTS_VIEWS,
+  SKILLS_VIEWS,
+  isExperienceEffect,
+  isProjectsView,
+  isSkillsView,
+} from "../config";
 import { resetSettings, updateSettings, useSettings } from "../lib/settings-store";
+import { OptionGroup } from "./option-group";
 
 /**
  * Gear button that opens a settings popup.
@@ -14,7 +22,7 @@ import { resetSettings, updateSettings, useSettings } from "../lib/settings-stor
 export function SettingsButton() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
-  const { experienceEffect } = useSettings();
+  const { experienceEffect, skillsView, projectsView } = useSettings();
 
   const close = () => dialogRef.current?.close();
 
@@ -67,51 +75,38 @@ export function SettingsButton() {
             </button>
           </div>
 
-          <fieldset className="mt-8 min-w-0">
-            <legend className="font-mono text-xs tracking-widest text-zinc-500 uppercase">
-              Experience effect
-            </legend>
-            <div className="mt-4 grid gap-2">
-              {EXPERIENCE_EFFECTS.map((option) => (
-                <label
-                  key={option.id}
-                  className="flex cursor-pointer items-start gap-4 rounded-xl border border-white/10 p-4 transition-colors hover:border-white/30 has-checked:border-white has-checked:bg-white/5 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-white motion-reduce:transition-none"
-                >
-                  <input
-                    type="radio"
-                    name="experience-effect"
-                    value={option.id}
-                    checked={experienceEffect === option.id}
-                    onChange={(event) => {
-                      if (isExperienceEffect(event.target.value)) {
-                        updateSettings({ experienceEffect: event.target.value });
-                      }
-                    }}
-                    className="peer sr-only"
-                  />
-                  <span
-                    aria-hidden="true"
-                    className="mt-1 size-3.5 shrink-0 rounded-full border-2 border-zinc-500 transition-[border-width,border-color] peer-checked:border-[5px] peer-checked:border-white motion-reduce:transition-none"
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2 font-bold">
-                      {option.label}
-                      {option.immersive && (
-                        <span className="rounded-full border border-white/20 px-2 py-0.5 font-mono text-[10px] font-normal tracking-widest text-zinc-400 uppercase">
-                          3D
-                        </span>
-                      )}
-                    </span>
-                    <span className="mt-0.5 block text-sm text-zinc-400">{option.description}</span>
-                  </span>
-                </label>
-              ))}
-            </div>
-            <p className="mt-4 text-xs leading-relaxed text-zinc-500">
-              3D effects need a wide screen and WebGL. On phones, or when your device asks for
-              reduced motion, the timeline is shown instead.
-            </p>
-          </fieldset>
+          <OptionGroup
+            legend="Experience effect"
+            name="experience-effect"
+            options={EXPERIENCE_EFFECTS}
+            value={experienceEffect}
+            onChange={(id) => {
+              if (isExperienceEffect(id)) updateSettings({ experienceEffect: id });
+            }}
+            note="3D effects need a wide screen and WebGL. On phones, or when your device asks for reduced motion, the timeline is shown instead."
+          />
+
+          <OptionGroup
+            legend="Projects view"
+            name="projects-view"
+            options={PROJECTS_VIEWS}
+            value={projectsView}
+            onChange={(id) => {
+              if (isProjectsView(id)) updateSettings({ projectsView: id });
+            }}
+            note="The 3D gallery needs a wide screen and WebGL. Otherwise the card grid is shown."
+          />
+
+          <OptionGroup
+            legend="Skills view"
+            name="skills-view"
+            options={SKILLS_VIEWS}
+            value={skillsView}
+            onChange={(id) => {
+              if (isSkillsView(id)) updateSettings({ skillsView: id });
+            }}
+            note="The 3D view needs a wide screen and WebGL. Otherwise a simple list is shown."
+          />
 
           <div className="mt-8 flex items-center justify-between gap-4">
             <button

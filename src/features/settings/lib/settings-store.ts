@@ -2,7 +2,13 @@
 
 import { useSyncExternalStore } from "react";
 
-import { DEFAULT_SETTINGS, isExperienceEffect, type Settings } from "../config";
+import {
+  DEFAULT_SETTINGS,
+  isExperienceEffect,
+  isProjectsView,
+  isSkillsView,
+  type Settings,
+} from "../config";
 
 /**
  * Tiny external store for the visitor's settings, persisted in localStorage.
@@ -23,11 +29,15 @@ function load(): Settings {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     const saved: unknown = raw ? JSON.parse(raw) : null;
     if (saved && typeof saved === "object") {
-      const { experienceEffect } = saved as Partial<Record<keyof Settings, unknown>>;
+      const { experienceEffect, skillsView, projectsView } = saved as Partial<
+        Record<keyof Settings, unknown>
+      >;
       return {
         experienceEffect: isExperienceEffect(experienceEffect)
           ? experienceEffect
           : DEFAULT_SETTINGS.experienceEffect,
+        skillsView: isSkillsView(skillsView) ? skillsView : DEFAULT_SETTINGS.skillsView,
+        projectsView: isProjectsView(projectsView) ? projectsView : DEFAULT_SETTINGS.projectsView,
       };
     }
   } catch {
