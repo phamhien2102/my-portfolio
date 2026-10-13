@@ -61,6 +61,12 @@ export const SKILLS_VIEWS = [
     description: "Each group orbits as its own ring; planet size shows proficiency.",
     immersive: true,
   },
+  {
+    id: "path",
+    label: "Fly-through path",
+    description: "Scroll to fly down a glowing path, one gate per skill group.",
+    immersive: true,
+  },
 ] as const satisfies readonly SettingOption[];
 
 export type SkillsView = (typeof SKILLS_VIEWS)[number]["id"];
@@ -76,6 +82,12 @@ export const PROJECTS_VIEWS = [
     id: "gallery",
     label: "3D gallery",
     description: "A curved wall of floating screens over a neon floor: drag or use the arrows.",
+    immersive: true,
+  },
+  {
+    id: "scroll",
+    label: "Scroll stack",
+    description: "Scroll down and project cards pile up on top of each other.",
     immersive: true,
   },
 ] as const satisfies readonly SettingOption[];

@@ -11,19 +11,24 @@ import { RINGS, STARS, constellationPoints, type Star } from "../lib/constellati
 import { GroupFilter } from "./group-filter";
 import { SkillList } from "./skill-list";
 
+interface SkillConstellationProps {
+  /** Title of the pinned group, if any (controlled by the parent). */
+  pinned: string | null;
+  onPin: (group: string | null) => void;
+}
+
 /**
  * Skills as a night sky. Distance from the centre encodes proficiency (stronger = closer),
  * each group is its own constellation. Hover or focus a star, or pin a group, to light it up.
  */
-export function SkillConstellation() {
+export function SkillConstellation({ pinned, onPin }: SkillConstellationProps) {
   const [hovered, setHovered] = useState<Star | null>(null);
-  const [pinned, setPinned] = useState<string | null>(null);
 
   const activeGroup = hovered?.group ?? pinned;
 
   return (
     <div>
-      <GroupFilter pinned={pinned} onPin={setPinned} />
+      <GroupFilter pinned={pinned} onPin={onPin} />
 
       <p className="mt-4 font-mono text-[11px] tracking-widest text-zinc-600 uppercase">
         <span className="hidden md:inline">Closer to the centre = stronger · hover a star</span>
@@ -31,7 +36,7 @@ export function SkillConstellation() {
       </p>
 
       {/* Desktop: the constellation. `hidden` removes it from the a11y tree on mobile. */}
-      <FadeIn className="group/fade mx-auto mt-6 hidden w-full max-w-3xl md:block">
+      <FadeIn className="group/fade mx-auto mt-6 hidden w-[min(48rem,100%,calc(100svh-16rem))] md:block">
         <div className="relative aspect-square" onPointerLeave={() => setHovered(null)}>
           {/* Soft glow behind the core. */}
           <div
@@ -145,7 +150,7 @@ export function SkillConstellation() {
                     onPointerEnter={() => setHovered(star)}
                     onFocus={() => setHovered(star)}
                     onBlur={() => setHovered(null)}
-                    onClick={() => setPinned(pinned === star.group ? null : star.group)}
+                    onClick={() => onPin(pinned === star.group ? null : star.group)}
                     className="group relative flex size-9 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
                     {/* Entrance only: scales in once the stage scrolls into view. */}

@@ -94,7 +94,7 @@ export function SettingsButton() {
             onChange={(id) => {
               if (isProjectsView(id)) updateSettings({ projectsView: id });
             }}
-            note="The 3D gallery needs a wide screen and WebGL. Otherwise the card grid is shown."
+            note="The gallery and the scroll stack need a wide screen (the gallery also WebGL). Otherwise the card grid is shown."
           />
 
           <OptionGroup
@@ -105,7 +105,7 @@ export function SettingsButton() {
             onChange={(id) => {
               if (isSkillsView(id)) updateSettings({ skillsView: id });
             }}
-            note="The 3D view needs a wide screen and WebGL. Otherwise a simple list is shown."
+            note="The 3D views need a wide screen and WebGL. Otherwise a simple list is shown."
           />
 
           <div className="mt-8 flex items-center justify-between gap-4">

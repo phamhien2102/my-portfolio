@@ -4,9 +4,9 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 import { THEME } from "@/config/theme";
 
-import { createPathScene } from "../lib/create-path-scene";
-import { PATH_STYLES, type PathEffect } from "../lib/effects";
-import { cardState, nearestRole, waypointP } from "../lib/flight-path";
+import { createPathScene } from "@/lib/path-journey/create-path-scene";
+import { PATH_STYLES, type PathEffect } from "@/lib/path-journey/effects";
+import { cardState, nearestRole, waypointP } from "@/lib/path-journey/flight-path";
 import { JOURNEY } from "../lib/journey";
 
 const COUNT = JOURNEY.length;

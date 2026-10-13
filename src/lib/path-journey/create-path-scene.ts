@@ -31,6 +31,8 @@ interface PathSceneOptions {
   stage: HTMLElement;
   /** One accent colour per gate, in the order they are flown through. */
   accents: readonly string[];
+  /** Distance (px) between the top of the screen and the sticky stage, if it is not flush. */
+  stickyTop?: number;
   /** Called every frame with the smoothed scroll progress (0-1). */
   onProgress: (progress: number) => void;
 }
@@ -47,6 +49,7 @@ export function createPathScene({
   runway,
   stage,
   accents,
+  stickyTop = 0,
   onProgress,
 }: PathSceneOptions): () => void {
   const n = accents.length;
@@ -227,7 +230,7 @@ export function createPathScene({
   // ---------- Input: scroll drives the flight, the pointer adds a little parallax ----------
   const progressNow = () => {
     const range = runway.offsetHeight - stage.offsetHeight;
-    return range > 0 ? clamp(-runway.getBoundingClientRect().top / range, 0, 1) : 0;
+    return range > 0 ? clamp((stickyTop - runway.getBoundingClientRect().top) / range, 0, 1) : 0;
   };
 
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 };

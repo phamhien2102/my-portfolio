@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { useSettings } from "@/features/settings";
 
-import { isPathEffect } from "../lib/effects";
+import { isPathEffect } from "@/lib/path-journey/effects";
 import { ExperiencePath } from "./experience-path";
 
 interface ExperienceViewProps {

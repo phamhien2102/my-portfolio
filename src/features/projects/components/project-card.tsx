@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useRef, type CSSProperties, type PointerEvent } from "react";
 
 import { accentAt } from "@/config/theme";
 
 import type { Project } from "../data";
+import { ProjectBackdrop } from "./project-backdrop";
 
 /** Maximum tilt in degrees on each axis. */
 const TILT = 9;
@@ -62,35 +62,11 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
     >
       {/* Preview: the real image when there is one, otherwise a generated backdrop. */}
       <div className="relative aspect-16/10 overflow-hidden rounded-2xl bg-[#0d0d14]">
-        {project.image ? (
-          <Image
-            src={project.image}
-            alt={`${project.title} preview`}
-            fill
-            sizes="(min-width: 1152px) 540px, (min-width: 640px) 45vw, 100vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-          />
-        ) : (
-          <>
-            <div
-              aria-hidden="true"
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `radial-gradient(70% 90% at 15% 0%, color-mix(in oklab, ${accent} 55%, transparent), transparent 70%), radial-gradient(60% 80% at 100% 100%, color-mix(in oklab, ${accentAt(index + 3)} 40%, transparent), transparent 70%)`,
-              }}
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 [background-image:linear-gradient(to_right,rgba(255,255,255,0.35)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.35)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)] [background-size:32px_32px] opacity-30"
-            />
-            <span
-              aria-hidden="true"
-              className="absolute inset-0 flex items-center justify-center text-[8rem] leading-none font-black tracking-tighter text-transparent transition-transform duration-500 ease-out select-none [-webkit-text-stroke:2px_rgba(255,255,255,0.55)] group-hover:scale-110 sm:text-[9rem]"
-            >
-              {String(index + 1).padStart(2, "0")}
-            </span>
-          </>
-        )}
+        <ProjectBackdrop
+          project={project}
+          index={index}
+          sizes="(min-width: 1152px) 540px, (min-width: 640px) 45vw, 100vw"
+        />
 
         {/* Pointer-following glare. */}
         <div

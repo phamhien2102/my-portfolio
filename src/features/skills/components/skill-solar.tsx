@@ -14,6 +14,9 @@ import { GroupFilter } from "./group-filter";
 const SOLAR_QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
 
 interface SkillSolarProps {
+  /** Title of the pinned group, if any (controlled by the parent). */
+  pinned: string | null;
+  onPin: (group: string | null) => void;
   /** Shown instead on phones, with reduced motion, or if WebGL fails. */
   fallback: ReactNode;
 }
@@ -23,14 +26,15 @@ interface SkillSolarProps {
  * Hover or focus a planet to slow time and read it; click one (or a group chip) to pin its group.
  * The planet labels are buttons, so the whole thing also works with a keyboard.
  */
-export function SkillSolar({ fallback }: SkillSolarProps) {
+export function SkillSolar({ pinned, onPin, fallback }: SkillSolarProps) {
   const [hovered, setHovered] = useState<number | null>(null);
-  const [pinned, setPinned] = useState<string | null>(null);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const labelRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const sceneRef = useRef<SolarScene | null>(null);
+  // The scene's click handler outlives renders, so it reads the latest pin through refs.
+  const pinRef = useRef({ pinned, onPin });
 
   const hoveredPlanet = hovered === null ? null : PLANETS[hovered];
   const activeGroup = hoveredPlanet?.group ?? pinned;
@@ -56,7 +60,8 @@ export function SkillSolar({ fallback }: SkillSolarProps) {
           onHover: setHovered,
           onSelect: (index) => {
             const group = PLANETS[index].group;
-            setPinned((current) => (current === group ? null : group));
+            const { pinned: current, onPin: pin } = pinRef.current;
+            pin(current === group ? null : group);
           },
         });
         sceneRef.current.setFocus(focusRef.current);
@@ -77,6 +82,10 @@ export function SkillSolar({ fallback }: SkillSolarProps) {
   }, []);
 
   useEffect(() => {
+    pinRef.current = { pinned, onPin };
+  }, [pinned, onPin]);
+
+  useEffect(() => {
     focusRef.current = { hovered, group: groupIndex < 0 ? null : groupIndex };
     sceneRef.current?.setFocus(focusRef.current);
   }, [hovered, groupIndex]);
@@ -85,13 +94,13 @@ export function SkillSolar({ fallback }: SkillSolarProps) {
     <div ref={rootRef} className="group/solar">
       {/* The 3D view: wide screens, motion allowed, WebGL working. */}
       <div className="hidden group-data-[solar=off]/solar:hidden! motion-safe:md:block">
-        <GroupFilter pinned={pinned} onPin={setPinned} />
+        <GroupFilter pinned={pinned} onPin={onPin} />
 
         <p className="mt-4 font-mono text-[11px] tracking-widest text-zinc-600 uppercase">
           One orbit per group · bigger planet = stronger · hover a planet
         </p>
 
-        <FadeIn className="relative mx-auto mt-6 aspect-3/2 w-full max-w-5xl lg:aspect-16/9">
+        <FadeIn className="relative mx-auto mt-6 aspect-3/2 max-h-[calc(100svh-16rem)] w-full max-w-5xl lg:aspect-16/9">
           {/* Soft glow behind the sun. */}
           <div
             aria-hidden="true"
@@ -115,9 +124,7 @@ export function SkillSolar({ fallback }: SkillSolarProps) {
                     aria-label={`${planet.name}, ${planet.group}, ${levelLabel(planet.level)}`}
                     onFocus={() => setHovered(planet.index)}
                     onBlur={() => setHovered(null)}
-                    onClick={() =>
-                      setPinned((current) => (current === planet.group ? null : planet.group))
-                    }
+                    onClick={() => onPin(pinned === planet.group ? null : planet.group)}
                     style={{ transform: "translate3d(-9999px, 0, 0)" }}
                     className={`absolute top-0 left-0 rounded-full px-2 py-0.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 [text-shadow:0_0_10px_#09090e,0_0_4px_#09090e] focus-visible:outline-2 focus-visible:outline-white ${
                       isHovered ? "text-white" : "text-zinc-300"
