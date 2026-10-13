@@ -20,6 +20,8 @@ export function buildCommon(trailLength: number, blobScale: number): string {
   uniform float uScale[${trailLength}];
   /* 1 = blob fully formed, 0 = melted away. */
   uniform float uLife;
+  /* Overall blob size multiplier, so it stays in proportion to the word on small screens. */
+  uniform float uBlob;
   const int N = ${trailLength};
 
   float hash(vec2 p) {
@@ -48,8 +50,8 @@ export function buildCommon(trailLength: number, blobScale: number): string {
     for (int i = 0; i < N; i++) {
       vec2 c = uTrail[i]; c.x *= aspect;
       float t = float(i) / float(N - 1);
-      float r = mix(0.065, 0.012, t) * ${scale} * uScale[i];
-      d = smin(d, length(q - c) - r, 0.07 * ${scale});
+      float r = mix(0.065, 0.012, t) * ${scale} * uBlob * uScale[i];
+      d = smin(d, length(q - c) - r, 0.07 * ${scale} * uBlob);
     }
     d += (noise(p * 60.0 + uTime) - 0.5) * 0.012 * uSpeed;
 
@@ -87,7 +89,19 @@ export const FINAL_FRAGMENT = /* glsl */ `
   uniform sampler2D uReveal;
   uniform sampler2D uText;
   uniform vec3 uIdle;
+  uniform vec3 uIdleDocked;
   uniform vec3 uBg;
+  /* The word is a transformed view of the text and reveal buffers, so shrinking it carries
+     the painted colours along. uAnchor is a point on the word (its left edge, mid-height);
+     uDest is where that point is drawn right now; uTextScale is the current size. */
+  uniform vec2  uAnchor;
+  uniform vec2  uDest;
+  uniform float uTextScale;
+  /* 0 = word fills the hero, 1 = word has shrunk into the header. */
+  uniform float uDock;
+  /* x = uv-y of the hero's bottom edge, y = hero height in uv. Outside the hero the canvas
+     is transparent except for the word, so the page scrolls underneath it. */
+  uniform vec2  uHero;
 
   vec3 env(vec3 r) {
     vec3 deep  = vec3(0.01, 0.06, 0.18);   // deep navy
@@ -106,12 +120,23 @@ export const FINAL_FRAGMENT = /* glsl */ `
 
     vec3 bg = uBg;
 
+    // Where this pixel sits in the original (full-size) word, and whether it is inside it.
+    vec2 src = uAnchor + (vUv - uDest) / uTextScale;
+    float inside = step(0.0, src.x) * step(src.x, 1.0) * step(0.0, src.y) * step(src.y, 1.0);
+    vec2 psrc = vec2(src.x * aspect, src.y);
+
+    // 0 at the hero's bottom edge, 1 at its top
+    float heroY = (vUv.y - uHero.x) / uHero.y;
+    float inHero = smoothstep(0.0, 0.0015, heroY) * step(heroY, 1.0);
+
     // text only shows where the blob has passed; ragged edge from noise
-    vec4 rv = texture2D(uReveal, vUv);          // rgb = stroke colour, a = coverage
-    float m = smoothstep(0.42, 0.58, rv.a + (noise(p * 45.0) - 0.5) * 0.4);
-    float txt = texture2D(uText, vUv).a;
-    vec3 base = mix(bg, uIdle, txt);            // idle (white) text
-    base = mix(base, rv.rgb, txt * m);          // stroke colour where swept
+    vec4 rv = texture2D(uReveal, src);          // rgb = stroke colour, a = coverage
+    float m = smoothstep(0.42, 0.58, rv.a + (noise(psrc * 45.0) - 0.5) * 0.4);
+    float txt = texture2D(uText, src).a * inside;
+    vec3 idle = mix(uIdle, uIdleDocked, uDock); // idle text brightens once it is the logo
+    vec3 wordCol = mix(idle, rv.rgb, m);        // stroke colour where swept
+    vec3 base = mix(bg, idle, txt);
+    base = mix(base, rv.rgb, txt * m);
 
     // chrome blob
     float d = map(p);
@@ -129,7 +154,7 @@ export const FINAL_FRAGMENT = /* glsl */ `
     col += vec3(0.35, 0.65, 0.95) * pow(1.0 - n.z, 3.0) * 0.35;
 
     // text seen through the blob, refracted by the normal
-    float seen = texture2D(uText, vUv + n.xy * 0.03).a;
+    float seen = texture2D(uText, src + n.xy * 0.03).a * inside;
     col = mix(col, col * 0.3 + uInk * 0.35, seen * 0.7);
 
     col = mix(col, vec3(0.03), smoothstep(-0.012, -0.001, d) * 0.85);
@@ -138,8 +163,16 @@ export const FINAL_FRAGMENT = /* glsl */ `
     vec3 outCol = mix(base, col, shape);
 
     // dark-mode finish: soft vignette + animated film grain
-    float vig = 1.0 - 0.55 * smoothstep(0.25, 0.95, length((vUv - 0.5) * vec2(1.0, 0.85)));
+    // (measured in hero space, so it scrolls away together with the hero)
+    vec2 hv = vec2(vUv.x, clamp(heroY, 0.0, 1.0));
+    float vig = 1.0 - 0.55 * smoothstep(0.25, 0.95, length((hv - 0.5) * vec2(1.0, 0.85)));
     float grain = (hash(vUv * uResolution + fract(uTime) * 100.0) - 0.5) * 0.05;
-    gl_FragColor = vec4(outCol * vig + grain, 1.0);
+    vec3 heroCol = outCol * vig + grain;
+
+    // Inside the hero: the full scene. Outside: only the word, so the canvas stays see-through.
+    // (premultiplied alpha, matching the renderer's default)
+    vec3 rgb = heroCol * inHero + wordCol * txt * (1.0 - inHero);
+    float a = inHero + txt * (1.0 - inHero);
+    gl_FragColor = vec4(rgb, a);
   }
 `;

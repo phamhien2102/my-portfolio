@@ -1,5 +1,5 @@
 import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
+import { LOGO_DOCK_ID, SiteHeader } from "@/components/layout/site-header";
 import { SITE } from "@/config/site";
 import { AboutSection } from "@/features/about";
 import { ContactSection } from "@/features/contact";
@@ -14,10 +14,10 @@ export default function Home() {
       <SiteHeader />
       <main className="flex-1">
         <section id="top" className="relative h-svh">
-          <RevealCanvas />
+          <RevealCanvas dockId={LOGO_DOCK_ID} />
 
-          {/* Overlay sits above the canvas; pointer-events-none keeps the effect interactive. */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-6 font-mono text-[11px] tracking-widest text-zinc-400 uppercase sm:p-10 sm:text-xs">
+          {/* Overlay sits above the canvas layer (z-20); pointer-events-none keeps the effect interactive. */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-25 flex items-end justify-between gap-6 p-6 font-mono text-[11px] tracking-widest text-zinc-400 uppercase sm:p-10 sm:text-xs">
             <span>{SITE.role}</span>
             <span className="text-zinc-500">
               <span className="pointer-coarse:hidden">Move your cursor to reveal</span>

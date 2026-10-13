@@ -5,13 +5,30 @@ import { hexToVec3 } from "./color";
 import { drawText } from "./draw-text";
 import { ACCUM_FRAGMENT, FINAL_FRAGMENT, VERTEX_SHADER, buildCommon } from "./shaders";
 
+/** Smallest the blob may get relative to its desktop size (keeps it visible on phones). */
+const MIN_BLOB = 0.4;
+
+interface RevealTargets {
+  /**
+   * Element that marks where the hero is on the page. The word is full size while it fills the
+   * viewport and shrinks as it scrolls away.
+   */
+  slot: HTMLElement;
+  /** Element the word shrinks into (the logo spot in the header). */
+  dock: HTMLElement | null;
+}
+
 /**
- * Mounts the reveal effect into `container` (sized to fill it) and returns a `dispose`
- * function that tears down the renderer, GPU resources, observers and animation loop.
- * The render loop pauses automatically while the container is scrolled out of view.
+ * Mounts the reveal effect into `container` (a fixed, viewport-sized layer) and returns a
+ * `dispose` function that tears down the renderer, GPU resources, observers and animation loop.
+ *
+ * The canvas is transparent outside the hero, so as the page scrolls the word is the only thing
+ * left on it: it shrinks and glides to `dock`, keeping every colour the blob painted. Once the
+ * hero is out of view the loop stops rendering.
  */
 export function createRevealScene(
   container: HTMLElement,
+  { slot, dock }: RevealTargets,
   config: RevealConfig = REVEAL_CONFIG,
 ): () => void {
   const {
@@ -40,13 +57,13 @@ export function createRevealScene(
     h: Math.max(1, container.clientHeight),
   });
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  // `alpha`: outside the hero the canvas must be see-through so the page shows underneath.
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setClearAlpha(0);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(size().w, size().h);
   const canvas = renderer.domElement;
   canvas.style.display = "block";
-  // Allow vertical page scroll on touch devices; horizontal drags still drive the blob.
-  canvas.style.touchAction = "pan-y";
   container.appendChild(canvas);
 
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -55,12 +72,24 @@ export function createRevealScene(
   // ---------- Text texture (drawn with canvas 2D) ----------
   const textCanvas = document.createElement("canvas");
   const textTex = new THREE.CanvasTexture(textCanvas);
-  textTex.minFilter = THREE.LinearFilter;
-  textTex.generateMipmaps = false;
+  // Mipmaps: the word is sampled at a fraction of its size when it shrinks into the header,
+  // and without them the letters would shimmer and alias.
+  textTex.minFilter = THREE.LinearMipmapLinearFilter;
+  textTex.generateMipmaps = true;
+
+  let dirty = true; // something changed that needs a frame even while the hero is offscreen
+  let textMetrics = { left: 0, width: 1 }; // the word's left edge and width, in CSS px
 
   const redrawText = () => {
     const { w, h } = size();
-    drawText(textCanvas, { word, width: w, height: h, widthRatio: textWidth, y: textY });
+    textMetrics = drawText(textCanvas, {
+      word,
+      width: w,
+      height: h,
+      widthRatio: textWidth,
+      y: textY,
+    });
+    dirty = true;
     // The canvas size changes on resize, and a texture's GPU storage is fixed-size, so the old
     // allocation must be released first or the new pixels get uploaded into the wrong-sized store.
     textTex.dispose();
@@ -118,6 +147,7 @@ export function createRevealScene(
     uTrail: { value: trail },
     uScale: { value: scales },
     uLife: { value: life },
+    uBlob: { value: 1 },
   };
 
   const common = buildCommon(N, blobScale);
@@ -142,7 +172,13 @@ export function createRevealScene(
       uReveal: { value: null as THREE.Texture | null },
       uText: { value: textTex },
       uIdle: { value: hexToVec3(idleColor) },
+      uIdleDocked: { value: hexToVec3(config.dockedIdleColor) },
       uBg: { value: hexToVec3(bgColor) },
+      uAnchor: { value: new THREE.Vector2(0.04, textY) },
+      uDest: { value: new THREE.Vector2(0.04, textY) },
+      uTextScale: { value: 1 },
+      uDock: { value: 0 },
+      uHero: { value: new THREE.Vector2(0, 1) },
     },
     vertexShader: VERTEX_SHADER,
     fragmentShader: common + FINAL_FRAGMENT,
@@ -151,7 +187,12 @@ export function createRevealScene(
   finalScene.add(new THREE.Mesh(quadGeometry, finalMat));
 
   // ---------- Events ----------
+  let progress = 0; // 0 = word fills the hero, 1 = word has shrunk into the header
+  let settled = false; // true once a frame has been drawn with the word fully docked
+
   const onPointerMove = (e: PointerEvent) => {
+    // Once the page has scrolled the blob is retired, so the pointer no longer drives it.
+    if (progress > 0.02) return;
     // Pointer coordinates are relative to the container, and ignored outside it.
     const rect = container.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -181,7 +222,7 @@ export function createRevealScene(
     const rt = rtSize();
     rtRead.setSize(rt.w, rt.h);
     rtWrite.setSize(rt.w, rt.h);
-    redrawText();
+    redrawText(); // also marks the scene dirty
   });
   resizeObserver.observe(container);
 
@@ -261,6 +302,28 @@ export function createRevealScene(
   };
 
   const frame = () => {
+    // Where the hero is now decides how far the word has shrunk towards the header.
+    const { w, h } = size();
+    const slotRect = slot.getBoundingClientRect();
+    const heroVisible = slotRect.bottom > 0 && slotRect.top < window.innerHeight;
+    // Hero fully scrolled away and the logo already drawn in its final place: nothing to redraw.
+    // (`settled` matters: a fast scroll can leave the last drawn frame mid-shrink.)
+    if (!heroVisible && !dirty && settled) {
+      lastTime = performance.now(); // avoid a big dt when we wake up
+      return;
+    }
+    dirty = false;
+
+    // The blob is sized in viewport heights but the word scales with the viewport width, so on
+    // a tall, narrow screen it would dwarf the letters. Shrink it to stay in proportion to them
+    // (letters are ~13% as tall as the word is wide; on a 16:9 screen the factor works out to 1).
+    const letterHeight = textMetrics.width * 0.133;
+    shared.uBlob.value = Math.min(Math.max((letterHeight / h / 0.217) * 1.5, MIN_BLOB), 1);
+
+    progress = Math.min(Math.max(-slotRect.top / (h * 0.55), 0), 1);
+    settled = progress >= 1;
+    const eased = progress * progress * (3 - 2 * progress);
+
     const t = clock.getElapsedTime();
     shared.uTime.value = t;
 
@@ -315,7 +378,26 @@ export function createRevealScene(
     } else {
       life += (1 - life) * f(0.1); // grow back out of nothing
     }
-    shared.uLife.value = life;
+    // The blob belongs to the hero: fade it out over the first few pixels of scrolling.
+    const retire = Math.min(progress / 0.06, 1);
+    shared.uLife.value = life * (1 - retire * retire * (3 - 2 * retire));
+
+    // Lay the word out: it slides and shrinks from filling the hero to sitting in the dock.
+    const measured = dock?.getBoundingClientRect();
+    const dockRect = measured && measured.width > 1 ? measured : undefined; // hidden = no spot
+    const endLeft = dockRect ? dockRect.left : 24;
+    const endCenterY = dockRect ? dockRect.top + dockRect.height / 2 : 32;
+    const endScale = (dockRect ? dockRect.width : 120) / textMetrics.width;
+    const anchorX = textMetrics.left / w; // the word's left edge ...
+    const fu = finalMat.uniforms;
+    fu.uAnchor.value.set(anchorX, textY); // ... at mid-height
+    fu.uDest.value.set(
+      anchorX + (endLeft / w - anchorX) * eased,
+      textY + (1 - endCenterY / h - textY) * eased,
+    );
+    fu.uTextScale.value = 1 + (endScale - 1) * eased;
+    fu.uDock.value = eased;
+    fu.uHero.value.set(1 - slotRect.bottom / h, slotRect.height / h);
 
     // Pass 1: write trail into the buffer, then swap read/write
     accumMat.uniforms.uPrev.value = rtRead.texture;
@@ -329,20 +411,11 @@ export function createRevealScene(
     renderer.render(finalScene, camera);
   };
 
-  // Only render while the container is visible: saves GPU/battery once the user scrolls on.
-  const visibilityObserver = new IntersectionObserver(([entry]) => {
-    if (entry.isIntersecting) {
-      lastTime = performance.now(); // avoid a big dt after the pause
-      renderer.setAnimationLoop(frame);
-    } else {
-      renderer.setAnimationLoop(null);
-    }
-  });
-  visibilityObserver.observe(container);
+  // The loop always ticks, but `frame` returns early (no GPU work) while the hero is offscreen.
+  renderer.setAnimationLoop(frame);
 
   return () => {
     disposed = true;
-    visibilityObserver.disconnect();
     resizeObserver.disconnect();
     renderer.setAnimationLoop(null);
     window.removeEventListener("pointermove", onPointerMove);

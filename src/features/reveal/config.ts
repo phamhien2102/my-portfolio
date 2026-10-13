@@ -33,6 +33,8 @@ export const REVEAL_CONFIG = {
   blobScale: 1.5,
   /** Text colour before the blob sweeps over it (a faint ghost on the dark background). */
   idleColor: THEME.ghost,
+  /** Colour of letters the blob never reached once the word has shrunk into the header. */
+  dockedIdleColor: "#8b8b97",
   /** Background colour. */
   bgColor: THEME.background,
   /** Auto-sweep once on load; stops when the user moves the pointer. */

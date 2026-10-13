@@ -5,28 +5,45 @@ import { useEffect, useRef } from "react";
 import { REVEAL_CONFIG } from "../config";
 import { createRevealScene } from "../lib/create-reveal-scene";
 
+interface RevealCanvasProps {
+  /** `id` of the element the word shrinks into as the page scrolls (the header logo). */
+  dockId: string;
+}
+
 /**
- * WebGL canvas that fills its nearest positioned ancestor: a chrome blob that reveals
- * the word as it sweeps. Place it inside a `relative` container with a defined height.
+ * WebGL effect: a chrome blob that reveals the word as it sweeps. Place it inside a `relative`
+ * hero with a defined height.
+ *
+ * It renders two things: an invisible slot that fills the hero (marking where the hero is, and
+ * receiving the pointer), and a fixed, viewport-sized canvas layer. The layer is transparent
+ * outside the hero, so while scrolling the word shrinks and glides into the element `dockId`.
  */
-export function RevealCanvas() {
+export function RevealCanvas({ dockId }: RevealCanvasProps) {
+  const slotRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const slot = slotRef.current;
     const container = containerRef.current;
-    if (!container) return;
-    return createRevealScene(container);
-  }, []);
+    if (!slot || !container) return;
+    return createRevealScene(container, { slot, dock: document.getElementById(dockId) });
+  }, [dockId]);
 
   return (
     <>
       {/* Canvas content isn't readable by assistive tech, so expose the word as text. */}
       <h1 className="sr-only">{REVEAL_CONFIG.word}</h1>
+      {/* Lets vertical drags scroll the page on touch devices; horizontal drags drive the blob. */}
+      <div
+        ref={slotRef}
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{ touchAction: "pan-y" }}
+      />
       <div
         ref={containerRef}
         aria-hidden="true"
-        className="absolute inset-0 overflow-hidden"
-        style={{ backgroundColor: REVEAL_CONFIG.bgColor }}
+        className="pointer-events-none fixed top-0 left-0 z-20 h-svh w-full overflow-hidden"
       />
     </>
   );
