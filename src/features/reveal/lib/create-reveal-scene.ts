@@ -71,7 +71,8 @@ export function createRevealScene(
   // `alpha`: outside the hero the canvas must be see-through so the page shows underneath.
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setClearAlpha(0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // 1.5 at most: the blob is soft, and a full-screen shader at 2x is what makes scrolling stutter.
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.setSize(size().w, size().h);
   const canvas = renderer.domElement;
   canvas.style.display = "block";

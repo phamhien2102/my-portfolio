@@ -1,3 +1,4 @@
+import { SectionPager } from "@/components/layout/section-pager";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { LOGO_DOCK_ID, SiteHeader } from "@/components/layout/site-header";
 import { SITE } from "@/config/site";
@@ -12,6 +13,7 @@ import { SkillsSection } from "@/features/skills";
 export default function Home() {
   return (
     <>
+      <SectionPager />
       <SiteHeader />
       <main className="flex-1 print:hidden">
         <section id="top" className="relative h-svh">
