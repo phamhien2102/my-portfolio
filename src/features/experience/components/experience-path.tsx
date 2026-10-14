@@ -11,8 +11,8 @@ import { JOURNEY } from "../lib/journey";
 
 const COUNT = JOURNEY.length;
 
-/** Only fly on wide screens, and only for people who haven't asked for less motion. */
-const FLY_QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
+/** Fly whenever the visitor hasn't asked for less motion. */
+const FLY_QUERY = "(prefers-reduced-motion: no-preference)";
 
 /** Scroll distance of the flight, in viewport heights. */
 const SCREENS_PER_ROLE = 1;
@@ -20,7 +20,7 @@ const SCREENS_PER_ROLE = 1;
 interface ExperiencePathProps {
   /** Which 3D look to fly through. */
   effect: PathEffect;
-  /** Shown instead of the flight on phones, with reduced motion, or if WebGL fails. */
+  /** Shown instead of the flight with reduced motion, or if WebGL fails. */
   children: ReactNode;
 }
 
@@ -109,8 +109,8 @@ export function ExperiencePath({ effect, children }: ExperiencePathProps) {
 
   return (
     <div ref={rootRef} className="group/exp">
-      {/* The flight: wide screens, motion allowed, WebGL working. */}
-      <div className="hidden group-data-[path=off]/exp:hidden! motion-safe:md:block">
+      {/* The flight: motion allowed, WebGL working. */}
+      <div className="hidden group-data-[path=off]/exp:hidden! motion-safe:block">
         <div
           ref={runwayRef}
           style={{ height: `${(COUNT * SCREENS_PER_ROLE + 1) * 100}svh` }}
@@ -120,18 +120,22 @@ export function ExperiencePath({ effect, children }: ExperiencePathProps) {
             ref={stageRef}
             className="sticky top-0 h-svh overflow-hidden border-y border-white/10"
           >
-            <div ref={hostRef} aria-hidden="true" className="absolute inset-0" />
+            <div ref={hostRef} aria-hidden="true" className="absolute inset-0 touch-pan-y" />
 
             {/* Keeps the cards legible over the scene, and softens the edges. */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
+              className="pointer-events-none absolute inset-0 bg-[#09090e]/55 md:hidden"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 hidden md:block"
               style={{
                 background: `linear-gradient(90deg, ${bg}f2 0%, ${bg}a6 34%, transparent 66%), radial-gradient(ellipse at center, transparent 55%, ${bg}cc 100%)`,
               }}
             />
 
-            <ol className="pointer-events-none absolute inset-0 grid items-center px-10 lg:px-20">
+            <ol className="pointer-events-none absolute inset-0 grid items-center px-6 pr-14 sm:px-10 lg:px-20">
               {JOURNEY.map(({ role, accent }, i) => (
                 <li
                   key={`${role.company}-${role.period}`}
@@ -169,7 +173,7 @@ export function ExperiencePath({ effect, children }: ExperiencePathProps) {
             </ol>
 
             {/* Progress rail: jump to any role. */}
-            <div className="absolute top-1/2 right-6 -translate-y-1/2 lg:right-10">
+            <div className="absolute top-1/2 right-4 -translate-y-1/2 lg:right-10">
               <div className="relative flex flex-col items-start gap-10">
                 <span
                   aria-hidden="true"
@@ -218,8 +222,8 @@ export function ExperiencePath({ effect, children }: ExperiencePathProps) {
         </div>
       </div>
 
-      {/* The plain timeline: phones, reduced motion, or no WebGL. */}
-      <div className="mx-auto block max-w-6xl px-6 group-data-[path=off]/exp:block! sm:px-10 motion-safe:md:hidden">
+      {/* The plain timeline: reduced motion, or no WebGL. */}
+      <div className="mx-auto block max-w-6xl px-6 group-data-[path=off]/exp:block! sm:px-10 motion-safe:hidden">
         {children}
       </div>
     </div>

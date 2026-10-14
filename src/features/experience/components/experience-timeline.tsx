@@ -6,7 +6,7 @@ import { accentAt } from "@/config/theme";
 import { EXPERIENCE } from "../data";
 
 /**
- * Plain vertical timeline, newest first. Used on phones, for people who prefer reduced motion,
+ * Plain vertical timeline, newest first. Used when the visitor prefers reduced motion,
  * and whenever the 3D flight-through can't run.
  */
 export function ExperienceTimeline() {

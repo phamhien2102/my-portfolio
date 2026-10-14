@@ -58,7 +58,7 @@ const TABS: readonly Tab[] = [
     intro: "How your work history is shown.",
     legend: "Experience effect",
     options: EXPERIENCE_EFFECTS,
-    note: "3D effects need a wide screen and WebGL. On phones, or when your device asks for reduced motion, the timeline is shown instead.",
+    note: "3D effects need WebGL. When your device asks for reduced motion, or WebGL is missing, the timeline is shown instead.",
   },
 ];
 

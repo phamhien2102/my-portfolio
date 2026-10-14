@@ -62,6 +62,7 @@ export function createPathScene({
   renderer.setClearColor(THEME.background);
   const canvas = renderer.domElement;
   canvas.style.display = "block";
+  canvas.style.touchAction = "pan-y";
   host.appendChild(canvas);
 
   const scene = new THREE.Scene();
