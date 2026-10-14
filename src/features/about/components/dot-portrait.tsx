@@ -348,6 +348,7 @@ export function DotPortrait({ label, className }: { label: string; className?: s
       ref={canvasRef}
       role="img"
       aria-label={label}
+      tabIndex={-1}
       className={`block aspect-square w-full touch-pan-y ${className ?? ""}`}
     />
   );

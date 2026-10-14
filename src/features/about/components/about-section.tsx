@@ -40,7 +40,7 @@ export function AboutSection() {
         </FadeIn>
 
         {/* ---- Story ---- */}
-        <div>
+        <div className="cursor-default select-none">
           {/* Every block of text resolves out of a mosaic of pixels as it scrolls into view. */}
           <PixelText
             as="p"
@@ -91,23 +91,24 @@ export function AboutSection() {
             </Cell>
 
             <Cell label="Focus" index="03" accent={accentAt(4)} wide>
-              <ul className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
                 {focus.map((item) => (
-                  <li
+                  <span
                     key={item}
                     className="border border-white/15 px-3 py-1 font-mono text-xs tracking-wider text-zinc-200"
                   >
                     {item}
-                  </li>
+                  </span>
                 ))}
-              </ul>
+              </div>
             </Cell>
           </PixelText>
 
           <FadeIn delay={200}>
             <a
               href="#contact"
-              className="group mt-10 inline-flex items-center gap-3 border border-white/30 px-6 py-3 font-mono text-xs tracking-widest uppercase transition-colors duration-300 hover:border-white hover:bg-white hover:text-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              tabIndex={-1}
+              className="pointer-events-auto group mt-10 inline-flex cursor-pointer items-center gap-3 border border-white/30 px-6 py-3 font-mono text-xs tracking-widest uppercase outline-none transition-colors duration-300 hover:border-white hover:bg-white hover:text-black"
             >
               Work with me
               <span

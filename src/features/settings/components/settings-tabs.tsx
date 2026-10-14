@@ -182,7 +182,6 @@ export function SettingsTabs() {
               <p className="text-sm text-zinc-400">{tab.intro}</p>
               <OptionGroup
                 legend={tab.legend}
-                name={`${tab.id}-setting`}
                 options={tab.options}
                 value={values[tab.id]}
                 onChange={(id) => choose(tab.id, id)}

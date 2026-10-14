@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef } from "react";
+import { useId, useRef, useState } from "react";
 
 import { resetSettings } from "../lib/settings-store";
 import { SettingsTabs } from "./settings-tabs";
@@ -14,6 +14,7 @@ import { SettingsTabs } from "./settings-tabs";
 export function SettingsButton() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
+  const [open, setOpen] = useState(false);
 
   const close = () => dialogRef.current?.close();
 
@@ -23,7 +24,10 @@ export function SettingsButton() {
         type="button"
         aria-label="Open settings"
         aria-haspopup="dialog"
-        onClick={() => dialogRef.current?.showModal()}
+        onClick={() => {
+          setOpen(true);
+          dialogRef.current?.showModal();
+        }}
         className="group flex size-8 shrink-0 items-center justify-center rounded-full border border-current/30 opacity-70 transition-[opacity,background-color,color] duration-300 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none max-sm:ml-auto sm:-mt-1.5"
       >
         <GearIcon className="size-4 transition-transform duration-500 group-hover:rotate-90 motion-reduce:transition-none" />
@@ -32,14 +36,16 @@ export function SettingsButton() {
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}
+        onClose={() => setOpen(false)}
         // A click on the dialog box itself (not its content) is a click on the backdrop.
         onClick={(event) => {
           if (event.target === event.currentTarget) close();
         }}
         className="m-auto flex max-h-[min(44rem,calc(100svh-2rem))] w-[min(34rem,calc(100vw-2rem))] scale-95 flex-col overflow-hidden rounded-2xl border border-white/15 bg-zinc-950 p-0 font-sans text-base tracking-normal text-white normal-case opacity-0 shadow-2xl transition-[opacity,scale,overlay,display] transition-discrete duration-300 ease-out backdrop:bg-black/70 backdrop:backdrop-blur-sm open:scale-100 open:opacity-100 motion-reduce:transition-none starting:open:scale-95 starting:open:opacity-0"
       >
+        {/* Keep the options out of the page until the popup is open, so they are not tab stops. */}
         {/* Header and footer stay put; only the middle scrolls when a tab is taller than the box. */}
-        <div className="flex min-h-0 flex-col">
+        <div className="flex min-h-0 flex-col" hidden={!open}>
           <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">
             <div>
               <h2 id={titleId} className="text-2xl font-black tracking-tight">
