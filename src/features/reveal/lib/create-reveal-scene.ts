@@ -140,6 +140,7 @@ export function createRevealScene(
   let speed = 0;
   let started = intro; // is there a blob on screen yet?
   let userControl = false; // true once the user has moved the pointer over the container
+  let introDone = false; // true once the intro sweep has reached the end
 
   const currentInk = hexToVec3(palette[0]);
 
@@ -344,10 +345,14 @@ export function createRevealScene(
     shared.uTime.value = t;
 
     // Intro sweep: left to right, weaving up and down to cover the letter height
-    if (intro && !userControl) {
+    // It ends for good once it reaches the far side: if it kept wobbling there, the "pointer"
+    // would never be still, and on a phone (where nobody moves a pointer) the blob would keep
+    // growing back at the right end and repainting the last letters in a new colour.
+    if (intro && !userControl && !introDone) {
       const k = Math.min(Math.max((t - 0.4) / 4.5, 0), 1);
       const e = k * k * (3 - 2 * k);
       mouse.set(0.04 + 0.92 * e, textY - 0.02 + 0.08 * Math.sin(t * 4.5));
+      if (k >= 1) introDone = true;
     }
 
     // dt in seconds; f(a) converts a "per-frame at 60fps" lerp factor to any frame rate
