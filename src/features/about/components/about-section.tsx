@@ -21,7 +21,7 @@ export function AboutSection() {
     .filter(Boolean);
 
   return (
-    <Section id="about" index="01" label="About" heading={ABOUT.heading} compactHeading>
+    <Section id="about" index="01" label="About" heading={ABOUT.heading} compactHeading flush>
       <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,30rem)_1fr] lg:gap-20">
         {/* ---- Halftone portrait ---- */}
         <FadeIn className="mx-auto w-full max-w-lg">

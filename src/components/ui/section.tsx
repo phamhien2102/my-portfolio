@@ -21,6 +21,11 @@ interface SectionProps {
   bleed?: boolean;
   /** Use a smaller heading, for long sentences. */
   compactHeading?: boolean;
+  /**
+   * Sit flush with the top of the screen on a phone. The hero canvas is opaque and paints above
+   * the header bar, so a scroll offset would leave a strip of the hero covering that bar.
+   */
+  flush?: boolean;
 }
 
 /** Shared section frame: anchor, spacing, eyebrow and big heading. */
@@ -32,12 +37,16 @@ export function Section({
   children,
   bleed = false,
   compactHeading = false,
+  flush = false,
 }: SectionProps) {
   return (
     <section
       id={id}
       className={cn(
-        "scroll-mt-16 border-t border-white/10 py-24 sm:py-32",
+        "border-t border-white/10",
+        // The phone header is taller than the old offset, so a flush section pads its heading
+        // clear of the bar once the hero has scrolled fully away. Desktop keeps the offset.
+        flush ? "scroll-mt-0 pt-36 pb-24 sm:scroll-mt-16 sm:py-32" : "scroll-mt-16 py-24 sm:py-32",
         !bleed && "px-6 sm:px-10",
       )}
     >
