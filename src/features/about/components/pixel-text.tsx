@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useRef, type ElementType, type ReactNode } from "react";
 
+import { cn } from "@/lib/cn";
+
 /** Block size (px) at the start of the reveal. Smaller = it resolves from a finer mosaic. */
 const START_BLOCK = 18;
 /** Once the block would be this small, the effect is dropped and the text is drawn normally. */
@@ -26,6 +28,9 @@ interface PixelTextProps {
  * once it is down to single pixels. Without JS, or with reduced motion, the text is simply there.
  *
  * The block size is written to the DOM straight from a scroll listener: no React renders.
+ *
+ * `overflow: clip` matters: the tiled SVG filter otherwise becomes a scroll target, so a wheel
+ * or a finger over the words scrolls that invisible layer instead of the page.
  */
 export function PixelText({ children, className, as: Tag = "div" }: PixelTextProps) {
   const id = `pixel-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
@@ -100,7 +105,7 @@ export function PixelText({ children, className, as: Tag = "div" }: PixelTextPro
           <feMorphology ref={dilateRef} operator="dilate" radius="9" />
         </filter>
       </svg>
-      <Tag ref={elementRef} className={className}>
+      <Tag ref={elementRef} className={cn("overflow-clip touch-pan-y", className)}>
         {children}
       </Tag>
     </>
