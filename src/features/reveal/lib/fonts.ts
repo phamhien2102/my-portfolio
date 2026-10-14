@@ -15,6 +15,8 @@ const SPECS: Record<HeroFont, HeroFontSpec> = {
   classic: { fallback: '"Arial Black", "Helvetica Neue", Arial, sans-serif', weight: 900 },
   neon: { cssVar: "--font-hero-neon", fallback: "Impact, sans-serif", weight: 400 },
   drip: { cssVar: "--font-hero-drip", fallback: "Impact, sans-serif", weight: 400 },
+  // The droplets are sampled from a heavy, simple face, so the letters come out solid.
+  droplets: { fallback: '"Arial Black", "Helvetica Neue", Arial, sans-serif', weight: 900 },
   block: { cssVar: "--font-hero-block", fallback: "Impact, sans-serif", weight: 400 },
 };
 

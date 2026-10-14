@@ -31,10 +31,10 @@ const TABS: readonly Tab[] = [
   {
     id: "hero",
     label: "Hero",
-    intro: "The typeface of the big word at the top.",
-    legend: "Hero typeface",
+    intro: "How the big word at the top looks.",
+    legend: "Hero style",
     options: HERO_FONTS,
-    note: "The first time you pick a typeface it is downloaded, so it can take a moment to appear.",
+    note: "The first time you pick a typeface it is downloaded, so it can take a moment to appear. Droplets replaces the chrome blob with letters you can splash.",
   },
   {
     id: "projects",

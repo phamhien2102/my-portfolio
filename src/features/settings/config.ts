@@ -124,6 +124,13 @@ export const HERO_FONTS = [
     immersive: false,
     fontVar: "--font-hero-block",
   },
+  {
+    id: "droplets",
+    label: "Droplets",
+    description:
+      "Letters made of water drops. Push them around, splash them, watch them flow back.",
+    immersive: false,
+  },
 ] as const satisfies readonly SettingOption[];
 
 export type HeroFont = (typeof HERO_FONTS)[number]["id"];

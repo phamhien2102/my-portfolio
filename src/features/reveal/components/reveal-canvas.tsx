@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { useSettings } from "@/features/settings";
 
 import { REVEAL_CONFIG } from "../config";
+import { createDropletScene } from "../lib/create-droplet-scene";
 import { createRevealScene, type RevealScene } from "../lib/create-reveal-scene";
 
 interface RevealCanvasProps {
@@ -25,29 +26,31 @@ export function RevealCanvas({ dockId }: RevealCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<RevealScene | null>(null);
 
-  // The scene lives outside React; the typeface is handed over when the setting changes.
+  // The scenes live outside React; the typeface is handed over when the setting changes.
   const { heroFont } = useSettings();
+  const droplets = heroFont === "droplets";
   const fontRef = useRef(heroFont);
   useEffect(() => {
     fontRef.current = heroFont;
     sceneRef.current?.setFont(heroFont);
   }, [heroFont]);
 
+  // Swapping between the blob and the droplets rebuilds the scene; changing typeface does not.
   useEffect(() => {
     const slot = slotRef.current;
     const container = containerRef.current;
     if (!slot || !container) return;
-    const scene = createRevealScene(container, {
-      slot,
-      dock: document.getElementById(dockId),
-      font: fontRef.current,
-    });
+    const dock = document.getElementById(dockId);
+
+    if (droplets) return createDropletScene(container, { slot, dock }).dispose;
+
+    const scene = createRevealScene(container, { slot, dock, font: fontRef.current });
     sceneRef.current = scene;
     return () => {
       sceneRef.current = null;
       scene.dispose();
     };
-  }, [dockId]);
+  }, [dockId, droplets]);
 
   return (
     <>
