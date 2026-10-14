@@ -8,7 +8,7 @@ import { accentAt } from "@/config/theme";
 import { ABOUT } from "../data";
 import { DotPortrait } from "./dot-portrait";
 import { LocalTime } from "./local-time";
-import { RevealText } from "./reveal-text";
+import { PixelText } from "./pixel-text";
 
 export function AboutSection() {
   const [lead, ...rest] = ABOUT.paragraphs;
@@ -41,63 +41,68 @@ export function AboutSection() {
 
         {/* ---- Story ---- */}
         <div>
-          <FadeIn>
-            <p className="font-mono text-[11px] tracking-widest text-zinc-500 uppercase">
-              <span className="text-zinc-300">(A)</span> The short version
-            </p>
-          </FadeIn>
+          {/* Every block of text resolves out of a mosaic of pixels as it scrolls into view. */}
+          <PixelText
+            as="p"
+            className="font-mono text-[11px] tracking-widest text-zinc-500 uppercase"
+          >
+            <span className="text-zinc-300">(A)</span> The short version
+          </PixelText>
 
-          {/* Lights up word by word as you scroll. */}
-          <RevealText
-            text={lead}
+          <PixelText
+            as="p"
             className="mt-5 text-2xl leading-snug font-medium tracking-tight text-zinc-100 sm:text-3xl"
-          />
+          >
+            {lead}
+          </PixelText>
 
-          <FadeIn delay={100}>
-            <div className="mt-6 space-y-5 text-lg leading-relaxed text-zinc-400">
-              {rest.map((text) => (
-                <p key={text}>{text}</p>
-              ))}
-            </div>
-          </FadeIn>
+          <PixelText className="mt-6 space-y-5 text-lg leading-relaxed text-zinc-400">
+            {rest.map((text) => (
+              <p key={text}>{text}</p>
+            ))}
+          </PixelText>
 
           {/* Spec sheet. */}
-          <FadeIn delay={150}>
-            <p className="mt-12 font-mono text-[11px] tracking-widest text-zinc-500 uppercase">
-              <span className="text-zinc-300">(B)</span> The details
-            </p>
-            <dl className="mt-5 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2">
-              <Cell label="Based in" index="01" accent={accentAt(2)}>
-                <span className="text-zinc-100">{location}</span>
-                <span className="mt-1 block font-mono text-xs text-zinc-500">
-                  <LocalTime timeZone={ABOUT.timeZone} /> local time
-                </span>
-              </Cell>
+          <PixelText
+            as="p"
+            className="mt-12 font-mono text-[11px] tracking-widest text-zinc-500 uppercase"
+          >
+            <span className="text-zinc-300">(B)</span> The details
+          </PixelText>
+          <PixelText
+            as="dl"
+            className="mt-5 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2"
+          >
+            <Cell label="Based in" index="01" accent={accentAt(2)}>
+              <span className="text-zinc-100">{location}</span>
+              <span className="mt-1 block font-mono text-xs text-zinc-500">
+                <LocalTime timeZone={ABOUT.timeZone} /> local time
+              </span>
+            </Cell>
 
-              <Cell label="Status" index="02" accent={accentAt(3)}>
-                <span className="flex items-center gap-3 text-zinc-100">
-                  <span aria-hidden="true" className="relative flex size-2.5">
-                    <span className="absolute inline-flex size-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
-                    <span className="relative inline-flex size-2.5 rounded-full bg-emerald-400" />
-                  </span>
-                  {status}
+            <Cell label="Status" index="02" accent={accentAt(3)}>
+              <span className="flex items-center gap-3 text-zinc-100">
+                <span aria-hidden="true" className="relative flex size-2.5">
+                  <span className="absolute inline-flex size-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-emerald-400" />
                 </span>
-              </Cell>
+                {status}
+              </span>
+            </Cell>
 
-              <Cell label="Focus" index="03" accent={accentAt(4)} wide>
-                <ul className="flex flex-wrap gap-2">
-                  {focus.map((item) => (
-                    <li
-                      key={item}
-                      className="border border-white/15 px-3 py-1 font-mono text-xs tracking-wider text-zinc-200"
-                    >
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </Cell>
-            </dl>
-          </FadeIn>
+            <Cell label="Focus" index="03" accent={accentAt(4)} wide>
+              <ul className="flex flex-wrap gap-2">
+                {focus.map((item) => (
+                  <li
+                    key={item}
+                    className="border border-white/15 px-3 py-1 font-mono text-xs tracking-wider text-zinc-200"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </Cell>
+          </PixelText>
 
           <FadeIn delay={200}>
             <a
