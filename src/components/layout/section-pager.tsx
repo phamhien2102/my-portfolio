@@ -6,8 +6,12 @@ import { useEffect } from "react";
 const PAGER_QUERY =
   "(min-width: 768px) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
 
-/** A section up to this many screens tall counts as one "page". Taller ones scroll freely. */
-const PAGE_MAX_SCREENS = 1.15;
+/**
+ * A section counts as one page only when it fits on the screen. A few pixels of slack cover
+ * borders and rounding; anything taller has content below the fold and must scroll freely,
+ * or a flick lands on it and then cannot move any further.
+ */
+const PAGE_SLACK = 32;
 /** The wheel must have been quiet this long (ms) before the next flick starts a new jump. */
 const QUIET_MS = 140;
 /** Ignore tiny wheel deltas (a resting trackpad finger). */
@@ -16,12 +20,13 @@ const MIN_DELTA = 3;
 /**
  * One gentle scroll = one section.
  *
- * While the section you are in is about a screen tall, a flick of the wheel or trackpad glides
- * straight to the next (or previous) section instead of scrolling a few lines. Sections that are
- * much taller than the screen, or that pin themselves while you scroll (Skills, Experience and
- * the project stack), keep their normal free scrolling, and the pager steps aside until you leave
- * them. After a jump it waits for the wheel (and any trackpad momentum) to go quiet, so a single
- * flick can never skip two sections.
+ * While the section you are in fits on one screen, a flick of the wheel or trackpad glides
+ * straight to the next (or previous) section instead of scrolling a few lines. Sections taller
+ * than the screen, or that pin themselves while you scroll (Skills, Experience and the project
+ * stack), keep their normal free scrolling, and the pager steps aside until you leave them.
+ * After a jump onto another full-screen section it waits for the wheel (and any trackpad
+ * momentum) to go quiet, so a single flick can never skip two sections. A jump into a tall
+ * section does not: the rest of that gesture has to be able to scroll on through it.
  *
  * Renders nothing. Touch scrolling, the keyboard, the scrollbar and open dialogs are left alone.
  */
@@ -90,6 +95,7 @@ export function SectionPager() {
 
       const list = sections();
       const vh = window.innerHeight;
+      const page = (item: HTMLElement) => item.offsetHeight <= vh + PAGE_SLACK;
       const index = list.findIndex((section) => {
         const rect = section.getBoundingClientRect();
         return rect.top <= vh * 0.5 && rect.bottom > vh * 0.5;
@@ -97,34 +103,42 @@ export function SectionPager() {
       if (index < 0) return;
       const section = list[index];
       // Tall sections (and the pinned ones) scroll on their own.
-      if (section.offsetHeight > vh * PAGE_MAX_SCREENS) return;
+      if (!page(section)) return;
 
       const rect = section.getBoundingClientRect();
       const top = rect.top + window.scrollY;
       const down = event.deltaY > 0;
       let target: number | null = null;
+      // Only a landing on another full-screen section should swallow the rest of the gesture.
+      let landOnPage = false;
 
       if (down) {
-        if (rect.top > 8)
+        if (rect.top > 8) {
           target = top; // not at its top yet: arrive there first
-        else if (list[index + 1]) {
-          target = list[index + 1].getBoundingClientRect().top + window.scrollY;
+          landOnPage = true;
+        } else if (list[index + 1]) {
+          const next = list[index + 1];
+          target = next.getBoundingClientRect().top + window.scrollY;
+          landOnPage = page(next);
         }
       } else if (rect.top < -8) {
         target = top; // scrolled a little into it: go back to its top
+        landOnPage = true;
       } else if (list[index - 1]) {
         const previous = list[index - 1];
         const previousTop = previous.getBoundingClientRect().top + window.scrollY;
         // Going back into a tall section: land at its end, and carry on upwards freely.
-        target =
-          previous.offsetHeight > vh * PAGE_MAX_SCREENS
-            ? Math.max(previousTop, previousTop + previous.offsetHeight - vh)
-            : previousTop;
+        if (page(previous)) {
+          target = previousTop;
+          landOnPage = true;
+        } else {
+          target = Math.max(previousTop, previousTop + previous.offsetHeight - vh);
+        }
       }
 
       if (target === null || Math.abs(target - window.scrollY) < 4) return;
       event.preventDefault();
-      needQuiet = true;
+      needQuiet = landOnPage;
       glideTo(target);
     };
 
