@@ -130,14 +130,14 @@ export function SettingsTabs() {
   const tab = TABS[active];
 
   return (
-    <div className="mt-6">
-      {/* Tab bar with a sliding pill. */}
+    <div className="mt-6 flex min-h-0 grow flex-col">
+      {/* Tab bar with a sliding pill. It stays put while the options below scroll. */}
       <div
         role="tablist"
         aria-label="Settings sections"
         onKeyDown={onKeyDown}
         style={{ "--tabs": TABS.length, "--active": active } as CSSProperties}
-        className="relative grid grid-cols-[repeat(var(--tabs),minmax(0,1fr))] rounded-full border border-white/10 bg-white/[0.04] p-1"
+        className="relative grid shrink-0 grid-cols-[repeat(var(--tabs),minmax(0,1fr))] rounded-full border border-white/10 bg-white/[0.04] p-1"
       >
         <span
           aria-hidden="true"
@@ -163,29 +163,32 @@ export function SettingsTabs() {
         ))}
       </div>
 
-      {/* Panel. The wrapper animates the height; the inner element is what gets measured. */}
-      <div
-        style={height === undefined ? undefined : { height }}
-        className="-m-1 mt-3 overflow-hidden p-1 transition-[height] duration-400 ease-out motion-reduce:transition-none"
-      >
-        <div ref={innerRef}>
-          <div
-            key={tab.id}
-            role="tabpanel"
-            id={`${baseId}-panel`}
-            aria-labelledby={`${baseId}-tab-${tab.id}`}
-            style={{ "--from": `${from}px` } as CSSProperties}
-            className="transition-[opacity,translate] duration-500 ease-out motion-reduce:transition-none starting:translate-x-(--from) starting:opacity-0"
-          >
-            <p className="text-sm text-zinc-400">{tab.intro}</p>
-            <OptionGroup
-              legend={tab.legend}
-              name={`${tab.id}-setting`}
-              options={tab.options}
-              value={values[tab.id]}
-              onChange={(id) => choose(tab.id, id)}
-              note={tab.note}
-            />
+      {/* Options scroll once they outgrow the dialog. The inner wrapper eases its height
+          between tabs, so the dialog never jumps while everything still fits. */}
+      <div className="mt-3 min-h-0 grow overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          style={height === undefined ? undefined : { height }}
+          className="overflow-hidden p-1 transition-[height] duration-400 ease-out motion-reduce:transition-none"
+        >
+          <div ref={innerRef}>
+            <div
+              key={tab.id}
+              role="tabpanel"
+              id={`${baseId}-panel`}
+              aria-labelledby={`${baseId}-tab-${tab.id}`}
+              style={{ "--from": `${from}px` } as CSSProperties}
+              className="transition-[opacity,translate] duration-500 ease-out motion-reduce:transition-none starting:translate-x-(--from) starting:opacity-0"
+            >
+              <p className="text-sm text-zinc-400">{tab.intro}</p>
+              <OptionGroup
+                legend={tab.legend}
+                name={`${tab.id}-setting`}
+                options={tab.options}
+                value={values[tab.id]}
+                onChange={(id) => choose(tab.id, id)}
+                note={tab.note}
+              />
+            </div>
           </div>
         </div>
       </div>
