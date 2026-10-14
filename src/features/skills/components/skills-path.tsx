@@ -15,8 +15,6 @@ const ACCENTS = SKILL_GROUPS.map((_, i) => accentAt(i + 1));
 /** Only fly on wide screens, and only for people who haven't asked for less motion. */
 const FLY_QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
 
-/** The framed stage sticks this far (px) below the top of the screen, under the header. */
-const STICKY_TOP = 80;
 /** Scroll distance of the flight, in viewport heights per group. */
 const SCREENS_PER_GROUP = 0.9;
 
@@ -27,7 +25,7 @@ interface SkillsPathProps {
 
 /**
  * Skills as a 3D scroll-driven flight: the same glowing path as the Experience fly-through,
- * with one gate per skill group. The page scrolls while a framed stage stays put, and the
+ * with one gate per skill group. The page scrolls while a full-screen stage stays put, and the
  * camera glides along the path, hovering at each gate while that group's skills fade in.
  * Per-frame changes (cards, rail) are written straight to the DOM: no React renders on scroll.
  */
@@ -80,7 +78,6 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
           runway,
           stage,
           accents: ACCENTS,
-          stickyTop: STICKY_TOP,
           onProgress,
         });
         delete root.dataset.path;
@@ -104,11 +101,7 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
     const stage = stageRef.current;
     if (!runway || !stage) return;
     const range = runway.offsetHeight - stage.offsetHeight;
-    const top =
-      runway.getBoundingClientRect().top +
-      window.scrollY -
-      STICKY_TOP +
-      waypointP(i, COUNT) * range;
+    const top = runway.getBoundingClientRect().top + window.scrollY + waypointP(i, COUNT) * range;
     window.scrollTo({ top, behavior: "smooth" });
   };
 
@@ -125,8 +118,7 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
         >
           <div
             ref={stageRef}
-            style={{ top: STICKY_TOP, height: `max(30rem, calc(100svh - ${STICKY_TOP + 24}px))` }}
-            className="sticky overflow-hidden border border-white/10"
+            className="sticky top-0 h-svh overflow-hidden border-y border-white/10"
           >
             <div ref={hostRef} aria-hidden="true" className="absolute inset-0" />
 
@@ -139,7 +131,7 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
               }}
             />
 
-            <ol className="pointer-events-none absolute inset-0 grid items-center px-8 lg:px-14">
+            <ol className="pointer-events-none absolute inset-0 grid items-center px-10 lg:px-20">
               {SKILL_GROUPS.map((group, i) => (
                 <li
                   key={group.title}
@@ -147,7 +139,7 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
                     cardRefs.current[i] = el;
                   }}
                   style={{ opacity: i === 0 ? 1 : 0, "--accent": ACCENTS[i] } as CSSProperties}
-                  className="col-start-1 row-start-1 max-w-xs will-change-[opacity,transform]"
+                  className="col-start-1 row-start-1 max-w-md will-change-[opacity,transform] lg:max-w-lg"
                 >
                   <p
                     style={{ color: ACCENTS[i] }}
@@ -232,7 +224,7 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
       </div>
 
       {/* The plain list: phones, reduced motion, or no WebGL. */}
-      <div className="block group-data-[path=off]/path:block! motion-safe:md:hidden">
+      <div className="mx-auto block max-w-6xl px-6 group-data-[path=off]/path:block! sm:px-10 motion-safe:md:hidden">
         {fallback}
       </div>
     </div>

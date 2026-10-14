@@ -52,12 +52,6 @@ export type ExperienceEffect = (typeof EXPERIENCE_EFFECTS)[number]["id"];
 
 export const SKILLS_VIEWS = [
   {
-    id: "constellation",
-    label: "Constellation",
-    description: "A night sky: the closer to the centre, the stronger the skill.",
-    immersive: false,
-  },
-  {
     id: "solar",
     label: "Solar system",
     description: "Each group orbits as its own ring; planet size shows proficiency.",
@@ -68,6 +62,12 @@ export const SKILLS_VIEWS = [
     label: "Fly-through path",
     description: "Scroll to fly down a glowing path, one gate per skill group.",
     immersive: true,
+  },
+  {
+    id: "constellation",
+    label: "Constellation",
+    description: "A night sky: the closer to the centre, the stronger the skill.",
+    immersive: false,
   },
 ] as const satisfies readonly SettingOption[];
 
@@ -98,6 +98,13 @@ export type ProjectsView = (typeof PROJECTS_VIEWS)[number]["id"];
 
 export const HERO_FONTS = [
   {
+    id: "drip",
+    label: "Drip",
+    description: "Wet paint, still running down the letters.",
+    immersive: false,
+    fontVar: "--font-hero-drip",
+  },
+  {
     id: "classic",
     label: "Classic",
     description: "Heavy, plain and bold.",
@@ -109,13 +116,6 @@ export const HERO_FONTS = [
     description: "Striped like a humming neon sign.",
     immersive: false,
     fontVar: "--font-hero-neon",
-  },
-  {
-    id: "drip",
-    label: "Drip",
-    description: "Wet paint, still running down the letters.",
-    immersive: false,
-    fontVar: "--font-hero-drip",
   },
   {
     id: "block",
@@ -144,7 +144,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   experienceEffect: "flythrough",
-  skillsView: "constellation",
+  skillsView: "solar",
   projectsView: "cards",
   heroFont: "drip",
 };
