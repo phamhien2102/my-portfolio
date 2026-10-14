@@ -24,7 +24,7 @@ export function SettingsButton() {
         aria-label="Open settings"
         aria-haspopup="dialog"
         onClick={() => dialogRef.current?.showModal()}
-        className="group -mt-1.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-current/30 opacity-70 transition-[opacity,background-color,color] duration-300 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none max-sm:ml-auto"
+        className="group flex size-8 shrink-0 items-center justify-center rounded-full border border-current/30 opacity-70 transition-[opacity,background-color,color] duration-300 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none max-sm:ml-auto sm:-mt-1.5"
       >
         <GearIcon className="size-4 transition-transform duration-500 group-hover:rotate-90 motion-reduce:transition-none" />
       </button>

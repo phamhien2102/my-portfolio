@@ -10,6 +10,25 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Touch hint on the hero: the label dips and brightens, so a tap reads as the way down. */
+  --animate-next-hint: next-hint 2.4s ease-in-out infinite;
+  @keyframes next-hint {
+    0%,
+    14% {
+      transform: translateY(0);
+      color: #71717a;
+    }
+    42% {
+      transform: translateY(0.4rem);
+      color: #fff;
+    }
+    64%,
+    100% {
+      transform: translateY(0);
+      color: #71717a;
+    }
+  }
 }
 
 html {

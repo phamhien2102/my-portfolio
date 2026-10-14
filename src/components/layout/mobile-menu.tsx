@@ -49,7 +49,7 @@ export function MobileMenu({ items, active, className }: MobileMenuProps) {
         aria-label="Open menu"
         aria-haspopup="dialog"
         onClick={() => dialogRef.current?.showModal()}
-        className="-mt-1.5 flex size-8 items-center justify-center rounded-full border border-current/30 opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none"
+        className="flex size-8 items-center justify-center rounded-full border border-current/30 opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none sm:-mt-1.5"
       >
         <svg
           aria-hidden="true"
