@@ -5,6 +5,7 @@ import { useSyncExternalStore } from "react";
 import {
   DEFAULT_SETTINGS,
   isExperienceEffect,
+  isHeroFont,
   isProjectsView,
   isSkillsView,
   type Settings,
@@ -29,7 +30,7 @@ function load(): Settings {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     const saved: unknown = raw ? JSON.parse(raw) : null;
     if (saved && typeof saved === "object") {
-      const { experienceEffect, skillsView, projectsView } = saved as Partial<
+      const { experienceEffect, skillsView, projectsView, heroFont } = saved as Partial<
         Record<keyof Settings, unknown>
       >;
       return {
@@ -38,6 +39,7 @@ function load(): Settings {
           : DEFAULT_SETTINGS.experienceEffect,
         skillsView: isSkillsView(skillsView) ? skillsView : DEFAULT_SETTINGS.skillsView,
         projectsView: isProjectsView(projectsView) ? projectsView : DEFAULT_SETTINGS.projectsView,
+        heroFont: isHeroFont(heroFont) ? heroFont : DEFAULT_SETTINGS.heroFont,
       };
     }
   } catch {

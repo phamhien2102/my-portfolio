@@ -5,6 +5,8 @@ export interface SettingOption {
   description: string;
   /** Needs a wide screen and motion allowed (and WebGL for some); otherwise a plain fallback is shown. */
   immersive: boolean;
+  /** CSS variable of the typeface to preview the option in (set by next/font in the layout). */
+  fontVar?: string;
 }
 
 export const EXPERIENCE_EFFECTS = [
@@ -94,16 +96,50 @@ export const PROJECTS_VIEWS = [
 
 export type ProjectsView = (typeof PROJECTS_VIEWS)[number]["id"];
 
+export const HERO_FONTS = [
+  {
+    id: "classic",
+    label: "Classic",
+    description: "Heavy, plain and bold.",
+    immersive: false,
+  },
+  {
+    id: "neon",
+    label: "Neon",
+    description: "Striped like a humming neon sign.",
+    immersive: false,
+    fontVar: "--font-hero-neon",
+  },
+  {
+    id: "drip",
+    label: "Drip",
+    description: "Wet paint, still running down the letters.",
+    immersive: false,
+    fontVar: "--font-hero-drip",
+  },
+  {
+    id: "block",
+    label: "Block",
+    description: "Chunky capitals with a solid 3D shadow.",
+    immersive: false,
+    fontVar: "--font-hero-block",
+  },
+] as const satisfies readonly SettingOption[];
+
+export type HeroFont = (typeof HERO_FONTS)[number]["id"];
+
 export interface Settings {
   experienceEffect: ExperienceEffect;
   skillsView: SkillsView;
   projectsView: ProjectsView;
+  heroFont: HeroFont;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   experienceEffect: "flythrough",
   skillsView: "constellation",
   projectsView: "cards",
+  heroFont: "drip",
 };
 
 export function isExperienceEffect(value: unknown): value is ExperienceEffect {
@@ -116,4 +152,8 @@ export function isSkillsView(value: unknown): value is SkillsView {
 
 export function isProjectsView(value: unknown): value is ProjectsView {
   return PROJECTS_VIEWS.some((option) => option.id === value);
+}
+
+export function isHeroFont(value: unknown): value is HeroFont {
+  return HERO_FONTS.some((option) => option.id === value);
 }

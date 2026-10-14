@@ -2,8 +2,10 @@
 
 import { useEffect, useRef } from "react";
 
+import { useSettings } from "@/features/settings";
+
 import { REVEAL_CONFIG } from "../config";
-import { createRevealScene } from "../lib/create-reveal-scene";
+import { createRevealScene, type RevealScene } from "../lib/create-reveal-scene";
 
 interface RevealCanvasProps {
   /** `id` of the element the word shrinks into as the page scrolls (the header logo). */
@@ -21,12 +23,30 @@ interface RevealCanvasProps {
 export function RevealCanvas({ dockId }: RevealCanvasProps) {
   const slotRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<RevealScene | null>(null);
+
+  // The scene lives outside React; the typeface is handed over when the setting changes.
+  const { heroFont } = useSettings();
+  const fontRef = useRef(heroFont);
+  useEffect(() => {
+    fontRef.current = heroFont;
+    sceneRef.current?.setFont(heroFont);
+  }, [heroFont]);
 
   useEffect(() => {
     const slot = slotRef.current;
     const container = containerRef.current;
     if (!slot || !container) return;
-    return createRevealScene(container, { slot, dock: document.getElementById(dockId) });
+    const scene = createRevealScene(container, {
+      slot,
+      dock: document.getElementById(dockId),
+      font: fontRef.current,
+    });
+    sceneRef.current = scene;
+    return () => {
+      sceneRef.current = null;
+      scene.dispose();
+    };
   }, [dockId]);
 
   return (

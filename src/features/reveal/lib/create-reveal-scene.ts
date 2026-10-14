@@ -1,8 +1,11 @@
 import * as THREE from "three";
 
+import type { HeroFont } from "@/features/settings";
+
 import { REVEAL_CONFIG, type RevealConfig } from "../config";
 import { hexToVec3 } from "./color";
 import { drawText } from "./draw-text";
+import { loadFont, resolveFont } from "./fonts";
 import { ACCUM_FRAGMENT, FINAL_FRAGMENT, VERTEX_SHADER, buildCommon } from "./shaders";
 
 /** Smallest the blob may get relative to its desktop size (keeps it visible on phones). */
@@ -16,11 +19,19 @@ interface RevealTargets {
   slot: HTMLElement;
   /** Element the word shrinks into (the logo spot in the header). */
   dock: HTMLElement | null;
+  /** Typeface the word starts in. */
+  font: HeroFont;
+}
+
+export interface RevealScene {
+  /** Redraw the word in another typeface (the blob's progress and colours are kept). */
+  setFont: (font: HeroFont) => void;
+  dispose: () => void;
 }
 
 /**
- * Mounts the reveal effect into `container` (a fixed, viewport-sized layer) and returns a
- * `dispose` function that tears down the renderer, GPU resources, observers and animation loop.
+ * Mounts the reveal effect into `container` (a fixed, viewport-sized layer) and returns `setFont`
+ * and a `dispose` function that tears down the renderer, GPU resources, observers and loop.
  *
  * The canvas is transparent outside the hero, so as the page scrolls the word is the only thing
  * left on it: it shrinks and glides to `dock`, keeping every colour the blob painted. Once the
@@ -28,9 +39,9 @@ interface RevealTargets {
  */
 export function createRevealScene(
   container: HTMLElement,
-  { slot, dock }: RevealTargets,
+  { slot, dock, font }: RevealTargets,
   config: RevealConfig = REVEAL_CONFIG,
-): () => void {
+): RevealScene {
   const {
     word,
     palette,
@@ -78,12 +89,14 @@ export function createRevealScene(
   textTex.generateMipmaps = true;
 
   let dirty = true; // something changed that needs a frame even while the hero is offscreen
-  let textMetrics = { left: 0, width: 1 }; // the word's left edge and width, in CSS px
+  let textMetrics = { left: 0, width: 1, height: 1 }; // the word's left edge, width and cap height, in CSS px
+  let wordFont = resolveFont(font);
 
   const redrawText = () => {
     const { w, h } = size();
     textMetrics = drawText(textCanvas, {
       word,
+      font: wordFont,
       width: w,
       height: h,
       widthRatio: textWidth,
@@ -193,6 +206,8 @@ export function createRevealScene(
   const onPointerMove = (e: PointerEvent) => {
     // Once the page has scrolled the blob is retired, so the pointer no longer drives it.
     if (progress > 0.02) return;
+    // A modal (settings, mobile menu) has the page's attention: the blob sits it out.
+    if (document.querySelector("dialog[open]")) return;
     // Pointer coordinates are relative to the container, and ignored outside it.
     const rect = container.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -316,8 +331,8 @@ export function createRevealScene(
 
     // The blob is sized in viewport heights but the word scales with the viewport width, so on
     // a tall, narrow screen it would dwarf the letters. Shrink it to stay in proportion to them
-    // (letters are ~13% as tall as the word is wide; on a 16:9 screen the factor works out to 1).
-    const letterHeight = textMetrics.width * 0.133;
+    // (on a 16:9 screen with the classic typeface the factor works out to 1).
+    const letterHeight = textMetrics.height;
     shared.uBlob.value = Math.min(Math.max((letterHeight / h / 0.217) * 1.5, MIN_BLOB), 1);
 
     progress = Math.min(Math.max(-slotRect.top / (h * 0.55), 0), 1);
@@ -414,19 +429,36 @@ export function createRevealScene(
   // The loop always ticks, but `frame` returns early (no GPU work) while the hero is offscreen.
   renderer.setAnimationLoop(frame);
 
-  return () => {
-    disposed = true;
-    resizeObserver.disconnect();
-    renderer.setAnimationLoop(null);
-    window.removeEventListener("pointermove", onPointerMove);
-    rtRead.dispose();
-    rtWrite.dispose();
-    textTex.dispose();
-    quadGeometry.dispose();
-    accumMat.dispose();
-    finalMat.dispose();
-    renderer.dispose();
-    renderer.forceContextLoss();
-    canvas.remove();
+  // Switching typeface: wait for the font file, then redraw the word with it. If the visitor
+  // switches again meanwhile, only the latest request is drawn.
+  let fontRequest = 0;
+  const setFont = (id: HeroFont) => {
+    const next = resolveFont(id);
+    const request = ++fontRequest;
+    void loadFont(next).then(() => {
+      if (disposed || request !== fontRequest) return;
+      wordFont = resolveFont(id); // re-read: the family name is only set once the font exists
+      redrawText();
+    });
+  };
+  setFont(font);
+
+  return {
+    setFont,
+    dispose: () => {
+      disposed = true;
+      resizeObserver.disconnect();
+      renderer.setAnimationLoop(null);
+      window.removeEventListener("pointermove", onPointerMove);
+      rtRead.dispose();
+      rtWrite.dispose();
+      textTex.dispose();
+      quadGeometry.dispose();
+      accumMat.dispose();
+      finalMat.dispose();
+      renderer.dispose();
+      renderer.forceContextLoss();
+      canvas.remove();
+    },
   };
 }

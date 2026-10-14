@@ -2,16 +2,8 @@
 
 import { useId, useRef } from "react";
 
-import {
-  EXPERIENCE_EFFECTS,
-  PROJECTS_VIEWS,
-  SKILLS_VIEWS,
-  isExperienceEffect,
-  isProjectsView,
-  isSkillsView,
-} from "../config";
-import { resetSettings, updateSettings, useSettings } from "../lib/settings-store";
-import { OptionGroup } from "./option-group";
+import { resetSettings } from "../lib/settings-store";
+import { SettingsTabs } from "./settings-tabs";
 
 /**
  * Gear button that opens a settings popup.
@@ -22,7 +14,6 @@ import { OptionGroup } from "./option-group";
 export function SettingsButton() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
-  const { experienceEffect, skillsView, projectsView } = useSettings();
 
   const close = () => dialogRef.current?.close();
 
@@ -45,7 +36,7 @@ export function SettingsButton() {
         onClick={(event) => {
           if (event.target === event.currentTarget) close();
         }}
-        className="m-auto max-h-[min(40rem,calc(100svh-2rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-2xl border border-white/15 bg-zinc-950 p-0 font-sans text-base tracking-normal text-white normal-case shadow-2xl backdrop:bg-black/70 backdrop:backdrop-blur-sm"
+        className="m-auto max-h-[min(44rem,calc(100svh-2rem))] w-[min(34rem,calc(100vw-2rem))] scale-95 overflow-y-auto overscroll-contain rounded-2xl border border-white/15 bg-zinc-950 p-0 font-sans text-base tracking-normal text-white normal-case opacity-0 shadow-2xl transition-[opacity,scale,overlay,display] transition-discrete duration-300 ease-out backdrop:bg-black/70 backdrop:backdrop-blur-sm open:scale-100 open:opacity-100 motion-reduce:transition-none starting:open:scale-95 starting:open:opacity-0"
       >
         <div className="p-6 sm:p-8">
           <div className="flex items-start justify-between gap-4">
@@ -75,38 +66,7 @@ export function SettingsButton() {
             </button>
           </div>
 
-          <OptionGroup
-            legend="Experience effect"
-            name="experience-effect"
-            options={EXPERIENCE_EFFECTS}
-            value={experienceEffect}
-            onChange={(id) => {
-              if (isExperienceEffect(id)) updateSettings({ experienceEffect: id });
-            }}
-            note="3D effects need a wide screen and WebGL. On phones, or when your device asks for reduced motion, the timeline is shown instead."
-          />
-
-          <OptionGroup
-            legend="Projects view"
-            name="projects-view"
-            options={PROJECTS_VIEWS}
-            value={projectsView}
-            onChange={(id) => {
-              if (isProjectsView(id)) updateSettings({ projectsView: id });
-            }}
-            note="The gallery and the scroll stack need a wide screen (the gallery also WebGL). Otherwise the card grid is shown."
-          />
-
-          <OptionGroup
-            legend="Skills view"
-            name="skills-view"
-            options={SKILLS_VIEWS}
-            value={skillsView}
-            onChange={(id) => {
-              if (isSkillsView(id)) updateSettings({ skillsView: id });
-            }}
-            note="The 3D views need a wide screen and WebGL. Otherwise a simple list is shown."
-          />
+          <SettingsTabs />
 
           <div className="mt-8 flex items-center justify-between gap-4">
             <button
