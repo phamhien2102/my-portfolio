@@ -199,11 +199,17 @@ function fadeTexture(): THREE.CanvasTexture {
  * Projects as a curved wall of floating screens standing on a neon grid floor and reflected in
  * it. The camera sits near the middle of the circle, so the screens wrap around the viewer; the
  * front one faces you, the others turn in and fade. Drag, click a neighbour, or drive it with
- * `setActive`. Runs only while on screen.
+ * `setActive`. After the last screen it loops to the first (and the other way). Runs only while
+ * on screen.
  */
 export function createGalleryScene({ host, onSelect, onOpen }: GallerySceneOptions): GalleryScene {
   const size = () => ({ w: Math.max(1, host.clientWidth), h: Math.max(1, host.clientHeight) });
-  const last = PROJECTS.length - 1;
+  const COUNT = PROJECTS.length;
+
+  const wrapIndex = (i: number) => ((i % COUNT) + COUNT) % COUNT;
+  /** Shortest signed offset on the looping wall, in `(-COUNT/2, COUNT/2]`. */
+  const wrapDelta = (d: number) => ((((d + COUNT / 2) % COUNT) + COUNT) % COUNT) - COUNT / 2;
+  const nearestCopy = (value: number, around: number) => around + wrapDelta(value - around);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -422,9 +428,7 @@ export function createGalleryScene({ host, onSelect, onOpen }: GallerySceneOptio
       host.setPointerCapture(e.pointerId);
       host.style.cursor = "grabbing";
     }
-    const raw = (e.clientX - pressed.x) / stepPixels();
-    const past = (active === 0 && raw > 0) || (active === last && raw < 0);
-    dragFraction = past ? raw * 0.25 : raw;
+    dragFraction = clamp((e.clientX - pressed.x) / stepPixels(), -1.15, 1.15);
   };
 
   const endDrag = (cancelled: boolean) => {
@@ -437,7 +441,7 @@ export function createGalleryScene({ host, onSelect, onOpen }: GallerySceneOptio
     if (!wasDragging) return;
     swallowClick = true; // the click that follows a drag must not select anything
     if (!cancelled && Math.abs(fraction) > 0.22) {
-      onSelect(clamp(active + (fraction < 0 ? 1 : -1), 0, last));
+      onSelect(wrapIndex(active + (fraction < 0 ? 1 : -1)));
     }
   };
   const onPointerUp = () => endDrag(false);
@@ -500,8 +504,10 @@ export function createGalleryScene({ host, onSelect, onOpen }: GallerySceneOptio
     const f = (a: number) => 1 - Math.pow(1 - a, dt * 60);
     const elapsed = clock.getElapsedTime();
 
-    const target = clamp(active - dragFraction, -0.4, last + 0.4);
+    const target = nearestCopy(active, position) - dragFraction;
     position += (target - position) * f(dragging ? 0.4 : 0.09);
+    // Fold back onto 0..COUNT once a wrap animation has settled, so position does not grow.
+    if (!dragging && Math.abs(target - position) < 0.03) position = wrapIndex(active);
 
     pointer.x += (pointer.tx - pointer.x) * f(0.05);
     pointer.y += (pointer.ty - pointer.y) * f(0.05);
@@ -515,7 +521,7 @@ export function createGalleryScene({ host, onSelect, onOpen }: GallerySceneOptio
     camera.lookAt(lookAt.x - pointer.x * 0.2, lookAt.y, lookAt.z);
 
     // Floor and glow take the colour of the project in front.
-    const near = clamp(Math.round(position), 0, last);
+    const near = wrapIndex(Math.round(position));
     tintTarget.set(accentAt(near));
     tint.lerp(tintTarget, f(0.06));
     gridMaterial.color.copy(tint);
@@ -523,7 +529,7 @@ export function createGalleryScene({ host, onSelect, onOpen }: GallerySceneOptio
     dustMaterial.color.copy(mix.copy(tint).lerp(new THREE.Color("#ffffff"), 0.4));
 
     screens.forEach((screen, i) => {
-      const d = i - position;
+      const d = wrapDelta(i - position);
       const away = Math.abs(d);
       const front = clamp(1 - away, 0, 1);
 
@@ -578,7 +584,7 @@ export function createGalleryScene({ host, onSelect, onOpen }: GallerySceneOptio
 
   return {
     setActive: (index) => {
-      active = clamp(index, 0, last);
+      active = wrapIndex(index);
     },
     dispose: () => {
       visibility.disconnect();

@@ -3,7 +3,7 @@ export interface SettingOption {
   id: string;
   label: string;
   description: string;
-  /** Needs a wide screen and motion allowed (and WebGL for some); otherwise a plain fallback is shown. */
+  /** Needs motion allowed (and WebGL for some); otherwise a plain fallback is shown. */
   immersive: boolean;
   /** CSS variable of the typeface to preview the option in (set by next/font in the layout). */
   fontVar?: string;
@@ -83,7 +83,7 @@ export const PROJECTS_VIEWS = [
   {
     id: "gallery",
     label: "3D gallery",
-    description: "A curved wall of floating screens over a neon floor: drag or use the arrows.",
+    description: "A curved wall of floating screens over a neon floor: drag or use the arrows. It loops.",
     immersive: true,
   },
   {

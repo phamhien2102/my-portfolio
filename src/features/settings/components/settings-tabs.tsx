@@ -53,7 +53,7 @@ const TABS: readonly Tab[] = [
     intro: "How the project list is shown.",
     legend: "Projects view",
     options: PROJECTS_VIEWS,
-    note: "The gallery and the scroll stack need a wide screen (the gallery also WebGL). Otherwise the card grid is shown.",
+    note: "The gallery needs WebGL. When your device asks for reduced motion, or WebGL is missing, the card grid is shown.",
   },
   {
     id: "skills",

@@ -118,7 +118,7 @@ export function ExperiencePath({ effect, children }: ExperiencePathProps) {
         >
           <div
             ref={stageRef}
-            className="sticky top-0 h-svh overflow-hidden border-y border-white/10"
+            className="sticky top-0 h-svh overflow-hidden border-t border-white/10"
           >
             <div ref={hostRef} aria-hidden="true" className="absolute inset-0 touch-pan-y" />
 

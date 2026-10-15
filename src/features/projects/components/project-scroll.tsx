@@ -9,17 +9,16 @@ import { ProjectBackdrop } from "./project-backdrop";
 
 const COUNT = PROJECTS.length;
 
-/** Only on wide screens, and only for people who haven't asked for less motion. */
-const SCROLL_QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
+/** Run whenever the visitor hasn't asked for less motion. */
+const SCROLL_QUERY = "(prefers-reduced-motion: no-preference)";
 
-/** Where the first card sticks (px from the top of the screen), and the step between cards. */
-const STICK_TOP = 88;
+/** Extra offset between stacked cards. The first card's top comes from `--stick-top` in CSS. */
 const STICK_STEP = 16;
 
 const clamp = (x: number, lo: number, hi: number) => Math.min(Math.max(x, lo), hi);
 
 interface ProjectScrollProps {
-  /** Shown instead on phones and with reduced motion. */
+  /** Shown instead with reduced motion. */
   fallback: ReactNode;
 }
 
@@ -53,7 +52,9 @@ export function ProjectScroll({ fallback }: ProjectScrollProps) {
         const card = cardRefs.current[i];
         if (!slot || !card) continue;
 
-        const stick = STICK_TOP + i * STICK_STEP;
+        const sticky = card.parentElement;
+        if (!sticky) continue;
+        const stick = parseFloat(getComputedStyle(sticky).top) || 0;
         // 0 while the card is far below, 1 once it has settled at its sticking place.
         const rise = 1 - clamp((slot.getBoundingClientRect().top - stick) / reach, 0, 1);
 
@@ -93,8 +94,8 @@ export function ProjectScroll({ fallback }: ProjectScrollProps) {
 
   return (
     <div>
-      {/* The stack: wide screens, motion allowed. */}
-      <ol className="hidden [perspective:1800px] motion-safe:md:block">
+      {/* The stack: motion allowed. `--stick-top` clears the taller phone header. */}
+      <ol className="hidden [perspective:1800px] [--stick-top:8.25rem] motion-safe:block sm:[--stick-top:5.5rem]">
         {PROJECTS.map((project, i) => {
           const accent = accentAt(i);
           const last = i === COUNT - 1;
@@ -108,7 +109,12 @@ export function ProjectScroll({ fallback }: ProjectScrollProps) {
               style={{ height: last ? undefined : "min(78svh, 40rem)" }}
             >
               <div
-                style={{ top: STICK_TOP + i * STICK_STEP, "--accent": accent } as CSSProperties}
+                style={
+                  {
+                    top: `calc(var(--stick-top) + ${i * STICK_STEP}px)`,
+                    "--accent": accent,
+                  } as CSSProperties
+                }
                 className="sticky"
               >
                 <div
@@ -135,7 +141,7 @@ export function ProjectScroll({ fallback }: ProjectScrollProps) {
                       </p>
 
                       <div>
-                        <h3 className="text-5xl leading-[1.02] font-black tracking-tight transition-colors duration-300 group-hover:text-(--accent) xl:text-6xl">
+                        <h3 className="text-4xl leading-[1.02] font-black tracking-tight transition-colors duration-300 group-hover:text-(--accent) sm:text-5xl xl:text-6xl">
                           {project.title}
                         </h3>
                         <p className="mt-5 max-w-md text-lg text-zinc-400">{project.summary}</p>
@@ -194,8 +200,8 @@ export function ProjectScroll({ fallback }: ProjectScrollProps) {
         })}
       </ol>
 
-      {/* The card grid: phones and reduced motion. */}
-      <div className="block motion-safe:md:hidden">{fallback}</div>
+      {/* The card grid: reduced motion. */}
+      <div className="block motion-safe:hidden">{fallback}</div>
     </div>
   );
 }
