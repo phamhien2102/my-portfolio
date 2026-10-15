@@ -41,11 +41,11 @@ export function SettingsButton() {
         onClick={(event) => {
           if (event.target === event.currentTarget) close();
         }}
-        className="m-auto flex max-h-[min(44rem,calc(100svh-2rem))] w-[min(34rem,calc(100vw-2rem))] scale-95 flex-col overflow-hidden rounded-2xl border border-white/15 bg-zinc-950 p-0 font-sans text-base tracking-normal text-white normal-case opacity-0 shadow-2xl transition-[opacity,scale,overlay,display] transition-discrete duration-300 ease-out backdrop:bg-black/70 backdrop:backdrop-blur-sm open:scale-100 open:opacity-100 motion-reduce:transition-none starting:open:scale-95 starting:open:opacity-0"
+        className="m-auto h-[min(44rem,calc(100svh-2rem))] w-[min(34rem,calc(100vw-2rem))] scale-95 flex-col overflow-hidden rounded-2xl border border-white/15 bg-zinc-950 p-0 font-sans text-base tracking-normal text-white normal-case opacity-0 shadow-2xl transition-[opacity,scale,overlay,display] transition-discrete duration-300 ease-out backdrop:bg-black/70 backdrop:backdrop-blur-sm open:flex open:scale-100 open:opacity-100 motion-reduce:transition-none starting:open:scale-95 starting:open:opacity-0"
       >
         {/* Keep the options out of the page until the popup is open, so they are not tab stops. */}
         {/* Header and footer stay put; only the middle scrolls when a tab is taller than the box. */}
-        <div className="flex min-h-0 flex-col" hidden={!open}>
+        <div className="flex h-full min-h-0 flex-col" hidden={!open}>
           <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">
             <div>
               <h2 id={titleId} className="text-2xl font-black tracking-tight">
@@ -73,7 +73,7 @@ export function SettingsButton() {
             </button>
           </div>
 
-          <div className="flex min-h-0 grow flex-col px-6 py-2 sm:px-8">
+          <div className="flex min-h-0 min-w-0 grow flex-col px-6 py-2 sm:px-8">
             <SettingsTabs />
           </div>
 

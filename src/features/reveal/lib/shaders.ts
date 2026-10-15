@@ -104,9 +104,9 @@ export const FINAL_FRAGMENT = /* glsl */ `
   uniform vec2  uHero;
 
   vec3 env(vec3 r) {
-    vec3 deep  = vec3(0.01, 0.06, 0.18);   // deep navy
-    vec3 ocean = vec3(0.10, 0.52, 0.95);   // ocean blue
-    vec3 sheen = vec3(0.70, 0.90, 1.00);   // pale sky-blue highlight
+    vec3 deep  = uInk * 0.16;
+    vec3 ocean = uInk;
+    vec3 sheen = mix(uInk, vec3(1.0), 0.72);
     float bands = sin(r.x * 7.0 + r.y * 5.0) * 0.5 + 0.5;
     float g = smoothstep(0.15, 0.85, bands * 0.55 + r.y * 0.35 + 0.35);
     vec3 col = mix(deep, ocean, g);
@@ -151,7 +151,7 @@ export const FINAL_FRAGMENT = /* glsl */ `
     vec3 col = env(r);
     vec3 L = normalize(vec3(-0.4, 0.6, 0.7));
     col += vec3(1.0) * pow(max(dot(n, L), 0.0), 48.0) * 0.9;
-    col += vec3(0.35, 0.65, 0.95) * pow(1.0 - n.z, 3.0) * 0.35;
+    col += uInk * pow(1.0 - n.z, 3.0) * 0.4;
 
     // text seen through the blob, refracted by the normal
     float seen = texture2D(uText, src + n.xy * 0.03).a * inside;

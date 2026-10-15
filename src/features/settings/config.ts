@@ -135,11 +135,30 @@ export const HERO_FONTS = [
 
 export type HeroFont = (typeof HERO_FONTS)[number]["id"];
 
+export const INK_MODES = [
+  {
+    id: "touch",
+    label: "By touch",
+    description:
+      "A new ink colour is picked the first time you touch, and again on each new stroke.",
+    immersive: false,
+  },
+  {
+    id: "time",
+    label: "By time",
+    description: "A new ink colour is picked about every five seconds.",
+    immersive: false,
+  },
+] as const satisfies readonly SettingOption[];
+
+export type InkMode = (typeof INK_MODES)[number]["id"];
+
 export interface Settings {
   experienceEffect: ExperienceEffect;
   skillsView: SkillsView;
   projectsView: ProjectsView;
   heroFont: HeroFont;
+  inkMode: InkMode;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -147,6 +166,7 @@ export const DEFAULT_SETTINGS: Settings = {
   skillsView: "solar",
   projectsView: "cards",
   heroFont: "drip",
+  inkMode: "touch",
 };
 
 export function isExperienceEffect(value: unknown): value is ExperienceEffect {
@@ -163,4 +183,8 @@ export function isProjectsView(value: unknown): value is ProjectsView {
 
 export function isHeroFont(value: unknown): value is HeroFont {
   return HERO_FONTS.some((option) => option.id === value);
+}
+
+export function isInkMode(value: unknown): value is InkMode {
+  return INK_MODES.some((option) => option.id === value);
 }

@@ -11,8 +11,10 @@ export type IdleEffect = "splatter" | "dissolve" | "none";
 /** Tunable settings for the RAYMOND reveal effect. */
 export const REVEAL_CONFIG = {
   word: "RAYMOND",
-  /** Ink colours: each new stroke advances to the next one, wrapping around. */
+  /** Ink colours: timed mode steps through these; touch mode picks one per stroke. */
   palette: THEME.palette,
+  /** Seconds between ink changes when the setting is "By time". */
+  inkInterval: 5,
   /** Seconds the pointer must rest before the next movement counts as a new stroke. */
   strokeGap: 0.5,
   /** Effect played when the pointer stops (reduced-motion users always get `dissolve`). */

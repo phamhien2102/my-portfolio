@@ -8,12 +8,14 @@ interface OptionGroupProps {
   options: readonly SettingOption[];
   value: string;
   onChange: (id: string) => void;
+  /** Option id that ships as the factory default. */
+  defaultId: string;
   /** Small print under the options. */
   note: string;
 }
 
 /** A titled set of option cards. */
-export function OptionGroup({ legend, options, value, onChange, note }: OptionGroupProps) {
+export function OptionGroup({ legend, options, value, onChange, defaultId, note }: OptionGroupProps) {
   return (
     <div className="mt-4 min-w-0">
       <p className="sr-only">{legend}</p>
@@ -55,6 +57,11 @@ export function OptionGroup({ legend, options, value, onChange, note }: OptionGr
                   >
                     {option.label}
                   </span>
+                  {option.id === defaultId && (
+                    <span className="text-xs font-normal tracking-normal text-zinc-500">
+                      (default)
+                    </span>
+                  )}
                   {option.immersive && (
                     <span className="rounded-full border border-white/20 px-2 py-0.5 font-mono text-[10px] font-normal tracking-widest text-zinc-400 uppercase">
                       3D

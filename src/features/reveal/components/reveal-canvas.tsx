@@ -2,11 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-import { useSettings } from "@/features/settings";
+import { useSettings, type HeroFont, type InkMode } from "@/features/settings";
 
 import { REVEAL_CONFIG } from "../config";
 import { createDropletScene } from "../lib/create-droplet-scene";
-import { createRevealScene, type RevealScene } from "../lib/create-reveal-scene";
+import { createRevealScene } from "../lib/create-reveal-scene";
 
 interface RevealCanvasProps {
   /** `id` of the element the word shrinks into as the page scrolls (the header logo). */
@@ -24,16 +24,25 @@ interface RevealCanvasProps {
 export function RevealCanvas({ dockId }: RevealCanvasProps) {
   const slotRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<RevealScene | null>(null);
+  const sceneRef = useRef<{
+    setFont?: (font: HeroFont) => void;
+    setInkMode: (mode: InkMode) => void;
+    dispose: () => void;
+  } | null>(null);
 
-  // The scenes live outside React; the typeface is handed over when the setting changes.
-  const { heroFont } = useSettings();
+  // The scenes live outside React; typeface and ink mode are handed over when they change.
+  const { heroFont, inkMode } = useSettings();
   const droplets = heroFont === "droplets";
   const fontRef = useRef(heroFont);
+  const inkModeRef = useRef(inkMode);
   useEffect(() => {
     fontRef.current = heroFont;
-    sceneRef.current?.setFont(heroFont);
+    sceneRef.current?.setFont?.(heroFont);
   }, [heroFont]);
+  useEffect(() => {
+    inkModeRef.current = inkMode;
+    sceneRef.current?.setInkMode(inkMode);
+  }, [inkMode]);
 
   // Swapping between the blob and the droplets rebuilds the scene; changing typeface does not.
   useEffect(() => {
@@ -42,9 +51,25 @@ export function RevealCanvas({ dockId }: RevealCanvasProps) {
     if (!slot || !container) return;
     const dock = document.getElementById(dockId);
 
-    if (droplets) return createDropletScene(container, { slot, dock }).dispose;
+    if (droplets) {
+      const scene = createDropletScene(container, {
+        slot,
+        dock,
+        inkMode: inkModeRef.current,
+      });
+      sceneRef.current = scene;
+      return () => {
+        sceneRef.current = null;
+        scene.dispose();
+      };
+    }
 
-    const scene = createRevealScene(container, { slot, dock, font: fontRef.current });
+    const scene = createRevealScene(container, {
+      slot,
+      dock,
+      font: fontRef.current,
+      inkMode: inkModeRef.current,
+    });
     sceneRef.current = scene;
     return () => {
       sceneRef.current = null;

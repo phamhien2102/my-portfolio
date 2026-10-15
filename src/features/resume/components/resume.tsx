@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
 import { SITE } from "@/config/site";
-import { accentAt } from "@/config/theme";
+import { THEME, accentAt } from "@/config/theme";
 import { ABOUT } from "@/features/about";
 import { EXPERIENCE } from "@/features/experience";
 import { PROJECTS } from "@/features/projects";
@@ -41,8 +41,8 @@ export function Resume() {
         </ul>
         {/* A thin band in the portfolio's palette. */}
         <div className="mt-[4mm] flex h-[1.2mm] overflow-hidden rounded-full">
-          {Array.from({ length: 7 }, (_, i) => (
-            <span key={i} style={{ backgroundColor: accentAt(i) }} className="flex-1" />
+          {THEME.palette.map((color) => (
+            <span key={color} style={{ backgroundColor: color }} className="flex-1" />
           ))}
         </div>
       </header>

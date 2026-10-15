@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import type { HeroFont } from "@/features/settings";
+import type { HeroFont, InkMode } from "@/features/settings";
 
 import { REVEAL_CONFIG, type RevealConfig } from "../config";
 import { hexToVec3 } from "./color";
@@ -21,11 +21,15 @@ interface RevealTargets {
   dock: HTMLElement | null;
   /** Typeface the word starts in. */
   font: HeroFont;
+  /** How ink colours are chosen. */
+  inkMode: InkMode;
 }
 
 export interface RevealScene {
   /** Redraw the word in another typeface (the blob's progress and colours are kept). */
   setFont: (font: HeroFont) => void;
+  /** Switch between timed ink and touch ink without rebuilding the scene. */
+  setInkMode: (mode: InkMode) => void;
   dispose: () => void;
 }
 
@@ -39,12 +43,13 @@ export interface RevealScene {
  */
 export function createRevealScene(
   container: HTMLElement,
-  { slot, dock, font }: RevealTargets,
+  { slot, dock, font, inkMode: initialInkMode }: RevealTargets,
   config: RevealConfig = REVEAL_CONFIG,
 ): RevealScene {
   const {
     word,
     palette,
+    inkInterval,
     strokeGap,
     textY,
     textWidth,
@@ -143,6 +148,19 @@ export function createRevealScene(
   let introDone = false; // true once the intro sweep has reached the end
 
   const currentInk = hexToVec3(palette[0]);
+  let colorIdx = 0;
+  let idle = 0; // seconds the blob has been still
+  let inkMode = initialInkMode;
+  let inkClock = 0; // seconds since the last timed ink change
+  const pickInk = () => {
+    if (palette.length === 0) return;
+    let next = Math.floor(Math.random() * palette.length);
+    if (palette.length > 1) {
+      while (next === colorIdx) next = Math.floor(Math.random() * palette.length);
+    }
+    colorIdx = next;
+    currentInk.copy(hexToVec3(palette[colorIdx]));
+  };
 
   // Idle effect state. While `gone`, the blob has left (bursting or melting) and waits for the
   // pointer to move again.
@@ -217,7 +235,13 @@ export function createRevealScene(
     if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
 
     mouse.set(x / rect.width, 1 - y / rect.height);
-    userControl = true; // pointer takes over from the intro sweep
+    if (!userControl) {
+      userControl = true; // pointer takes over from the intro sweep
+      if (inkMode === "touch") {
+        pickInk();
+        idle = 0;
+      }
+    }
     if (!started) {
       // no intro: place the whole tail at the pointer so the blob doesn't fly in from offscreen
       started = true;
@@ -226,6 +250,7 @@ export function createRevealScene(
     }
   };
   window.addEventListener("pointermove", onPointerMove);
+  window.addEventListener("pointerdown", onPointerMove);
 
   let lastW = size().w;
   let lastH = size().h;
@@ -252,14 +277,7 @@ export function createRevealScene(
   // ---------- Loop ----------
   const clock = new THREE.Clock();
   let lastTime = performance.now();
-  let colorIdx = 0;
   let hasMoved = false;
-  let idle = 0; // seconds the blob has been still
-
-  const nextColor = () => {
-    colorIdx = (colorIdx + 1) % palette.length;
-    currentInk.copy(hexToVec3(palette[colorIdx]));
-  };
 
   const DROPLET_DRAG = 3; // per second: droplets lose speed quickly
   const DROPLET_GRAVITY = 0.7; // UV heights per second squared
@@ -380,15 +398,28 @@ export function createRevealScene(
       }
       shared.uSpeed.value = speed;
 
-      // Moving after a long enough pause = a new stroke -> next colour
+      // Moving after a long enough pause = a new stroke -> next colour (touch mode only)
       if (moving) {
-        if (hasMoved && idle > strokeGap) nextColor();
+        if (inkMode === "touch" && hasMoved && idle > strokeGap) pickInk();
         idle = 0;
         hasMoved = true;
         if (gone) regrow();
       } else {
         idle += dt;
         if (!gone && idleEffect !== "none" && idle > idleDelay) leave();
+      }
+    }
+
+    if (
+      inkMode === "time" &&
+      !prefersReducedMotion &&
+      heroVisible &&
+      progress < 0.02
+    ) {
+      inkClock += dt;
+      while (inkClock >= inkInterval) {
+        inkClock -= inkInterval;
+        pickInk();
       }
     }
 
@@ -449,13 +480,20 @@ export function createRevealScene(
   };
   setFont(font);
 
+  const setInkMode = (mode: InkMode) => {
+    inkMode = mode;
+    inkClock = 0;
+  };
+
   return {
     setFont,
+    setInkMode,
     dispose: () => {
       disposed = true;
       resizeObserver.disconnect();
       renderer.setAnimationLoop(null);
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerdown", onPointerMove);
       rtRead.dispose();
       rtWrite.dispose();
       textTex.dispose();

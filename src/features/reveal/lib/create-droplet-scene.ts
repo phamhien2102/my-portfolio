@@ -1,8 +1,30 @@
+import type { InkMode } from "@/features/settings";
+
 import { REVEAL_CONFIG } from "../config";
 import { drawText, type TextMetrics } from "./draw-text";
 import { resolveFont } from "./fonts";
 
+const clampByte = (n: number) => Math.min(255, Math.max(0, Math.round(n)));
+
+function hexRgb(hex: string): [number, number, number] {
+  const n = parseInt(hex.replace("#", ""), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function mixWhite(rgb: readonly [number, number, number], t: number): [number, number, number] {
+  return [
+    clampByte(rgb[0] + (255 - rgb[0]) * t),
+    clampByte(rgb[1] + (255 - rgb[1]) * t),
+    clampByte(rgb[2] + (255 - rgb[2]) * t),
+  ];
+}
+
+function scaleRgb(rgb: readonly [number, number, number], k: number): [number, number, number] {
+  return [clampByte(rgb[0] * k), clampByte(rgb[1] * k), clampByte(rgb[2] * k)];
+}
+
 export interface DropletScene {
+  setInkMode: (mode: InkMode) => void;
   dispose: () => void;
 }
 
@@ -11,6 +33,8 @@ interface DropletTargets {
   slot: HTMLElement;
   /** Element the word shrinks into (the logo spot in the header). */
   dock: HTMLElement | null;
+  /** How ink colours are chosen. */
+  inkMode: InkMode;
 }
 
 const clamp = (x: number, lo: number, hi: number) => Math.min(Math.max(x, lo), hi);
@@ -33,12 +57,14 @@ function makeSprite(tint: readonly [number, number, number]): HTMLCanvasElement 
   if (!ctx) return canvas;
   const c = size / 2;
   const [r, g, b] = tint;
+  const hi = mixWhite(tint, 0.45);
+  const lo = scaleRgb(tint, 0.35);
 
   const body = ctx.createRadialGradient(c * 0.9, c * 0.85, 0, c, c, c);
-  body.addColorStop(0, `rgba(${r + 70},${g + 50},255,0.55)`);
+  body.addColorStop(0, `rgba(${hi[0]},${hi[1]},${hi[2]},0.55)`);
   body.addColorStop(0.55, `rgba(${r},${g},${b},0.55)`);
-  body.addColorStop(0.88, `rgba(${r - 50},${g - 70},${b - 60},0.9)`);
-  body.addColorStop(1, `rgba(${r - 60},${g - 90},${b - 90},0)`);
+  body.addColorStop(0.88, `rgba(${lo[0]},${lo[1]},${lo[2]},0.9)`);
+  body.addColorStop(1, `rgba(${lo[0]},${lo[1]},${lo[2]},0)`);
   ctx.fillStyle = body;
   ctx.beginPath();
   ctx.arc(c, c, c, 0, Math.PI * 2);
@@ -54,8 +80,8 @@ function makeSprite(tint: readonly [number, number, number]): HTMLCanvasElement 
   ctx.fill();
 
   const glow = ctx.createRadialGradient(c * 1.3, c * 1.35, 0, c * 1.3, c * 1.35, c * 0.38);
-  glow.addColorStop(0, "rgba(200,240,255,0.5)");
-  glow.addColorStop(1, "rgba(200,240,255,0)");
+  glow.addColorStop(0, `rgba(${hi[0]},${hi[1]},${hi[2]},0.5)`);
+  glow.addColorStop(1, `rgba(${hi[0]},${hi[1]},${hi[2]},0)`);
   ctx.fillStyle = glow;
   ctx.beginPath();
   ctx.arc(c * 1.3, c * 1.35, c * 0.38, 0, Math.PI * 2);
@@ -74,9 +100,9 @@ function makeSprite(tint: readonly [number, number, number]): HTMLCanvasElement 
  */
 export function createDropletScene(
   container: HTMLElement,
-  { slot, dock }: DropletTargets,
+  { slot, dock, inkMode: initialInkMode }: DropletTargets,
 ): DropletScene {
-  const { word, textY, textWidth } = REVEAL_CONFIG;
+  const { word, textY, textWidth, palette, inkInterval } = REVEAL_CONFIG;
   const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const size = () => ({
@@ -93,11 +119,27 @@ export function createDropletScene(
   if (!context) throw new Error("2D canvas is not available");
   const ctx = context;
 
-  const sprites = [
-    makeSprite([70, 150, 255]),
-    makeSprite([60, 185, 255]),
-    makeSprite([95, 135, 255]),
-  ];
+  let inkIdx = 0;
+  let picked = false;
+  let inkMode = initialInkMode;
+  let inkClock = 0;
+  const sprites: HTMLCanvasElement[] = [];
+  const paintSprites = (hex: string) => {
+    const rgb = hexRgb(hex);
+    sprites[0] = makeSprite(rgb);
+    sprites[1] = makeSprite(mixWhite(rgb, 0.18));
+    sprites[2] = makeSprite(scaleRgb(rgb, 0.82));
+  };
+  paintSprites(palette[0]);
+  const pickInk = () => {
+    if (palette.length === 0) return;
+    let next = Math.floor(Math.random() * palette.length);
+    if (palette.length > 1) {
+      while (next === inkIdx) next = Math.floor(Math.random() * palette.length);
+    }
+    inkIdx = next;
+    paintSprites(palette[inkIdx]);
+  };
 
   // ---------- The droplets ----------
   let count = 0;
@@ -219,6 +261,10 @@ export function createDropletScene(
     pointer.y = event.clientY;
     pointer.at = now;
     pointer.active = true;
+    if (inkMode === "touch" && !picked) {
+      pickInk();
+      picked = true;
+    }
   };
   const onDown = (event: PointerEvent) => {
     if (!usable() || !overHero(event.clientX, event.clientY)) return;
@@ -336,6 +382,14 @@ export function createDropletScene(
     settled = progress >= 1;
     const eased = progress * progress * (3 - 2 * progress);
 
+    if (inkMode === "time" && !still && heroVisible && progress < 0.02) {
+      inkClock += dt;
+      while (inkClock >= inkInterval) {
+        inkClock -= inkInterval;
+        pickInk();
+      }
+    }
+
     if (!still && progress < 0.02) step(dt);
     dirty = false;
     render(eased, now / 1000);
@@ -343,6 +397,11 @@ export function createDropletScene(
   frameHandle = requestAnimationFrame(frame);
 
   return {
+    setInkMode: (mode: InkMode) => {
+      inkMode = mode;
+      inkClock = 0;
+      if (mode === "touch") picked = false;
+    },
     dispose: () => {
       disposed = true;
       cancelAnimationFrame(frameHandle);
