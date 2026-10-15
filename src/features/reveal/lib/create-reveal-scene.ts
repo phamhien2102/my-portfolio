@@ -50,7 +50,6 @@ export function createRevealScene(
     word,
     palette,
     inkInterval,
-    strokeGap,
     textY,
     textWidth,
     revealFade,
@@ -236,10 +235,10 @@ export function createRevealScene(
     mouse.set(x / rect.width, 1 - y / rect.height);
     if (!userControl) {
       userControl = true; // pointer takes over from the intro sweep
-      if (inkMode === "touch") {
-        pickInk();
-        idle = 0;
-      }
+      idle = 0;
+      // Only pick a colour if the blob is not on screen yet. Intro (and a later touch
+      // after the blob has already appeared) must keep the ink that is already showing.
+      if (inkMode === "touch" && !started) pickInk();
     }
     if (!started) {
       // no intro: place the whole tail at the pointer so the blob doesn't fly in from offscreen
@@ -276,7 +275,6 @@ export function createRevealScene(
   // ---------- Loop ----------
   const clock = new THREE.Clock();
   let lastTime = performance.now();
-  let hasMoved = false;
 
   const DROPLET_DRAG = 3; // per second: droplets lose speed quickly
   const DROPLET_GRAVITY = 0.7; // UV heights per second squared
@@ -397,11 +395,9 @@ export function createRevealScene(
       }
       shared.uSpeed.value = speed;
 
-      // Moving after a long enough pause = a new stroke -> next colour (touch mode only)
+      // A later touch, or a flick after the blob has paused, should not pick a new colour.
       if (moving) {
-        if (inkMode === "touch" && hasMoved && idle > strokeGap) pickInk();
         idle = 0;
-        hasMoved = true;
         if (gone) regrow();
       } else {
         idle += dt;
