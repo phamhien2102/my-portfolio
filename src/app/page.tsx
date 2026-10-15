@@ -6,7 +6,7 @@ import { AboutSection } from "@/features/about";
 import { ContactSection } from "@/features/contact";
 import { ExperienceSection } from "@/features/experience";
 import { ProjectsSection } from "@/features/projects";
-import { RevealCanvas } from "@/features/reveal";
+import { HeroContinue, RevealCanvas } from "@/features/reveal";
 import { Resume } from "@/features/resume";
 import { SkillsSection } from "@/features/skills";
 
@@ -27,13 +27,7 @@ export default function Home() {
                 Move your cursor to reveal
                 <span aria-hidden="true"> &darr;</span>
               </span>
-              <a
-                href="#about"
-                className="pointer-events-auto hidden items-center gap-1.5 pointer-coarse:inline-flex focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-safe:animate-next-hint"
-              >
-                Continue
-                <span aria-hidden="true">&darr;</span>
-              </a>
+              <HeroContinue />
             </span>
           </div>
         </section>

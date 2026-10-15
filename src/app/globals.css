@@ -46,6 +46,11 @@ html:has(dialog[open]) {
   overflow: hidden;
 }
 
+/* Phone hero: block pull-to-refresh / rubber-banding while swipe-to-scroll is locked. */
+html[data-hero-lock] {
+  overscroll-behavior: none;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
