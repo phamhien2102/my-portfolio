@@ -164,7 +164,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   experienceEffect: "flythrough",
   skillsView: "path",
-  projectsView: "cards",
+  projectsView: "gallery",
   heroFont: "drip",
   inkMode: "touch",
 };
