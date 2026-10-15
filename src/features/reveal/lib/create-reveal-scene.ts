@@ -153,7 +153,6 @@ export function createRevealScene(
   let inkMode = initialInkMode;
   let inkClock = 0; // seconds since the last timed ink change
   const pickInk = () => {
-    if (palette.length === 0) return;
     let next = Math.floor(Math.random() * palette.length);
     if (palette.length > 1) {
       while (next === colorIdx) next = Math.floor(Math.random() * palette.length);

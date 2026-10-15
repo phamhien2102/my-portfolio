@@ -132,7 +132,6 @@ export function createDropletScene(
   };
   paintSprites(palette[0]);
   const pickInk = () => {
-    if (palette.length === 0) return;
     let next = Math.floor(Math.random() * palette.length);
     if (palette.length > 1) {
       while (next === inkIdx) next = Math.floor(Math.random() * palette.length);
