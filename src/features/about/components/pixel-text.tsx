@@ -25,6 +25,13 @@ const deltaPx = (event: WheelEvent) => {
 };
 
 /**
+ * Same-document filter URL that still resolves when the page location has a hash (`#about`).
+ * Path only — a query string makes WebKit treat this as a different document and drop the mosaic.
+ */
+const filterCss = (id: string) =>
+  `url("${window.location.origin}${window.location.pathname}#${id}")`;
+
+/**
  * Text that resolves out of a mosaic of pixels as it scrolls into view.
  *
  * It uses an SVG filter on the live text (so the words stay real, selectable and readable by
@@ -36,8 +43,10 @@ const deltaPx = (event: WheelEvent) => {
  * The block size is written to the DOM straight from a scroll listener: no React renders.
  *
  * The words never take the pointer: the cursor stays an arrow, the text cannot be selected, and
- * the only gesture is scrolling the page. While the mosaic is on, wheel and touch over the block
- * are forwarded to the document, because the filter would otherwise scroll itself.
+ * the only gesture is scrolling the page. The filter is not applied while the block is off
+ * screen (five live morphology filters behind the hero are what used to stall phones). Wheel
+ * over the mosaic is forwarded to the document on a mouse, because the filter would otherwise
+ * scroll itself; touch is left to the browser so a flick keeps its momentum.
  */
 export function PixelText({ children, className, as: Tag = "div" }: PixelTextProps) {
   const id = `pixel-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
@@ -54,10 +63,14 @@ export function PixelText({ children, className, as: Tag = "div" }: PixelTextPro
     if (!element || !flood || !size || !dilate) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    // Phones: coarser steps and a longer reveal so the mosaic is visible, not a one-frame hitch.
+    const step = coarse ? 2 : 1;
+    const windowFrac = coarse ? 0.72 : 0.42;
+
     let frame = 0;
     let lastBlock = -1;
     let mosaic = false;
-    let touchY = 0;
 
     const over = (x: number, y: number) => {
       if (!mosaic) return false;
@@ -65,34 +78,55 @@ export function PixelText({ children, className, as: Tag = "div" }: PixelTextPro
       return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     };
 
+    const clearFilter = () => {
+      element.style.filter = "";
+      element.style.webkitFilter = "";
+      element.style.opacity = "";
+    };
+
     const update = () => {
       frame = 0;
       const rect = element.getBoundingClientRect();
       const vh = window.innerHeight;
+
+      if (rect.bottom < 0 || rect.top > vh) {
+        const off = rect.top > vh ? -1 : 0;
+        if (lastBlock === off && !mosaic) return;
+        lastBlock = off;
+        mosaic = false;
+        clearFilter();
+        return;
+      }
+
       // 0 while the element is still below the fold, 1 once it is well inside the screen.
-      const raw = clamp((vh * 0.95 - rect.top) / (vh * 0.42), 0, 1);
+      const raw = clamp((vh * 0.95 - rect.top) / (vh * windowFrac), 0, 1);
       const eased = raw * raw * (3 - 2 * raw);
       const smooth = 1 + (START_BLOCK - 1) * (1 - eased) ** 1.6;
-      // 0 means "no effect"; otherwise whole pixels, at least 2.
-      const block = smooth < END_BLOCK ? 0 : Math.round(smooth);
+      // 0 means "no effect"; otherwise whole pixels, at least END_BLOCK.
+      const block = smooth < END_BLOCK ? 0 : Math.round(smooth / step) * step;
 
       if (block === lastBlock) return;
       lastBlock = block;
 
       if (block === 0) {
         mosaic = false;
-        element.style.filter = "";
-        element.style.opacity = "";
+        clearFilter();
         return;
       }
       mosaic = true;
+
       const half = block / 2;
       flood.setAttribute("x", String(half - 1));
       flood.setAttribute("y", String(half - 1));
+      flood.setAttribute("width", "2");
+      flood.setAttribute("height", "2");
       size.setAttribute("width", String(block));
       size.setAttribute("height", String(block));
       dilate.setAttribute("radius", String(half));
-      element.style.filter = `url(#${id})`;
+
+      const css = filterCss(id);
+      element.style.filter = css;
+      element.style.webkitFilter = css;
       element.style.opacity = String((0.35 + 0.65 * eased).toFixed(3));
     };
     const schedule = () => {
@@ -104,33 +138,19 @@ export function PixelText({ children, className, as: Tag = "div" }: PixelTextPro
       event.preventDefault();
       window.scrollBy({ top: deltaPx(event), left: event.deltaX, behavior: "instant" });
     };
-    const onTouchStart = (event: TouchEvent) => {
-      touchY = event.touches[0]?.clientY ?? 0;
-    };
-    const onTouchMove = (event: TouchEvent) => {
-      const touch = event.touches[0];
-      if (!touch || !over(touch.clientX, touch.clientY)) return;
-      const dy = touchY - touch.clientY;
-      touchY = touch.clientY;
-      event.preventDefault();
-      window.scrollBy(0, dy);
-    };
 
     update();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
-    window.addEventListener("wheel", onWheel, { capture: true, passive: false });
-    window.addEventListener("touchstart", onTouchStart, { capture: true, passive: true });
-    window.addEventListener("touchmove", onTouchMove, { capture: true, passive: false });
+    if (!coarse) {
+      window.addEventListener("wheel", onWheel, { capture: true, passive: false });
+    }
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
       window.removeEventListener("wheel", onWheel, { capture: true });
-      window.removeEventListener("touchstart", onTouchStart, { capture: true });
-      window.removeEventListener("touchmove", onTouchMove, { capture: true });
-      element.style.filter = "";
-      element.style.opacity = "";
+      clearFilter();
     };
   }, [id]);
 
@@ -140,11 +160,16 @@ export function PixelText({ children, className, as: Tag = "div" }: PixelTextPro
         aria-hidden="true"
         focusable="false"
         tabIndex={-1}
-        width="0"
-        height="0"
-        className="pointer-events-none absolute"
+        className="pointer-events-none absolute top-0 left-0 h-px w-px overflow-hidden"
       >
-        <filter id={id} x="0" y="0" width="100%" height="100%">
+        <filter
+          id={id}
+          x="-8%"
+          y="-8%"
+          width="116%"
+          height="116%"
+          colorInterpolationFilters="sRGB"
+        >
           <feFlood ref={floodRef} x="8" y="8" width="2" height="2" />
           <feComposite ref={sizeRef} width="18" height="18" />
           <feTile result="blocks" />
@@ -154,7 +179,7 @@ export function PixelText({ children, className, as: Tag = "div" }: PixelTextPro
       </svg>
       <Tag
         ref={elementRef}
-        className={cn("pointer-events-none cursor-default select-none", className)}
+        className={cn("pointer-events-none touch-pan-y cursor-default select-none", className)}
       >
         {children}
       </Tag>
