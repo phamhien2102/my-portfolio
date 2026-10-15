@@ -12,14 +12,14 @@ import { SKILL_GROUPS, levelLabel } from "../data";
 const COUNT = SKILL_GROUPS.length;
 const ACCENTS = SKILL_GROUPS.map((_, i) => accentAt(i + 1));
 
-/** Only fly on wide screens, and only for people who haven't asked for less motion. */
-const FLY_QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
+/** Fly whenever the visitor hasn't asked for less motion. */
+const FLY_QUERY = "(prefers-reduced-motion: no-preference)";
 
 /** Scroll distance of the flight, in viewport heights per group. */
 const SCREENS_PER_GROUP = 0.9;
 
 interface SkillsPathProps {
-  /** Shown instead of the flight on phones, with reduced motion, or if WebGL fails. */
+  /** Shown instead of the flight with reduced motion, or if WebGL fails. */
   fallback: ReactNode;
 }
 
@@ -109,8 +109,8 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
 
   return (
     <div ref={rootRef} className="group/path">
-      {/* The flight: wide screens, motion allowed, WebGL working. */}
-      <div className="hidden group-data-[path=off]/path:hidden! motion-safe:md:block">
+      {/* The flight: motion allowed, WebGL working. */}
+      <div className="hidden group-data-[path=off]/path:hidden! motion-safe:block">
         <div
           ref={runwayRef}
           style={{ height: `${(COUNT * SCREENS_PER_GROUP + 1) * 100}svh` }}
@@ -120,18 +120,22 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
             ref={stageRef}
             className="sticky top-0 h-svh overflow-hidden border-y border-white/10"
           >
-            <div ref={hostRef} aria-hidden="true" className="absolute inset-0" />
+            <div ref={hostRef} aria-hidden="true" className="absolute inset-0 touch-pan-y" />
 
             {/* Keeps the cards legible over the scene, and softens the edges. */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
+              className="pointer-events-none absolute inset-0 bg-[#09090e]/55 md:hidden"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 hidden md:block"
               style={{
                 background: `linear-gradient(90deg, ${bg}f2 0%, ${bg}a6 38%, transparent 70%), radial-gradient(ellipse at center, transparent 55%, ${bg}cc 100%)`,
               }}
             />
 
-            <ol className="pointer-events-none absolute inset-0 grid items-center px-10 lg:px-20">
+            <ol className="pointer-events-none absolute inset-0 grid items-center px-6 pr-14 sm:px-10 lg:px-20">
               {SKILL_GROUPS.map((group, i) => (
                 <li
                   key={group.title}
@@ -147,7 +151,7 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
                   >
                     {String(i + 1).padStart(2, "0")} / {String(COUNT).padStart(2, "0")}
                   </p>
-                  <h3 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">
+                  <h3 className="mt-4 text-3xl font-black tracking-tight sm:text-5xl">
                     {group.title}
                   </h3>
 
@@ -174,7 +178,7 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
             </ol>
 
             {/* Progress rail: jump to any group. */}
-            <div className="absolute top-1/2 right-6 -translate-y-1/2 lg:right-10">
+            <div className="absolute top-1/2 right-4 -translate-y-1/2 lg:right-10">
               <div className="relative flex flex-col items-start gap-10">
                 <span
                   aria-hidden="true"
@@ -223,8 +227,8 @@ export function SkillsPath({ fallback }: SkillsPathProps) {
         </div>
       </div>
 
-      {/* The plain list: phones, reduced motion, or no WebGL. */}
-      <div className="mx-auto block max-w-6xl px-6 group-data-[path=off]/path:block! sm:px-10 motion-safe:md:hidden">
+      {/* The plain list: reduced motion, or no WebGL. */}
+      <div className="mx-auto block max-w-6xl px-6 group-data-[path=off]/path:block! sm:px-10 motion-safe:hidden">
         {fallback}
       </div>
     </div>

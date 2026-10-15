@@ -69,6 +69,7 @@ export function createSolarScene({
   renderer.setClearColor(0x000000, 0);
   const canvas = renderer.domElement;
   canvas.style.display = "block";
+  canvas.style.touchAction = "pan-y";
   host.appendChild(canvas);
 
   const scene = new THREE.Scene();

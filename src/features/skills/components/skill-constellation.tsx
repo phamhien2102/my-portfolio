@@ -9,7 +9,6 @@ import { cn } from "@/lib/cn";
 import { SKILL_GROUPS, levelLabel } from "../data";
 import { RINGS, STARS, constellationPoints, type Star } from "../lib/constellation";
 import { GroupFilter } from "./group-filter";
-import { SkillList } from "./skill-list";
 
 interface SkillConstellationProps {
   /** Title of the pinned group, if any (controlled by the parent). */
@@ -31,12 +30,10 @@ export function SkillConstellation({ pinned, onPin }: SkillConstellationProps) {
       <GroupFilter pinned={pinned} onPin={onPin} />
 
       <p className="mt-4 font-mono text-[11px] tracking-widest text-zinc-600 uppercase">
-        <span className="hidden md:inline">Closer to the centre = stronger · hover a star</span>
-        <span className="md:hidden">Grouped by area, strongest first</span>
+        Closer to the centre = stronger · hover or tap a star
       </p>
 
-      {/* Desktop: the constellation. `hidden` removes it from the a11y tree on mobile. */}
-      <FadeIn className="group/fade mx-auto mt-6 hidden w-[min(48rem,100%,calc(100svh-16rem))] md:block">
+      <FadeIn className="group/fade mx-auto mt-6 w-[min(48rem,100%,calc(100svh-16rem))]">
         <div className="relative aspect-square" onPointerLeave={() => setHovered(null)}>
           {/* Soft glow behind the core. */}
           <div
@@ -174,7 +171,7 @@ export function SkillConstellation({ pinned, onPin }: SkillConstellationProps) {
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "absolute text-sm font-medium whitespace-nowrap transition-colors duration-300",
+                          "absolute hidden text-sm font-medium whitespace-nowrap transition-colors duration-300 sm:block",
                           star.side === "right" ? "left-full -ml-0.5" : "right-full -mr-0.5",
                           isHovered ? "text-white" : "text-zinc-400",
                         )}
@@ -189,9 +186,6 @@ export function SkillConstellation({ pinned, onPin }: SkillConstellationProps) {
           </ul>
         </div>
       </FadeIn>
-
-      {/* Mobile: labels would be too small around a circle, so list the same data. */}
-      <SkillList className="mt-8 md:hidden" />
     </div>
   );
 }

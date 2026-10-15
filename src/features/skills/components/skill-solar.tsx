@@ -10,14 +10,14 @@ import { createSolarScene, type SolarScene } from "../lib/create-solar-scene";
 import { PLANETS } from "../lib/solar";
 import { GroupFilter } from "./group-filter";
 
-/** Only on wide screens, and only for people who haven't asked for less motion. */
-const SOLAR_QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
+/** Run whenever the visitor hasn't asked for less motion. */
+const SOLAR_QUERY = "(prefers-reduced-motion: no-preference)";
 
 interface SkillSolarProps {
   /** Title of the pinned group, if any (controlled by the parent). */
   pinned: string | null;
   onPin: (group: string | null) => void;
-  /** Shown instead on phones, with reduced motion, or if WebGL fails. */
+  /** Shown instead with reduced motion, or if WebGL fails. */
   fallback: ReactNode;
 }
 
@@ -92,21 +92,21 @@ export function SkillSolar({ pinned, onPin, fallback }: SkillSolarProps) {
 
   return (
     <div ref={rootRef} className="group/solar">
-      {/* The 3D view: wide screens, motion allowed, WebGL working. */}
-      <div className="hidden group-data-[solar=off]/solar:hidden! motion-safe:md:block">
+      {/* The 3D view: motion allowed, WebGL working. */}
+      <div className="hidden group-data-[solar=off]/solar:hidden! motion-safe:block">
         <GroupFilter pinned={pinned} onPin={onPin} />
 
         <p className="mt-4 font-mono text-[11px] tracking-widest text-zinc-600 uppercase">
-          One orbit per group · bigger planet = stronger · hover a planet
+          One orbit per group · bigger planet = stronger · hover or tap a planet
         </p>
 
-        <FadeIn className="relative mx-auto mt-6 aspect-3/2 max-h-[calc(100svh-16rem)] w-full max-w-5xl lg:aspect-16/9">
+        <FadeIn className="relative mx-auto mt-6 aspect-square max-h-[calc(100svh-16rem)] w-full max-w-5xl sm:aspect-3/2 lg:aspect-16/9">
           {/* Soft glow behind the sun. */}
           <div
             aria-hidden="true"
             className="absolute inset-[30%] rounded-full bg-[radial-gradient(circle,rgba(255,170,80,0.10),transparent_70%)]"
           />
-          <div ref={hostRef} aria-hidden="true" className="absolute inset-0" />
+          <div ref={hostRef} aria-hidden="true" className="absolute inset-0 touch-pan-y" />
 
           {/* One label per planet, moved under it by the scene. They take keyboard focus but
               leave the pointer to the scene, which hit-tests planets and labels together. */}
@@ -126,7 +126,7 @@ export function SkillSolar({ pinned, onPin, fallback }: SkillSolarProps) {
                     onBlur={() => setHovered(null)}
                     onClick={() => onPin(pinned === planet.group ? null : planet.group)}
                     style={{ transform: "translate3d(-9999px, 0, 0)" }}
-                    className={`absolute top-0 left-0 rounded-full px-2 py-0.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 [text-shadow:0_0_10px_#09090e,0_0_4px_#09090e] focus-visible:outline-2 focus-visible:outline-white ${
+                    className={`absolute top-0 left-0 rounded-full px-2 py-0.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 [text-shadow:0_0_10px_#09090e,0_0_4px_#09090e] focus-visible:outline-2 focus-visible:outline-white max-sm:hidden ${
                       isHovered ? "text-white" : "text-zinc-300"
                     }`}
                   >
@@ -171,8 +171,8 @@ export function SkillSolar({ pinned, onPin, fallback }: SkillSolarProps) {
         </FadeIn>
       </div>
 
-      {/* The plain list: phones, reduced motion, or no WebGL. */}
-      <div className="block group-data-[solar=off]/solar:block! motion-safe:md:hidden">
+      {/* The plain list: reduced motion, or no WebGL. */}
+      <div className="block group-data-[solar=off]/solar:block! motion-safe:hidden">
         {fallback}
       </div>
     </div>

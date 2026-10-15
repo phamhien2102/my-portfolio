@@ -61,7 +61,7 @@ const TABS: readonly Tab[] = [
     intro: "How your toolbox is shown.",
     legend: "Skills view",
     options: SKILLS_VIEWS,
-    note: "The 3D views need a wide screen and WebGL. Otherwise a simple list is shown.",
+    note: "3D views need WebGL. When your device asks for reduced motion, or WebGL is missing, a simple list is shown.",
   },
   {
     id: "experience",

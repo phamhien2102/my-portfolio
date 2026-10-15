@@ -6,8 +6,8 @@ import { accentAt } from "@/config/theme";
 
 import { SKILL_GROUPS, levelLabel } from "../data";
 
-/** The scroll story only runs on wide screens, for people who haven't asked for less motion. */
-const STORY_QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
+/** The scroll story runs whenever the visitor hasn't asked for less motion. */
+const STORY_QUERY = "(prefers-reduced-motion: no-preference)";
 
 /** The overview, then one step per group. */
 const STEPS = SKILL_GROUPS.length + 1;
@@ -22,10 +22,10 @@ interface SkillsScrollerProps {
 /**
  * Turns Skills into a scroll-driven walkthrough.
  *
- * On wide screens the view is pinned to the top while the page keeps scrolling underneath it,
- * and the scroll position picks which group is lit: first the overview, then Mobile, Frontend,
- * Backend, Tooling. Clicking a chip still works; the next step boundary hands control back to the
- * scroll. On phones, or with reduced motion, it is just the plain view.
+ * The view is pinned to the top while the page keeps scrolling underneath it, and the scroll
+ * position picks which group is lit: first the overview, then Mobile, Frontend, Backend, Tooling.
+ * Clicking a chip still works; the next step boundary hands control back to the scroll. With
+ * reduced motion, it is just the plain view.
  */
 export function SkillsScroller({ pinned, onPin, children }: SkillsScrollerProps) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -95,11 +95,11 @@ export function SkillsScroller({ pinned, onPin, children }: SkillsScrollerProps)
     <div
       ref={trackRef}
       style={{ "--steps": STEPS } as CSSProperties}
-      className="motion-safe:md:[height:calc(var(--steps)*55svh+45svh)]"
+      className="motion-safe:[height:calc(var(--steps)*55svh+45svh)]"
     >
-      <div ref={stageRef} className="motion-safe:md:sticky motion-safe:md:top-20">
+      <div ref={stageRef} className="motion-safe:sticky motion-safe:top-20">
         {/* What the scroll is showing right now. */}
-        <div className="hidden motion-safe:md:block">
+        <div className="hidden motion-safe:block">
           <div className="h-px bg-white/10">
             <div
               ref={barRef}
@@ -109,7 +109,7 @@ export function SkillsScroller({ pinned, onPin, children }: SkillsScrollerProps)
 
           <div
             aria-live="polite"
-            className="mt-4 flex min-h-12 items-baseline gap-4 font-mono text-[11px] tracking-widest uppercase"
+            className="mt-4 flex min-h-12 flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-[11px] tracking-widest uppercase"
           >
             <span className="shrink-0 text-zinc-500">
               <span ref={counterRef} className="text-zinc-200">
