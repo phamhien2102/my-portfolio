@@ -120,8 +120,8 @@ export function createDropletScene(
   const ctx = context;
 
   let inkIdx = 0;
-  let picked = false;
   let inkMode = initialInkMode;
+  let protectAppearance = true; // the drops that appear on load keep their colour through the first touch
   let inkClock = 0;
   const sprites: HTMLCanvasElement[] = [];
   const paintSprites = (hex: string) => {
@@ -246,10 +246,12 @@ export function createDropletScene(
 
   const onMove = (event: PointerEvent) => {
     if (!usable() || !overHero(event.clientX, event.clientY)) {
+      if (pointer.active) protectAppearance = false;
       pointer.active = false;
       return;
     }
     const now = performance.now();
+    const starting = !pointer.active;
     if (pointer.active) {
       const seconds = Math.max(0.008, (now - pointer.at) / 1000);
       // Smoothed, so a jittery mouse does not make the droplets twitch.
@@ -260,17 +262,23 @@ export function createDropletScene(
     pointer.y = event.clientY;
     pointer.at = now;
     pointer.active = true;
-    if (inkMode === "touch" && !picked) {
+    // The opening colour stays for the first visit. A later visit, after the pointer has left, picks.
+    if (inkMode === "touch" && event.type !== "pointerdown" && starting && !protectAppearance) {
       pickInk();
-      picked = true;
+      protectAppearance = true;
     }
   };
   const onDown = (event: PointerEvent) => {
     if (!usable() || !overHero(event.clientX, event.clientY)) return;
+    if (inkMode === "touch" && !protectAppearance) {
+      pickInk();
+      protectAppearance = true;
+    }
     onMove(event);
     splash = { x: event.clientX, y: event.clientY };
   };
   const onLeave = () => {
+    if (pointer.active) protectAppearance = false;
     pointer.active = false;
   };
   window.addEventListener("pointermove", onMove);
@@ -399,7 +407,7 @@ export function createDropletScene(
     setInkMode: (mode: InkMode) => {
       inkMode = mode;
       inkClock = 0;
-      if (mode === "touch") picked = false;
+      if (mode === "touch") protectAppearance = true;
     },
     dispose: () => {
       disposed = true;

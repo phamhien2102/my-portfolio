@@ -145,6 +145,8 @@ export function createRevealScene(
   let started = intro; // is there a blob on screen yet?
   let userControl = false; // true once the user has moved the pointer over the container
   let introDone = false; // true once the intro sweep has reached the end
+  let touchStroke = true; // the drop that appears on load already has its colour
+  let metBlob = false; // the first touch keeps that colour; only a later stroke may change it
 
   const currentInk = hexToVec3(palette[0]);
   let colorIdx = 0;
@@ -236,9 +238,9 @@ export function createRevealScene(
     if (!userControl) {
       userControl = true; // pointer takes over from the intro sweep
       idle = 0;
-      // Only pick a colour if the blob is not on screen yet. Intro (and a later touch
-      // after the blob has already appeared) must keep the ink that is already showing.
-      if (inkMode === "touch" && !started) pickInk();
+      // The automatic appearance keeps its colour. This first touch must not recolour it.
+      metBlob = true;
+      touchStroke = true;
     }
     if (!started) {
       // no intro: place the whole tail at the pointer so the blob doesn't fly in from offscreen
@@ -282,6 +284,8 @@ export function createRevealScene(
   /** The pointer stopped: send the blob away. */
   const leave = () => {
     gone = true;
+    // Only arm a new colour once the visitor has already met the opening drop.
+    if (metBlob) touchStroke = false;
     if (idleEffect !== "splatter") return; // dissolve just lowers `life`
 
     const aspect = size().w / size().h;
@@ -395,9 +399,13 @@ export function createRevealScene(
       }
       shared.uSpeed.value = speed;
 
-      // A later touch, or a flick after the blob has paused, should not pick a new colour.
       if (moving) {
         idle = 0;
+        // By touch: the opening drop keeps its colour. After that stroke ends, the next one picks.
+        if (userControl && inkMode === "touch" && !touchStroke) {
+          pickInk();
+          touchStroke = true;
+        }
         if (gone) regrow();
       } else {
         idle += dt;
@@ -478,6 +486,8 @@ export function createRevealScene(
   const setInkMode = (mode: InkMode) => {
     inkMode = mode;
     inkClock = 0;
+    // Keep the colour already on screen. A later stroke can pick a new one.
+    if (mode === "touch") touchStroke = true;
   };
 
   return {

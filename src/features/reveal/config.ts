@@ -11,7 +11,7 @@ export type IdleEffect = "splatter" | "dissolve" | "none";
 /** Tunable settings for the RAYMOND reveal effect. */
 export const REVEAL_CONFIG = {
   word: "RAYMOND",
-  /** Ink colours: timed mode steps through these; touch mode keeps the one already on screen. */
+  /** Ink colours: timed mode steps through these; touch mode keeps the opening colour, then picks on a later touch. */
   palette: THEME.palette,
   /** Seconds between ink changes when the setting is "By time". */
   inkInterval: 5,

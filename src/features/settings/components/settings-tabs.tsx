@@ -239,7 +239,7 @@ export function SettingsTabs() {
               value={settings.inkMode}
               defaultId={DEFAULT_SETTINGS.inkMode}
               onChange={chooseInk}
-              note="The chrome blob and Droplets share this. By touch waits for you; by time changes colour about every five seconds."
+              note="The chrome blob and Droplets share this. By touch keeps the opening colour; a later touch picks a new one. By time changes colour about every five seconds."
             />
           )}
         </div>

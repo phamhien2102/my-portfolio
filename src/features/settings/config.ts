@@ -140,7 +140,7 @@ export const INK_MODES = [
     id: "touch",
     label: "By touch",
     description:
-      "A new ink colour is picked the first time the blob appears. Touching again keeps it.",
+      "The drop that appears on load keeps its colour. After it leaves, the next touch picks a new one.",
     immersive: false,
   },
   {
