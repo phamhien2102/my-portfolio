@@ -1,42 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 
 import { cn } from "@/lib/cn";
 
-import type { Destination } from "../data";
 import { playSound } from "../lib/sound";
-
-export interface Ticket {
-  passenger: string;
-  destination: Destination;
-  dateLabel: string;
-  time: string;
-  seat: string;
-}
-
-/** Giờ anh có mặt: 20 phút trước giờ cất cánh. */
-function pickupTime(time: string) {
-  const [hours, minutes] = time.split(":").map(Number);
-  const total = hours * 60 + minutes - 20;
-  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
-}
-
-/** Vạch mã vạch sinh từ nội dung vé, cùng vé thì cùng vạch. */
-function barcodeBars(seed: string) {
-  let state = 0;
-  for (const char of seed) state = (state * 31 + char.charCodeAt(0)) >>> 0;
-  const bars: Array<{ x: number; w: number }> = [];
-  let x = 0;
-  while (x < 220) {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    const w = 1 + (state % 4);
-    const gap = 1 + ((state >>> 8) % 3);
-    bars.push({ x, w });
-    x += w + gap;
-  }
-  return bars;
-}
+import { barcodeBars, FLIGHT, pickupTime, type Ticket } from "../lib/ticket";
 
 function Field({ label, value, big }: { label: string; value: string; big?: boolean }) {
   return (
@@ -60,11 +29,8 @@ export function BoardingPass({ ticket, onTorn }: { ticket: Ticket; onTorn: () =>
   const [stubGone, setStubGone] = useState(false);
   const [printed, setPrinted] = useState(false);
   const tiltRef = useRef<HTMLDivElement>(null);
-  const flight = "HH143";
-  const bars = useMemo(
-    () => barcodeBars(`${ticket.passenger}${flight}${ticket.seat}${ticket.time}`),
-    [ticket.passenger, flight, ticket.seat, ticket.time],
-  );
+  const flight = FLIGHT;
+  const bars = barcodeBars(ticket);
 
   // Máy in kêu đúng lúc vé trượt ra, in xong mới cho vé nghiêng theo tay.
   useEffect(() => {
@@ -212,7 +178,7 @@ export function BoardingPass({ ticket, onTorn }: { ticket: Ticket; onTorn: () =>
           >
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-1">
               <Field label="Seat" value={ticket.seat} big />
-              <Field label="Next to" value="ME · 3C" />
+              <Field label="Next to" value={`ME · ${ticket.partnerSeat}`} />
             </div>
             <span className="rounded-full bg-[#ff2d78] px-3 py-1.5 text-xs font-bold text-white transition group-hover:scale-105">
               ✂ Tear here

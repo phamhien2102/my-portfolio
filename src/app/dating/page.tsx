@@ -10,7 +10,7 @@ const vietnamese = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: "Date Airways · Flight HH143",
-  description: "The only flight still boarding this weekend.",
+  description: "The only flight still boarding this week.",
   robots: { index: false, follow: false },
 };
 

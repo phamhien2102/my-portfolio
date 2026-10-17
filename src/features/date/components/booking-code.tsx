@@ -26,11 +26,13 @@ export function BookingCodeInput({
   onChange,
   invalid,
   verified,
+  disabled,
 }: {
   value: string;
   onChange: (value: string) => void;
   invalid: boolean;
   verified: boolean;
+  disabled: boolean;
 }) {
   const [focused, setFocused] = useState(false);
   const [reveal, setReveal] = useState(false);
@@ -50,7 +52,7 @@ export function BookingCodeInput({
   };
 
   return (
-    <div className="flex gap-2">
+    <div className={cn("flex gap-2 transition-opacity", disabled && !verified && "opacity-40")}>
       <div className="relative flex-1">
         <div aria-hidden="true" className="flex justify-between gap-1 sm:gap-1.5">
           {Array.from({ length: CODE_LENGTH }, (_, index) => {
@@ -93,18 +95,20 @@ export function BookingCodeInput({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           maxLength={CODE_LENGTH}
+          disabled={disabled}
           autoComplete="off"
           autoCapitalize="characters"
           autoCorrect="off"
           spellCheck={false}
           aria-invalid={invalid}
           aria-describedby="booking-code-hint"
-          className="absolute inset-0 h-full w-full cursor-text bg-transparent text-transparent caret-transparent outline-none selection:bg-transparent"
+          className="absolute inset-0 h-full w-full cursor-text bg-transparent text-transparent caret-transparent outline-none selection:bg-transparent disabled:cursor-not-allowed"
         />
       </div>
       <button
         type="button"
         onClick={() => setReveal(!reveal)}
+        disabled={disabled && !verified}
         aria-label={reveal ? "Hide booking code" : "Show booking code"}
         aria-pressed={reveal}
         className="flex h-12 w-11 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-lg transition hover:border-white/40"

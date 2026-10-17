@@ -4,20 +4,29 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { cn } from "@/lib/cn";
 
-import { verifyBookingCode } from "../actions";
+import { verifyBookingCode, verifyPassenger } from "../actions";
 import {
   CODE_LENGTH,
   DEPARTURE_TIMES,
   DESTINATIONS,
   FORECASTS,
+  JET_OPEN_TIME,
+  PRIVATE_JET_PA,
+  PRIVATE_JET_WEEKDAYS,
+  SECRET_TIME,
+  SECRET_TIME_PA,
+  SOLD_OUT_PA,
   OPENING_PA,
   STEPS,
   WRONG_CODE_PA,
+  WRONG_NAME_PA,
   type Destination,
 } from "../data";
 import { playSound, setSoundEnabled, unlockSound } from "../lib/sound";
 import { toTicketName } from "../lib/ticket-name";
-import { BoardingPass, type Ticket } from "./boarding-pass";
+import { type Ticket } from "../lib/ticket";
+import { downloadTicketImage, downloadTicketPdf } from "../lib/ticket-export";
+import { BoardingPass } from "./boarding-pass";
 import { BookingCodeInput } from "./booking-code";
 import { CaptainBar } from "./captain";
 import { DepartureBoard } from "./departure-board";
@@ -29,6 +38,8 @@ import { WelcomeGate } from "./welcome-gate";
 
 interface DayOption {
   label: string;
+  /** getDay(): 0 là chủ nhật, 1 là thứ 2… */
+  weekday: number;
   /** Ngày dạng YYYYMMDD, dùng cho file lịch. */
   stamp: string;
   year: number;
@@ -56,6 +67,7 @@ function upcomingDays(): DayOption[] {
       year,
       month,
       date,
+      weekday: day.getDay(),
       forecast: FORECASTS[index % FORECASTS.length],
     };
   });
@@ -175,6 +187,12 @@ function Countdown({ target }: { target: number }) {
 export function FlightCheckIn() {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
+  /** Tên đã được server xác nhận là đúng người trên danh sách. */
+  const [nameOk, setNameOk] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [wrongNames, setWrongNames] = useState(0);
+  const latestName = useRef("");
+  const nameTimer = useRef(0);
   const [code, setCode] = useState("");
   const [wrongTries, setWrongTries] = useState(0);
   const [codeError, setCodeError] = useState(false);
@@ -185,11 +203,24 @@ export function FlightCheckIn() {
   const [destination, setDestination] = useState<Destination | null>(null);
   const [days, setDays] = useState<DayOption[]>([]);
   const [day, setDay] = useState<DayOption | null>(null);
+  /** Những ngày cuối tuần em đã bấm thử và bị từ chối, để gạch đi. */
+  const [soldOut, setSoldOut] = useState<string[]>([]);
+  const [dayRefusal, setDayRefusal] = useState<{ stamp: string; text: string } | null>(null);
+  /** Cả tuần đã hết vé, chỉ còn chuyên cơ riêng. */
+  const [privateJet, setPrivateJet] = useState(false);
+  const [soldOutTimes, setSoldOutTimes] = useState<string[]>([]);
+  const [timeRefusal, setTimeRefusal] = useState<{ time: string; text: string } | null>(null);
+  /** Mọi giờ thường đã hết vé, chỉ còn khung giờ bí mật. */
+  const [secretSlot, setSecretSlot] = useState(false);
+  /** Hẹn giờ mở khung giờ bí mật, giữ lại để huỷ được khi em đổi ngày. */
+  const secretTimer = useRef(0);
   const [time, setTime] = useState<string | null>(null);
   const [seat, setSeat] = useState<string | null>(null);
+  const [partnerSeat, setPartnerSeat] = useState<string | null>(null);
   const [clearing, setClearing] = useState(false);
   const [departed, setDeparted] = useState(false);
   const [shared, setShared] = useState<string | null>(null);
+  const [exporting, setExporting] = useState<"image" | "pdf" | null>(null);
   const [entered, setEntered] = useState(false);
   const [sound, setSound] = useState(true);
   const [shaking, setShaking] = useState(false);
@@ -229,47 +260,87 @@ export function FlightCheckIn() {
     return ok;
   };
 
-  const changeCode = (value: string) => {
+  const rejectCode = () => {
+    playSound("buzz");
+    setCodeError(true);
+    shake();
+    announce(WRONG_CODE_PA[Math.min(wrongTries, WRONG_CODE_PA.length - 1)]);
+    setWrongTries(wrongTries + 1);
+    // Mã sai thì xoá trắng và đặt con trỏ lại vào ô mã để em nhập lại ngay.
+    latestCode.current = "";
+    setCode("");
+    setVerified(false);
+    document.getElementById("booking-code")?.focus();
+  };
+
+  /** Gõ đủ 8 ký tự là tự kiểm tra. Mã đúng thì để các ô sáng xanh một chút rồi mới sang bước sau. */
+  const changeCode = async (value: string) => {
     latestCode.current = value;
     setCode(value);
     setCodeError(false);
     setVerified(false);
-    if (value.length === CODE_LENGTH) {
-      void checkCode(value).then((ok) => {
-        if (ok) playSound("sparkle");
-      });
-    }
-  };
+    if (value.length !== CODE_LENGTH) return;
 
-  /** Phải có tên và đủ 8 ký tự mã thì nút Check-in mới bấm được. */
-  const canCheckIn = name.trim().length > 0 && code.length === CODE_LENGTH;
-
-  const startCheckIn = async (event: FormEvent) => {
-    event.preventDefault();
-    if (checking || !canCheckIn) return;
-    let ok = verified;
-    if (!ok && code.length === CODE_LENGTH) {
-      setChecking(true);
-      ok = (await checkCode(code)) ?? false;
-      setChecking(false);
-    }
+    setChecking(true);
+    const ok = await checkCode(value);
+    setChecking(false);
+    if (ok === null) return;
     if (!ok) {
-      playSound("buzz");
-      setCodeError(true);
-      shake();
-      announce(WRONG_CODE_PA[Math.min(wrongTries, WRONG_CODE_PA.length - 1)]);
-      setWrongTries(wrongTries + 1);
-      // Mã sai thì xoá trắng và đặt con trỏ lại vào ô mã để em nhập lại ngay.
-      latestCode.current = "";
-      setCode("");
-      setVerified(false);
-      document.getElementById("booking-code")?.focus();
+      rejectCode();
       return;
     }
-    announce(
-      `Welcome aboard, ${passenger}. Cabin crew report that you look great today. Please choose a destination.`,
-    );
-    setStep(1);
+    playSound("sparkle");
+    window.setTimeout(() => {
+      announce(
+        `Welcome aboard, ${passenger}. Cabin crew report that you look great today. Please choose a destination.`,
+      );
+      setStep(1);
+    }, 800);
+  };
+
+  /** Ô mã chỉ mở khi tên đã đúng, vì mã đúng là đi tiếp luôn. */
+  const hasName = nameOk;
+
+  const confirmName = () => {
+    setNameOk(true);
+    setNameError(false);
+    playSound("sparkle");
+    // Đợi ô mã được mở khoá xong rồi mới đặt con trỏ vào.
+    window.setTimeout(() => document.getElementById("booking-code")?.focus(), 60);
+  };
+
+  const rejectName = () => {
+    playSound("buzz");
+    setNameError(true);
+    announce(WRONG_NAME_PA[Math.min(wrongNames, WRONG_NAME_PA.length - 1)]);
+    setWrongNames(wrongNames + 1);
+    const input = document.getElementById("passenger");
+    if (input instanceof HTMLInputElement) input.select();
+  };
+
+  /** Gõ tới đâu kiểm tra ngầm tới đó: đúng thì mở ô mã ngay, sai thì chưa báo lỗi khi đang gõ dở. */
+  const changeName = (value: string) => {
+    setName(value);
+    setNameOk(false);
+    setNameError(false);
+    latestName.current = value;
+    window.clearTimeout(nameTimer.current);
+    if (!value.trim()) return;
+    nameTimer.current = window.setTimeout(async () => {
+      const ok = await verifyPassenger(value);
+      if (ok && latestName.current === value) confirmName();
+    }, 450);
+  };
+
+  /** Nhấn Enter hoặc rời ô tên: lúc này mới báo lỗi nếu tên sai. */
+  const submitName = async () => {
+    const value = latestName.current;
+    if (!value.trim() || nameOk) return;
+    window.clearTimeout(nameTimer.current);
+    const ok = await verifyPassenger(value);
+    if (latestName.current !== value) return;
+    if (ok) confirmName();
+    else rejectName();
   };
 
   const chooseDestination = (option: Destination) => {
@@ -277,6 +348,76 @@ export function FlightCheckIn() {
     setDays(upcomingDays());
     announce(option.pa);
     setStep(2);
+  };
+
+  /**
+   * Lịch thường ngày nào cũng hết vé: bấm vào là bị gạch, gắn tem SOLD OUT kèm một câu đùa.
+   * Bấm hết cả tuần thì chuyên cơ riêng của cơ trưởng hiện ra.
+   */
+  const pickDay = (option: DayOption) => {
+    const refusal = SOLD_OUT_PA[option.weekday];
+    playSound("buzz");
+    setDayRefusal({ stamp: option.stamp, text: refusal });
+    announce(refusal);
+    // Bỏ trạng thái rung sau khi rung xong, để lần bấm sau vẫn rung lại được.
+    window.setTimeout(
+      () => setDayRefusal((current) => (current ? { ...current, stamp: "" } : current)),
+      450,
+    );
+    if (soldOut.includes(option.stamp)) return;
+    const next = [...soldOut, option.stamp];
+    setSoldOut(next);
+    if (next.length === days.length) {
+      window.setTimeout(() => {
+        playSound("sparkle");
+        announce(PRIVATE_JET_PA);
+        setPrivateJet(true);
+      }, 1200);
+    }
+  };
+
+  /** Giờ cũng như ngày: giờ nào cũng hết vé, hết sạch thì mở khung giờ bí mật 19:30. */
+  /** Giờ còn chọn được với ngày đang chọn (thứ 2 đi chuyên cơ thì 19:00 không bị sold out). */
+  const isOpenTime = (value: string) =>
+    day?.weekday === JET_OPEN_TIME.weekday && value === JET_OPEN_TIME.time;
+
+  const pickTime = (option: (typeof DEPARTURE_TIMES)[number]) => {
+    if (!day) return;
+    if (isOpenTime(option.time)) {
+      playSound("blip");
+      setTimeRefusal(null);
+      setTime(option.time);
+      return;
+    }
+    playSound("buzz");
+    setTimeRefusal({ time: option.time, text: option.soldOut });
+    announce(option.soldOut);
+    window.setTimeout(
+      () => setTimeRefusal((current) => (current ? { ...current, time: "" } : current)),
+      450,
+    );
+    if (soldOutTimes.includes(option.time)) return;
+    const next = [...soldOutTimes, option.time];
+    setSoldOutTimes(next);
+    if (next.length === DEPARTURE_TIMES.length) {
+      secretTimer.current = window.setTimeout(() => {
+        playSound("sparkle");
+        announce(SECRET_TIME_PA);
+        setSecretSlot(true);
+      }, 1200);
+    }
+  };
+
+  /** Đổi sang ngày khác thì phần giờ phải chọn lại từ đầu: hết SOLD OUT, ẩn khung giờ bí mật. */
+  const pickJetDay = (option: DayOption) => {
+    playSound("blip");
+    if (day?.stamp === option.stamp) return;
+    setDay(option);
+    window.clearTimeout(secretTimer.current);
+    setTime(null);
+    setSoldOutTimes([]);
+    setTimeRefusal(null);
+    setSecretSlot(false);
   };
 
   const confirmSchedule = () => {
@@ -287,8 +428,9 @@ export function FlightCheckIn() {
     setStep(3);
   };
 
-  const pickSeat = (picked: string) => {
+  const pickSeat = (picked: string, partner: string) => {
     setSeat(picked);
+    setPartnerSeat(partner);
     announce(
       `Seat ${picked} confirmed. Armrest sharing is mandatory on this flight. Please proceed to security.`,
     );
@@ -319,9 +461,26 @@ export function FlightCheckIn() {
   };
 
   const ticket: Ticket | null =
-    destination && day && time && seat
-      ? { passenger, destination, dateLabel: day.label, time, seat }
+    destination && day && time && seat && partnerSeat
+      ? { passenger, destination, dateLabel: day.label, time, seat, partnerSeat }
       : null;
+
+  /** Tải vé về máy dưới dạng ảnh PNG hoặc PDF. Font chữ lấy từ chính nút được bấm. */
+  const saveTicket = async (kind: "image" | "pdf", button: HTMLElement) => {
+    if (!ticket || exporting) return;
+    playSound("print");
+    setExporting(kind);
+    const sans = getComputedStyle(button).fontFamily;
+    try {
+      if (kind === "image") await downloadTicketImage(ticket, sans);
+      else await downloadTicketPdf(ticket, sans);
+      setShared(kind === "image" ? "Ticket saved as an image." : "Ticket saved as a PDF.");
+    } catch {
+      setShared("Couldn't save the ticket. A screenshot works too.");
+    } finally {
+      setExporting(null);
+    }
+  };
 
   const share = async () => {
     if (!ticket) return;
@@ -345,8 +504,6 @@ export function FlightCheckIn() {
       setShared("Couldn't send it. A screenshot works too.");
     }
   };
-
-  const vibe = DEPARTURE_TIMES.find((option) => option.time === time)?.vibe;
 
   return (
     <div
@@ -415,6 +572,42 @@ export function FlightCheckIn() {
           25% { transform: translateY(0) scale(1); }
           80% { opacity: 1; }
           100% { opacity: 0; transform: translateY(-14px); }
+        }
+        @keyframes heartbeat {
+          0%, 100% { box-shadow: 0 0 20px rgba(255,45,120,0.4); filter: brightness(1); }
+          30% { box-shadow: 0 0 50px rgba(255,45,120,0.9); filter: brightness(1.3); }
+        }
+        @keyframes verify-bar {
+          0% { width: 0%; }
+          70% { width: 92%; }
+          100% { width: 99%; }
+        }
+        @keyframes glitch {
+          0% { transform: translateX(0); }
+          50% { transform: translateX(-3px); }
+          100% { transform: translateX(3px); }
+        }
+        @keyframes letter-pop {
+          0% { opacity: 0; transform: scale(0.2) rotate(-20deg); }
+          100% { opacity: 1; transform: scale(1) rotate(0); }
+        }
+        @keyframes claw-drop {
+          0% { transform: translateY(-110px); }
+          100% { transform: translateY(0); }
+        }
+        @keyframes tile-flip {
+          0% { transform: rotateY(0) scale(1); }
+          50% { transform: rotateY(90deg) scale(1.3); }
+          100% { transform: rotateY(0) scale(1.15); }
+        }
+        @keyframes tooltip-in {
+          0% { opacity: 0; transform: translateY(8px) scale(0.6); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes seat-flip {
+          0% { transform: rotateY(0) scale(1); }
+          50% { transform: rotateY(180deg) scale(1.3); }
+          100% { transform: rotateY(360deg) scale(1.1); }
         }
         @keyframes poof {
           0% { opacity: 1; transform: scale(0.6); }
@@ -500,7 +693,7 @@ export function FlightCheckIn() {
         <div key={step} className="step-in mt-8 flex w-full flex-1 flex-col items-center">
           {step === 0 && (
             <>
-              <StepHeading eyebrow="Domestic terminal · This weekend" title="Departures" />
+              <StepHeading eyebrow="Domestic terminal · This week" title="Departures" />
               <p className="mt-3 max-w-md text-center text-sm text-white/60">
                 Every other flight is cancelled. Only one gate is still open. Tap a flight if you
                 don’t believe me.
@@ -514,7 +707,7 @@ export function FlightCheckIn() {
                 )}
               </div>
               <form
-                onSubmit={startCheckIn}
+                onSubmit={(event: FormEvent) => event.preventDefault()}
                 className="mt-8 flex w-full max-w-md flex-col gap-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm"
               >
                 <div className="flex flex-col gap-2">
@@ -527,12 +720,44 @@ export function FlightCheckIn() {
                   <input
                     id="passenger"
                     value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    onChange={(event) => changeName(event.target.value)}
+                    onKeyDown={(event) => {
+                      // Không có nút Check-in nên form không tự gửi khi nhấn Enter; tự kiểm tra tên.
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        if (nameOk) document.getElementById("booking-code")?.focus();
+                        else void submitName();
+                      }
+                    }}
+                    onBlur={() => void submitName()}
                     placeholder="Your name"
                     maxLength={14}
-                    autoComplete="given-name"
-                    className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base outline-none placeholder:text-white/30 focus:border-[#ffc94a] focus:shadow-[0_0_0_4px_rgba(255,201,74,0.15)]"
+                    autoComplete="off"
+                    aria-invalid={nameError}
+                    aria-describedby="passenger-hint"
+                    className={cn(
+                      "rounded-xl border bg-white/5 px-4 py-3 text-base outline-none placeholder:text-white/30",
+                      nameOk
+                        ? "border-[#5cff9d] text-[#5cff9d] shadow-[0_0_18px_rgba(92,255,157,0.25)]"
+                        : nameError
+                          ? "animate-[row-shake_0.45s_ease-in-out] border-[#ff5c5c]/70 bg-[#ff5c5c]/10"
+                          : "border-white/15 focus:border-[#ffc94a] focus:shadow-[0_0_0_4px_rgba(255,201,74,0.15)]",
+                    )}
                   />
+                  <p
+                    id="passenger-hint"
+                    aria-live="polite"
+                    className={cn(
+                      "text-xs",
+                      nameError ? "text-[#ff8a8a]" : nameOk ? "text-[#5cff9d]" : "text-white/40",
+                    )}
+                  >
+                    {nameError
+                      ? `📢 ${WRONG_NAME_PA[Math.min(wrongNames - 1, WRONG_NAME_PA.length - 1)]}`
+                      : nameOk
+                        ? "✓ Passenger found on the list."
+                        : "Name as it appears on your booking."}
+                  </p>
                 </div>
                 <div
                   className={cn(
@@ -553,32 +778,36 @@ export function FlightCheckIn() {
                   </div>
                   <BookingCodeInput
                     value={code}
-                    onChange={changeCode}
+                    onChange={(value) => void changeCode(value)}
                     invalid={codeError}
                     verified={verified}
+                    disabled={!hasName || verified}
                   />
                   <p
                     id="booking-code-hint"
                     className={cn(
                       "text-xs",
-                      codeError ? "text-[#ff8a8a]" : verified ? "text-[#5cff9d]" : "text-white/40",
+                      codeError
+                        ? "text-[#ff8a8a]"
+                        : verified
+                          ? "text-[#5cff9d]"
+                          : checking
+                            ? "text-[#ffc94a]"
+                            : "text-white/40",
                     )}
                   >
                     {/* Lặp lại gợi ý ngay dưới ô nhập, vì lúc này khung cơ trưởng có thể đã bị cuộn khuất. */}
                     {codeError
                       ? `📢 ${WRONG_CODE_PA[Math.min(wrongTries - 1, WRONG_CODE_PA.length - 1)]}`
                       : verified
-                        ? "Booking found. One seat reserved next to the pilot."
-                        : "8 characters. The pilot sent it to you privately."}
+                        ? "Booking found. Boarding you now…"
+                        : checking
+                          ? "Checking your booking…"
+                          : hasName
+                            ? "8 characters. The pilot sent it to you privately."
+                            : "Confirm the passenger name first to unlock the booking code."}
                   </p>
                 </div>
-                <button
-                  type="submit"
-                  disabled={checking || !canCheckIn}
-                  className="rounded-xl bg-gradient-to-r from-[#ff2d78] to-[#ff5c9a] px-5 py-3.5 font-bold text-white shadow-[0_10px_30px_rgba(255,45,120,0.4)] transition hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 disabled:pointer-events-none disabled:opacity-40 disabled:shadow-none"
-                >
-                  {checking ? "Checking booking…" : "Check-in ✈"}
-                </button>
               </form>
             </>
           )}
@@ -626,22 +855,75 @@ export function FlightCheckIn() {
                   <button
                     key={option.stamp}
                     type="button"
-                    onClick={() => {
-                      playSound("blip");
-                      setDay(option);
-                    }}
-                    aria-pressed={day?.stamp === option.stamp}
+                    onClick={() => pickDay(option)}
                     className={cn(
-                      "rounded-xl border px-4 py-3 font-mono text-sm transition",
-                      day?.stamp === option.stamp
-                        ? "scale-105 border-[#ffc94a] bg-[#ffc94a] font-bold text-[#1d1500] shadow-[0_0_24px_rgba(255,201,74,0.35)]"
+                      "relative rounded-xl border px-4 py-3 font-mono text-sm transition",
+                      // Lịch thường không bao giờ được chọn: ngày nào bấm vào cũng thành SOLD OUT.
+                      soldOut.includes(option.stamp)
+                        ? "border-[#ff5c5c]/40 bg-[#ff5c5c]/5 text-white/35 line-through"
                         : "border-white/15 bg-white/[0.04] hover:-translate-y-0.5 hover:border-white/40",
+                      dayRefusal?.stamp === option.stamp && "animate-[row-shake_0.45s_ease-in-out]",
                     )}
                   >
                     {option.label}
+                    {soldOut.includes(option.stamp) && (
+                      <span className="absolute -top-2.5 -right-2 [rotate:8deg] animate-[stamp_0.35s_cubic-bezier(.3,1.6,.6,1)_both] rounded border-2 border-[#ff3b5c] bg-[#070a12] px-1 font-mono text-[9px] font-black tracking-wider text-[#ff3b5c] no-underline">
+                        SOLD OUT
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
+              {dayRefusal && !privateJet && (
+                <p
+                  key={dayRefusal.text}
+                  aria-live="polite"
+                  className="step-in mt-4 max-w-md rounded-2xl border border-[#ff5c5c]/30 bg-[#ff5c5c]/10 px-4 py-2 text-center text-sm text-[#ffb3b3]"
+                >
+                  📢 {dayRefusal.text}
+                </p>
+              )}
+              {privateJet && (
+                <div className="step-in relative mt-6 w-full max-w-md overflow-hidden rounded-3xl border border-[#ffc94a]/50 bg-gradient-to-br from-[#2a1d05] via-[#14101f] to-[#2a0b1a] p-5 text-center shadow-[0_0_60px_rgba(255,201,74,0.2)]">
+                  <span
+                    aria-hidden="true"
+                    className="absolute -top-6 -right-4 [rotate:-20deg] text-7xl opacity-20"
+                  >
+                    🛩️
+                  </span>
+                  <p className="font-mono text-[10px] tracking-[0.35em] text-[#ffc94a]">
+                    ✨ CAPTAIN&apos;S PRIVATE JET ✨
+                  </p>
+                  <p className="mt-2 text-lg font-extrabold text-white">
+                    Whole week sold out. Good thing I own a jet.
+                  </p>
+                  <p className="mt-1 text-sm text-white/60">
+                    One passenger only. Champagne optional, me included.
+                  </p>
+                  <div className="mt-4 flex justify-center gap-3">
+                    {days
+                      .filter((option) =>
+                        (PRIVATE_JET_WEEKDAYS as readonly number[]).includes(option.weekday),
+                      )
+                      .map((option) => (
+                        <button
+                          key={option.stamp}
+                          type="button"
+                          onClick={() => pickJetDay(option)}
+                          aria-pressed={day?.stamp === option.stamp}
+                          className={cn(
+                            "rounded-xl border px-4 py-3 font-mono text-sm font-bold transition",
+                            day?.stamp === option.stamp
+                              ? "scale-105 border-[#ffc94a] bg-[#ffc94a] text-[#1d1500] shadow-[0_0_24px_rgba(255,201,74,0.5)]"
+                              : "border-[#ffc94a]/40 bg-[#ffc94a]/10 text-[#ffe3a3] hover:-translate-y-0.5 hover:border-[#ffc94a]",
+                          )}
+                        >
+                          🛩️ {option.label}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
               {day && (
                 <p
                   key={day.stamp}
@@ -650,31 +932,96 @@ export function FlightCheckIn() {
                   ☀️ Forecast: {day.forecast}
                 </p>
               )}
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {/* Phải chọn ngày trước rồi mới được chọn giờ. */}
+              {!day && (
+                <p className="mt-6 text-center font-mono text-[11px] tracking-[0.2em] text-white/40 uppercase">
+                  🔒 Pick a date first to unlock departure times
+                </p>
+              )}
+              <div
+                className={cn(
+                  "mt-4 flex flex-wrap justify-center gap-2 transition-opacity duration-500",
+                  !day && "opacity-25",
+                )}
+              >
                 {DEPARTURE_TIMES.map((option) => (
                   <button
                     key={option.time}
                     type="button"
-                    onClick={() => {
-                      playSound("blip");
-                      setTime(option.time);
-                    }}
-                    aria-pressed={time === option.time}
+                    onClick={() => pickTime(option)}
+                    disabled={!day}
+                    aria-pressed={isOpenTime(option.time) ? time === option.time : undefined}
                     className={cn(
-                      "rounded-full border px-5 py-2 font-mono text-sm transition",
+                      "relative rounded-full border px-5 py-2 font-mono text-sm transition",
+                      !day && "cursor-not-allowed",
                       time === option.time
                         ? "scale-105 border-[#ff2d78] bg-[#ff2d78] font-bold text-white shadow-[0_0_24px_rgba(255,45,120,0.4)]"
-                        : "border-white/15 hover:-translate-y-0.5 hover:border-white/40",
+                        : soldOutTimes.includes(option.time)
+                          ? "border-[#ff5c5c]/40 bg-[#ff5c5c]/5 text-white/35 line-through"
+                          : "border-white/15 hover:-translate-y-0.5 hover:border-white/40",
+                      timeRefusal?.time === option.time && "animate-[row-shake_0.45s_ease-in-out]",
                     )}
                   >
                     {option.time}
+                    {soldOutTimes.includes(option.time) && (
+                      <span className="absolute -top-2.5 -right-3 [rotate:10deg] animate-[stamp_0.35s_cubic-bezier(.3,1.6,.6,1)_both] rounded border-2 border-[#ff3b5c] bg-[#070a12] px-1 font-mono text-[8px] font-black tracking-wider text-[#ff3b5c]">
+                        SOLD OUT
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
-              {vibe && (
-                <p key={vibe} className="step-in mt-3 text-center text-sm text-[#ff8ab3]">
-                  {vibe}
+              {time && isOpenTime(time) && !timeRefusal && (
+                <p
+                  aria-live="polite"
+                  className="step-in mt-4 max-w-md rounded-2xl border border-[#5cff9d]/30 bg-[#5cff9d]/10 px-4 py-2 text-center text-sm text-[#b8ffd6]"
+                >
+                  ✈ {JET_OPEN_TIME.note}
                 </p>
+              )}
+              {timeRefusal && !secretSlot && (
+                <p
+                  key={timeRefusal.text}
+                  aria-live="polite"
+                  className="step-in mt-4 max-w-md rounded-2xl border border-[#ff5c5c]/30 bg-[#ff5c5c]/10 px-4 py-2 text-center text-sm text-[#ffb3b3]"
+                >
+                  📢 {timeRefusal.text}
+                </p>
+              )}
+              {secretSlot && (
+                <div className="step-in relative mt-6 w-full max-w-md overflow-hidden rounded-3xl border border-[#ff8ab3]/50 bg-gradient-to-br from-[#2a0b1a] via-[#14101f] to-[#1a0b2a] p-5 text-center shadow-[0_0_60px_rgba(255,45,120,0.2)]">
+                  <span
+                    aria-hidden="true"
+                    className="absolute -top-5 -left-3 [rotate:15deg] text-7xl opacity-20"
+                  >
+                    🌙
+                  </span>
+                  <p className="font-mono text-[10px] tracking-[0.35em] text-[#ff8ab3]">
+                    🤫 SECRET DEPARTURE 🤫
+                  </p>
+                  <p className="mt-2 text-lg font-extrabold text-white">
+                    Every slot is gone. Except this one.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playSound("blip");
+                      setTime(SECRET_TIME.time);
+                    }}
+                    aria-pressed={time === SECRET_TIME.time}
+                    className={cn(
+                      "mt-4 rounded-full border px-8 py-3 font-mono text-lg font-bold transition",
+                      time === SECRET_TIME.time
+                        ? "scale-105 border-[#ff2d78] bg-[#ff2d78] text-white shadow-[0_0_30px_rgba(255,45,120,0.5)]"
+                        : "animate-[seat-pulse_1.4s_ease-in-out_infinite] border-[#ff8ab3]/60 bg-[#ff2d78]/15 text-[#ffd6e7] hover:-translate-y-0.5",
+                    )}
+                  >
+                    🌙 {SECRET_TIME.time}
+                  </button>
+                  {time === SECRET_TIME.time && (
+                    <p className="step-in mt-3 text-sm text-[#ff8ab3]">{SECRET_TIME.vibe}</p>
+                  )}
+                </div>
               )}
               <button
                 type="button"
@@ -693,9 +1040,10 @@ export function FlightCheckIn() {
               <div className="mt-6">
                 <SeatMap
                   onPick={pickSeat}
+                  onAnnounce={announce}
                   onPokeMany={() =>
                     announce(
-                      "Passenger near the front, please stop poking other passengers. There is a free seat next to the captain.",
+                      "Passenger near the front, please stop poking other passengers. The blue seats are free, I promise.",
                     )
                   }
                 />
@@ -703,7 +1051,9 @@ export function FlightCheckIn() {
             </>
           )}
 
-          {step === 4 && <SecurityCheck onAnnounce={announce} onDone={passSecurity} />}
+          {step === 4 && (
+            <SecurityCheck passenger={passenger} onAnnounce={announce} onDone={passSecurity} />
+          )}
 
           {step === 5 && ticket && day && (
             <>
@@ -738,6 +1088,24 @@ export function FlightCheckIn() {
                       className="rounded-xl border border-white/20 px-6 py-3 font-bold transition hover:-translate-y-0.5 hover:border-white/50"
                     >
                       📅 Add to calendar
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={(event) => void saveTicket("image", event.currentTarget)}
+                      disabled={exporting !== null}
+                      className="rounded-xl border border-white/20 px-5 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 hover:border-white/50 disabled:opacity-50"
+                    >
+                      {exporting === "image" ? "Printing…" : "🖼 Save as image"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(event) => void saveTicket("pdf", event.currentTarget)}
+                      disabled={exporting !== null}
+                      className="rounded-xl border border-white/20 px-5 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 hover:border-white/50 disabled:opacity-50"
+                    >
+                      {exporting === "pdf" ? "Printing…" : "📄 Save as PDF"}
                     </button>
                   </div>
                   {shared && (

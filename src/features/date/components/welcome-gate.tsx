@@ -23,7 +23,7 @@ export function WelcomeGate({ onEnter }: { onEnter: () => void }) {
           id="welcome-title"
           className="relative mt-3 text-3xl font-extrabold tracking-tight text-white"
         >
-          Welcome to the airport
+          Welcome to the Raymond airport
         </h2>
         <p className="relative mt-3 text-sm leading-relaxed text-white/65">
           This trip comes with sound: flapping boards, airport chimes, and a captain who talks too
