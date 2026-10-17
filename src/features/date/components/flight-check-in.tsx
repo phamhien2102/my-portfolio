@@ -30,7 +30,13 @@ import {
 import { playSound, setSoundEnabled, unlockSound } from "../lib/sound";
 import { normalizeName, toTicketName } from "../lib/ticket-name";
 import { type Ticket } from "../lib/ticket";
-import { downloadTicketImage, downloadTicketPdf } from "../lib/ticket-export";
+import {
+  download,
+  downloadTicketImage,
+  downloadTicketPdf,
+  TICKET_IMAGE_NAME,
+  ticketImageBlob,
+} from "../lib/ticket-export";
 import { BoardingPass } from "./boarding-pass";
 import { BookingCodeInput, MAX_CODE_LENGTH, normalizeCode } from "./booking-code";
 import { CaptainBar } from "./captain";
@@ -247,6 +253,10 @@ export function FlightCheckIn() {
   const [torn, setTorn] = useState(false);
   const [skywriting, setSkywriting] = useState(false);
   const [shared, setShared] = useState<string | null>(null);
+  /** Ảnh vé vẽ sẵn sau khi cất cánh, để gửi ngay khi bấm "Send me the ticket". */
+  const ticketImage = useRef<Blob | null>(null);
+  /** Khung gốc của trang, dùng để lấy đúng font khi vẽ ảnh vé. */
+  const rootRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState<"image" | "pdf" | null>(null);
   const [entered, setEntered] = useState(false);
   /** Số chuyến em đã bấm huỷ trên bảng giờ bay, và chuyến bí mật đã lộ ra chưa. */
@@ -586,6 +596,16 @@ export function FlightCheckIn() {
 
   const depart = () => {
     setDeparted(true);
+    // Vẽ sẵn ảnh vé ngay lúc này: Safari chỉ cho mở bảng chia sẻ ngay sau cú bấm,
+    // nên bấm "Send me the ticket" rồi mới vẽ thì có thể bị chặn.
+    if (ticket) {
+      const sans = getComputedStyle(rootRef.current ?? document.body).fontFamily;
+      void ticketImageBlob(ticket, sans)
+        .then((blob) => {
+          ticketImage.current = blob;
+        })
+        .catch(() => {});
+    }
     setCelebration({ x: window.innerWidth / 2, y: window.innerHeight * 0.45 });
     playSound("whoosh");
     window.setTimeout(() => playSound("sparkle"), 300);
@@ -616,7 +636,11 @@ export function FlightCheckIn() {
     }
   };
 
-  const share = async () => {
+  /**
+   * Gửi ảnh tấm vé cho anh. Điện thoại: mở bảng chia sẻ kèm file ảnh. Máy không chia sẻ được file:
+   * chép ảnh vào clipboard để dán vào tin nhắn; không chép được nữa thì tải ảnh về.
+   */
+  const share = async (button: HTMLElement) => {
     if (!ticket) return;
     playSound("blip");
     const text = [
@@ -627,20 +651,32 @@ export function FlightCheckIn() {
       `Seat: ${ticket.seat}, next to me`,
     ].join("\n");
     try {
-      if (navigator.share) {
-        await navigator.share({ title: "Date ticket", text });
-        setShared("Ticket sent.");
-      } else {
-        await navigator.clipboard.writeText(text);
-        setShared("Ticket copied. Paste it in a message to me.");
+      const blob =
+        ticketImage.current ?? (await ticketImageBlob(ticket, getComputedStyle(button).fontFamily));
+      ticketImage.current = blob;
+      const file = new File([blob], TICKET_IMAGE_NAME, { type: "image/png" });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Date ticket", text });
+        setShared("Ticket sent ✈");
+        return;
       }
-    } catch {
+      if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        setShared("Ticket image copied. Paste it in a message to me.");
+        return;
+      }
+      download(blob, TICKET_IMAGE_NAME);
+      setShared("Ticket image saved. Send it to me.");
+    } catch (error) {
+      // Em tự đóng bảng chia sẻ thì không báo lỗi.
+      if (error instanceof DOMException && error.name === "AbortError") return;
       setShared("Couldn't send it. A screenshot works too.");
     }
   };
 
   return (
     <div
+      ref={rootRef}
       className={cn(
         "relative min-h-svh overflow-hidden bg-[#070a12] text-[#f4f1ea]",
         shaking && "animate-[screen-shake_0.45s_ease-in-out]",
@@ -1287,7 +1323,7 @@ export function FlightCheckIn() {
                   <div className="flex flex-wrap justify-center gap-3">
                     <button
                       type="button"
-                      onClick={share}
+                      onClick={(event) => void share(event.currentTarget)}
                       className="rounded-xl bg-[#ffc94a] px-6 py-3 font-bold text-[#1d1500] transition hover:-translate-y-0.5 hover:brightness-110"
                     >
                       Send me the ticket

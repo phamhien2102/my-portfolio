@@ -218,7 +218,9 @@ export async function drawTicket(ticket: Ticket, sans: string) {
   return canvas;
 }
 
-function download(blob: Blob, filename: string) {
+export const TICKET_IMAGE_NAME = "date-airways-hh143.png";
+
+export function download(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -227,11 +229,16 @@ function download(blob: Blob, filename: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function downloadTicketImage(ticket: Ticket, sans: string) {
+/** Ảnh PNG của vé, dùng để tải về hoặc gửi qua bảng chia sẻ của máy. */
+export async function ticketImageBlob(ticket: Ticket, sans: string) {
   const canvas = await drawTicket(ticket, sans);
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!blob) throw new Error("Could not create the image");
-  download(blob, "date-airways-hh143.png");
+  return blob;
+}
+
+export async function downloadTicketImage(ticket: Ticket, sans: string) {
+  download(await ticketImageBlob(ticket, sans), TICKET_IMAGE_NAME);
 }
 
 /**

@@ -15,7 +15,8 @@ export function Skywriting({ name }: { name: string }) {
       role="img"
       aria-label={`A plane draws a heart in the sky with the name ${name}`}
       // Phủ nền đêm mờ trong lúc vẽ, để vệt khói không lẫn vào vé và đồng hồ phía sau.
-      className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-[#070a12]/80 backdrop-blur-sm"
+      // Lớp phủ chặn mọi cú bấm, để em xem hết trái tim rồi mới bấm được các nút bên dưới.
+      className="fixed inset-0 z-40 flex touch-none items-center justify-center bg-[#070a12]/80 backdrop-blur-sm select-none"
       style={{ animation: "sky-fade 7s ease-in forwards" }}
     >
       <svg viewBox="0 0 400 320" className="w-[min(92vw,560px)] overflow-visible">
