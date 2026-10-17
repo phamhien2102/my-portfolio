@@ -112,7 +112,7 @@ export function FinalScene({ dateLabel, time }: { dateLabel: string; time: strin
           <Chibi who="him" mood="love" pose="reach-left" className="-ml-6 h-36 w-32" />
         </div>
       </div>
-      <p className="rounded-full bg-white/10 px-4 py-1.5 font-mono text-sm text-[#ffd6e7]">
+      <p className="rounded-full bg-[#0b0f1c]/80 px-4 py-1.5 font-mono text-sm text-[#ffd6e7] backdrop-blur-md">
         ✈ {dateLabel} · {time}
       </p>
     </div>

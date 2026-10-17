@@ -26,9 +26,11 @@ import {
   wrongCodeHints,
   wrongNameHints,
   type Destination,
+  type SceneName,
 } from "../data";
 import { playSound, setSoundEnabled, unlockSound } from "../lib/sound";
 import { normalizeName, toTicketName } from "../lib/ticket-name";
+import { useScrollLock } from "../lib/use-scroll-lock";
 import { type Ticket } from "../lib/ticket";
 import {
   download,
@@ -127,7 +129,7 @@ function StepHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div className="text-center">
       <p className="font-mono text-[11px] tracking-[0.35em] text-[#ffc94a] uppercase">{eyebrow}</p>
-      <h1 className="mt-2 bg-gradient-to-b from-white to-[#ffd6e7] bg-clip-text text-3xl font-extrabold tracking-tight text-balance text-transparent sm:text-5xl">
+      <h1 className="mt-2 bg-gradient-to-b from-white to-[#ffd6e7] bg-clip-text text-3xl font-extrabold tracking-tight text-balance text-transparent drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)] [text-shadow:none] sm:text-5xl">
         {title}
       </h1>
     </div>
@@ -262,12 +264,17 @@ export function FlightCheckIn() {
   /** Số chuyến em đã bấm huỷ trên bảng giờ bay, và chuyến bí mật đã lộ ra chưa. */
   const [boardCancelled, setBoardCancelled] = useState(0);
   const [boardRevealed, setBoardRevealed] = useState(false);
+  /** Cảnh của chuyến vừa bấm trên bảng. */
+  const [previewScene, setPreviewScene] = useState<SceneName | null>(null);
   /** Đã bấm chọn chuyến bí mật trên bảng chưa. Chưa chọn thì chưa được nhập tên. */
   const [pickedFlight, setPickedFlight] = useState(false);
   const [sound, setSound] = useState(true);
   const [shaking, setShaking] = useState(false);
   const [pa, setPa] = useState({ id: 0, text: OPENING_PA });
   const [celebration, setCelebration] = useState<{ x: number; y: number } | null>(null);
+
+  // Đang có popup chào, dấu CLEARED hoặc trái tim bằng khói thì không cho cuộn trang.
+  useScrollLock(!entered || clearing || skywriting);
 
   const passenger = toTicketName(name) || "YOU";
 
@@ -583,6 +590,15 @@ export function FlightCheckIn() {
     }, 1500);
   };
 
+  /** Bấm một chuyến trên bảng: nền chuyển sang cảnh nơi đó và giữ nguyên tới khi bấm chuyến khác. */
+  const previewFlight = (next: SceneName) => setPreviewScene(next);
+
+  /**
+   * Nền: trời đêm sân bay lúc đầu, cảnh của chuyến vừa bấm trên bảng,
+   * và Hà Giang từ khi lộ chuyến hẹn hò trở đi.
+   */
+  const scene: SceneName = step > 0 || boardRevealed ? "hagiang" : (previewScene ?? "night");
+
   /** Giữ đủ ga: cuống vé tự xé, máy bay cất cánh rồi vẽ trái tim bằng khói trên trời. */
   const liftoff = () => {
     playSound("rip");
@@ -762,6 +778,14 @@ export function FlightCheckIn() {
           82% { opacity: 1; transform: translate(10px, 18px); }
           100% { opacity: 0; transform: translate(14px, 22px); }
         }
+        @keyframes hg-mist { from { transform: translateX(-60px); } to { transform: translateX(60px); } }
+        @keyframes hg-river { 50% { opacity: 0.5; } }
+        @keyframes hg-sway { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+        @keyframes petal-fall {
+          0% { transform: translate(0, -5vh) rotate(0deg); opacity: 0; }
+          10% { opacity: 1; }
+          100% { transform: translate(-12vw, 105vh) rotate(540deg); opacity: 0.8; }
+        }
         @keyframes tap-hint {
           0%, 100% { transform: translateY(10px); }
           45% { transform: translateY(0) scale(0.92); }
@@ -843,7 +867,7 @@ export function FlightCheckIn() {
         }
       `}</style>
 
-      <Sky banner={step > 0 || boardRevealed} />
+      <Sky banner={step > 0 || boardRevealed} scene={scene} />
 
       <button
         type="button"
@@ -894,7 +918,7 @@ export function FlightCheckIn() {
         </div>
       )}
 
-      <div className="relative z-10 mx-auto flex min-h-svh max-w-3xl flex-col items-center px-5 pt-10 pb-24 sm:pt-14">
+      <div className="relative z-10 mx-auto flex min-h-svh max-w-3xl flex-col items-center px-5 pt-10 pb-24 [text-shadow:0_1px_10px_rgba(0,0,0,0.65)] sm:pt-14">
         <Progress step={step} />
         <CaptainBar announcement={entered ? pa : null} />
 
@@ -928,6 +952,7 @@ export function FlightCheckIn() {
                   <DepartureBoard
                     passenger={toTicketName(name)}
                     onAnnounce={announce}
+                    onPreview={previewFlight}
                     onProgress={(count, revealed) => {
                       setBoardCancelled(count);
                       setBoardRevealed(revealed);
@@ -945,7 +970,7 @@ export function FlightCheckIn() {
               </div>
               <form
                 onSubmit={(event: FormEvent) => event.preventDefault()}
-                className="mt-8 flex w-full max-w-md flex-col gap-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm"
+                className="mt-8 flex w-full max-w-md flex-col gap-5 rounded-2xl border border-white/10 bg-[#0b0f1c]/95 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-lg"
               >
                 <div className="flex flex-col gap-2">
                   <label
@@ -974,7 +999,7 @@ export function FlightCheckIn() {
                     aria-invalid={nameError}
                     aria-describedby="passenger-hint"
                     className={cn(
-                      "rounded-xl border bg-white/5 px-4 py-3 text-base outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-40",
+                      "rounded-xl border bg-[#05070d]/80 px-4 py-3 text-base outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-40",
                       nameOk
                         ? "border-[#5cff9d] text-[#5cff9d] shadow-[0_0_18px_rgba(92,255,157,0.25)]"
                         : nameError
@@ -1068,7 +1093,7 @@ export function FlightCheckIn() {
                     key={option.code}
                     type="button"
                     onClick={() => chooseDestination(option)}
-                    className="step-in group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-left transition duration-300 hover:-translate-y-1 hover:rotate-[-0.6deg] hover:border-[#ffc94a]/60 hover:bg-white/[0.07] hover:shadow-[0_20px_50px_rgba(255,201,74,0.12)]"
+                    className="step-in group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b0f1c]/85 p-5 text-left backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:rotate-[-0.6deg] hover:border-[#ffc94a]/60 hover:bg-[#151b2e]/90 hover:shadow-[0_20px_50px_rgba(255,201,74,0.12)]"
                     style={{ animationDelay: `${index * 80}ms` }}
                   >
                     <span
@@ -1108,7 +1133,7 @@ export function FlightCheckIn() {
                       // Lịch thường không bao giờ được chọn: ngày nào bấm vào cũng thành SOLD OUT.
                       soldOut.includes(option.stamp)
                         ? "border-[#ff5c5c]/40 bg-[#ff5c5c]/5 text-white/35 line-through"
-                        : "border-white/15 bg-white/[0.04] hover:-translate-y-0.5 hover:border-white/40",
+                        : "border-white/15 bg-[#0b0f1c]/80 backdrop-blur-md hover:-translate-y-0.5 hover:border-white/40",
                       dayRefusal?.stamp === option.stamp && "animate-[row-shake_0.45s_ease-in-out]",
                     )}
                   >
@@ -1174,7 +1199,7 @@ export function FlightCheckIn() {
               {day && (
                 <p
                   key={day.stamp}
-                  className="step-in mt-4 rounded-full bg-white/5 px-4 py-2 text-center text-sm text-white/75"
+                  className="step-in mt-4 rounded-full bg-[#0b0f1c]/85 px-4 py-2 text-center text-sm text-white/75 backdrop-blur-md"
                 >
                   ☀️ Forecast: {day.forecast}
                 </p>
@@ -1205,7 +1230,7 @@ export function FlightCheckIn() {
                         ? "scale-105 border-[#ff2d78] bg-[#ff2d78] font-bold text-white shadow-[0_0_24px_rgba(255,45,120,0.4)]"
                         : soldOutTimes.includes(option.time)
                           ? "border-[#ff5c5c]/40 bg-[#ff5c5c]/5 text-white/35 line-through"
-                          : "border-white/15 hover:-translate-y-0.5 hover:border-white/40",
+                          : "border-white/15 bg-[#0b0f1c]/80 backdrop-blur-md hover:-translate-y-0.5 hover:border-white/40",
                       timeRefusal?.time === option.time && "animate-[row-shake_0.45s_ease-in-out]",
                       // Thứ 2: các giờ khác hết vé rồi thì 19:00 nhấp nháy mời chọn.
                       isOpenTime(option.time) &&

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
-import { BOARD_PA, DEPARTURES, SECRET_FLIGHT } from "../data";
+import { BOARD_PA, DEPARTURES, SECRET_FLIGHT, type SceneName } from "../data";
 import { playSound } from "../lib/sound";
 
 const CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -98,6 +98,7 @@ export function DepartureBoard({
   onAnnounce,
   onProgress,
   onPickOpen,
+  onPreview,
 }: {
   passenger: string;
   /** Đã chọn chuyến bí mật chưa, để làm sáng dòng đó. */
@@ -107,6 +108,8 @@ export function DepartureBoard({
   onProgress: (cancelled: number, revealed: boolean) => void;
   /** Bấm vào chuyến bí mật: đưa em xuống ô check-in. */
   onPickOpen: () => void;
+  /** Bấm một chuyến chưa huỷ: cho nền hiện cảnh nơi đó trước khi chuyến bị huỷ. */
+  onPreview: (scene: SceneName) => void;
 }) {
   const [shaking, setShaking] = useState<string | null>(null);
   const [cancelled, setCancelled] = useState<string[]>([]);
@@ -138,6 +141,7 @@ export function DepartureBoard({
 
     const next = [...cancelled, row.flight];
     setCancelled(next);
+    onPreview(row.scene);
     onAnnounce(row.cancel);
     onProgress(next.length, false);
 

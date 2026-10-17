@@ -42,7 +42,7 @@ export function CaptainBar({
     <div
       role="status"
       aria-live="polite"
-      className="mt-8 flex min-h-[4.75rem] w-full max-w-xl items-start gap-3 rounded-2xl border border-white/10 bg-[#0b0f1c]/70 px-4 py-3 backdrop-blur-md"
+      className="mt-8 flex min-h-[4.75rem] w-full max-w-xl items-start gap-3 rounded-2xl border border-white/10 bg-[#0b0f1c]/85 px-4 py-3 backdrop-blur-md"
     >
       <span aria-hidden="true" className="mt-0.5 text-lg">
         📢

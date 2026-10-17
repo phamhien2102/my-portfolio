@@ -7,18 +7,21 @@ export const DEPARTURES = [
   {
     flight: "HH101",
     destination: "DA LAT",
+    scene: "dalat",
     status: "ON TIME",
     cancel: "Flight HH101 to Da Lat is cancelled. Too cold without someone to hold hands with.",
   },
   {
     flight: "HH204",
     destination: "PHU QUOC",
+    scene: "phuquoc",
     status: "ON TIME",
     cancel: "Flight HH204 to Phu Quoc is cancelled. The beach says it is not the same without you.",
   },
   {
     flight: "HH317",
     destination: "SEOUL",
+    scene: "seoul",
     status: "BOARD",
     cancel:
       "Flight HH317 to Seoul is cancelled. The pilot only knows one Korean word, and it is saranghae.",
@@ -26,11 +29,15 @@ export const DEPARTURES = [
   {
     flight: "HH520",
     destination: "TOKYO",
+    scene: "tokyo",
     status: "ON TIME",
     cancel:
       "Flight HH520 to Tokyo is cancelled. Cherry blossom season is postponed until you say yes.",
   },
 ] as const;
+
+/** Các cảnh nền: trời đêm sân bay lúc đầu, cảnh từng chuyến khi bấm, Hà Giang sau khi lộ chuyến hẹn hò. */
+export type SceneName = "night" | "hagiang" | "dalat" | "phuquoc" | "seoul" | "tokyo";
 
 /** Chuyến bí mật chỉ hiện ra ở dòng cuối sau khi em đã tự tay huỷ hết các chuyến khác. */
 export const SECRET_FLIGHT = {

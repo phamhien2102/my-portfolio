@@ -478,7 +478,7 @@ export function SecurityCheck({
                   answer(option);
                 }
               }}
-              className="rounded-xl border border-white/20 bg-white/[0.03] px-6 py-3 font-semibold transition hover:-translate-y-0.5 hover:border-[#ffc94a] hover:text-[#ffc94a]"
+              className="rounded-xl border border-white/20 bg-[#0b0f1c]/80 px-6 py-3 font-semibold backdrop-blur-md transition hover:-translate-y-0.5 hover:border-[#ffc94a] hover:text-[#ffc94a]"
             >
               {option.label}
             </button>

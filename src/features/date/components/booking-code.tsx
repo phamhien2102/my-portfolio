@@ -76,8 +76,8 @@ export function BookingCodeInput({
                     : invalid
                       ? "border-[#ff5c5c]/70 bg-[#ff5c5c]/10 text-[#ffb3b3]"
                       : active
-                        ? "border-[#ffc94a] bg-white/10 text-white"
-                        : "border-white/15 bg-white/5 text-white",
+                        ? "border-[#ffc94a] bg-[#1a2033]/90 text-white"
+                        : "border-white/15 bg-[#05070d]/80 text-white",
                 )}
                 style={verified ? { transitionDelay: `${index * 40}ms` } : undefined}
               >
@@ -117,7 +117,7 @@ export function BookingCodeInput({
         disabled={disabled && !verified}
         aria-label={reveal ? "Hide booking code" : "Show booking code"}
         aria-pressed={reveal}
-        className="flex h-12 w-11 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-lg transition hover:border-white/40"
+        className="flex h-12 w-11 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-[#05070d]/80 text-lg transition hover:border-white/40"
       >
         {reveal ? "🙈" : "👁"}
       </button>
