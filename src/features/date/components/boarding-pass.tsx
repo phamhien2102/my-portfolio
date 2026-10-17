@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 
 import { playSound } from "../lib/sound";
 import { barcodeBars, FLIGHT, pickupTime, type Ticket } from "../lib/ticket";
+import { CoupleSticker } from "./chibi-scenes";
 
 function Field({ label, value, big }: { label: string; value: string; big?: boolean }) {
   return (
@@ -23,9 +24,8 @@ function Field({ label, value, big }: { label: string; value: string; big?: bool
   );
 }
 
-/** Vé lên máy bay, có cuống để xé. */
-export function BoardingPass({ ticket, onTorn }: { ticket: Ticket; onTorn: () => void }) {
-  const [torn, setTorn] = useState(false);
+/** Vé lên máy bay. Cuống vé tự xé khi máy bay cất cánh (bên ngoài bật `torn`). */
+export function BoardingPass({ ticket, torn }: { ticket: Ticket; torn: boolean }) {
   const [stubGone, setStubGone] = useState(false);
   const [printed, setPrinted] = useState(false);
   const tiltRef = useRef<HTMLDivElement>(null);
@@ -58,15 +58,6 @@ export function BoardingPass({ ticket, onTorn }: { ticket: Ticket; onTorn: () =>
     el.style.setProperty("--mx", "50%");
   };
 
-  const tear = () => {
-    if (torn) return;
-    playSound("rip");
-    setTorn(true);
-    window.setTimeout(onTorn, 700);
-    // Cuống rơi xong thì bỏ hẳn, để vé không chừa lại một khoảng trống.
-    window.setTimeout(() => setStubGone(true), 900);
-  };
-
   return (
     <div className="relative w-full max-w-2xl">
       {/* Khe máy in: vé trượt ra từ đây. */}
@@ -93,20 +84,7 @@ export function BoardingPass({ ticket, onTorn }: { ticket: Ticket; onTorn: () =>
                   "linear-gradient(115deg, transparent 25%, rgba(255,255,255,0.9) calc(var(--mx, 50%) - 8%), rgba(255,138,179,0.6) var(--mx, 50%), rgba(92,200,255,0.5) calc(var(--mx, 50%) + 8%), transparent 75%)",
               }}
             />
-            <span
-              aria-hidden="true"
-              className="absolute top-14 right-[38%] hidden size-16 rotate-[-12deg] items-center justify-center rounded-full text-center font-mono text-[8px] leading-tight font-black tracking-wider text-white/90 shadow-inner sm:flex"
-              style={{
-                background:
-                  "conic-gradient(from var(--holo-angle, 0deg), #ff8ab3, #ffc94a, #5cff9d, #5cc8ff, #c58aff, #ff8ab3)",
-                animation: "holo-spin 6s linear infinite",
-              }}
-            >
-              ♥<br />
-              VERIFIED
-              <br />
-              CUTE
-            </span>
+            <CoupleSticker className="absolute top-12 right-[38%] hidden size-20 rotate-[-12deg] sm:flex" />
             <div className="flex items-center justify-between">
               <p className="text-xs font-extrabold tracking-[0.2em] text-[#ff2d78]">
                 ✈ DATE AIRWAYS
@@ -165,11 +143,9 @@ export function BoardingPass({ ticket, onTorn }: { ticket: Ticket; onTorn: () =>
             className="h-0 border-t-2 border-dashed border-[#d8cfbf] bg-[#f6f1e7] sm:h-auto sm:w-0 sm:border-t-0 sm:border-l-2"
           />
 
-          <button
-            type="button"
-            onClick={tear}
-            disabled={torn}
-            aria-label="Tear off the stub"
+          <div
+            // Cuống rơi xong thì bỏ hẳn, để vé không chừa lại một khoảng trống.
+            onAnimationEnd={() => torn && setStubGone(true)}
             className={cn(
               "group relative flex flex-row items-center justify-between gap-3 rounded-b-2xl bg-[#ffe4ee] p-5 text-left sm:w-44 sm:flex-col sm:items-start sm:rounded-r-2xl sm:rounded-bl-none",
               torn && "stub-torn",
@@ -180,10 +156,10 @@ export function BoardingPass({ ticket, onTorn }: { ticket: Ticket; onTorn: () =>
               <Field label="Seat" value={ticket.seat} big />
               <Field label="Next to" value={`ME · ${ticket.partnerSeat}`} />
             </div>
-            <span className="rounded-full bg-[#ff2d78] px-3 py-1.5 text-xs font-bold text-white transition group-hover:scale-105">
-              ✂ Tear here
+            <span className="font-mono text-[10px] tracking-[0.2em] text-[#ff2d78] uppercase">
+              ✂ Tears at take-off
             </span>
-          </button>
+          </div>
         </div>
       </div>
     </div>

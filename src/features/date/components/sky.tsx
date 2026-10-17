@@ -1,3 +1,5 @@
+import { CAPTAIN_NAME } from "../data";
+
 /** Vị trí "ngẫu nhiên" tính từ chỉ số, để server và client vẽ ra cùng một bầu trời. */
 function scatter(index: number, salt: number) {
   const value = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
@@ -19,7 +21,7 @@ const CLOUDS = [
 ];
 
 /** Bầu trời đêm: sao nhấp nháy, mây trôi, và một máy bay kéo băng rôn bay ngang định kỳ. */
-export function Sky() {
+export function Sky({ banner }: { banner: boolean }) {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <div
@@ -54,16 +56,19 @@ export function Sky() {
           }}
         />
       ))}
-      <div
-        className="absolute top-3 left-0 flex items-center gap-1 text-white/70 sm:top-[7%]"
-        style={{ animation: "banner-plane 26s 4s linear infinite" }}
-      >
-        <span className="text-2xl">✈</span>
-        <span className="h-px w-6 bg-white/40" />
-        <span className="rounded-sm bg-[#ff2d78]/80 px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.2em] text-white [clip-path:polygon(0_0,100%_0,94%_50%,100%_100%,0_100%)]">
-          ♥ GO OUT WITH ME? ♥
-        </span>
-      </div>
+      {/* Băng rôn chỉ bay ra sau khi đã lộ chuyến hẹn hò, để không lộ bài từ đầu. */}
+      {banner && (
+        <div
+          className="absolute top-3 left-0 flex items-center gap-1 text-white/70 sm:top-[7%]"
+          style={{ animation: "banner-plane 26s 1s linear infinite both" }}
+        >
+          <span className="text-2xl">✈</span>
+          <span className="h-px w-6 bg-white/40" />
+          <span className="rounded-sm bg-[#ff2d78]/80 px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.2em] text-white [clip-path:polygon(0_0,100%_0,94%_50%,100%_100%,0_100%)]">
+            ♥ GO OUT WITH {CAPTAIN_NAME.toUpperCase()} ♥
+          </span>
+        </div>
+      )}
       {/* Đèn đường băng chạy dọc chân trang. */}
       <div className="absolute inset-x-0 bottom-6 flex justify-center gap-6 opacity-60">
         {Array.from({ length: 14 }, (_, index) => (

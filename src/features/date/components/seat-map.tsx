@@ -13,6 +13,7 @@ import {
   SEAT_ROWS,
 } from "../data";
 import { playSound } from "../lib/sound";
+import { PlotTwistScene } from "./chibi-scenes";
 import { HeartBurst } from "./heart-burst";
 
 const GRID = "grid grid-cols-[repeat(2,2.75rem)_1.5rem_repeat(2,2.75rem)] gap-2";
@@ -94,15 +95,19 @@ export function SeatMap({
   return (
     <div className="flex flex-col items-center">
       {burst && <HeartBurst x={burst.x} y={burst.y} count={140} />}
-      <p
-        aria-live="polite"
-        className={cn(
-          "min-h-[3em] max-w-sm text-center text-sm transition-colors",
-          phase === "revealed" ? "font-semibold text-[#ffc94a]" : "text-white/70",
-        )}
-      >
-        {caption}
-      </p>
+      {phase === "revealed" ? (
+        // Lộ ra rồi thì để hình chibi nói thay chữ; câu chữ vẫn có cho trình đọc màn hình.
+        <>
+          <p aria-live="polite" className="sr-only">
+            {caption}
+          </p>
+          <PlotTwistScene />
+        </>
+      ) : (
+        <p aria-live="polite" className="min-h-[3em] max-w-sm text-center text-sm text-white/70">
+          {caption}
+        </p>
+      )}
 
       {/* Thân máy bay: mũi tròn ở trên, hai cánh hai bên. */}
       <div className="relative mt-4">

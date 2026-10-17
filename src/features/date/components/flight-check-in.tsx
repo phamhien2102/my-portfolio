@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 
 import { verifyBookingCode, verifyPassenger } from "../actions";
 import {
+  BOARD_SUBTITLES,
   CODE_LENGTH,
   DEPARTURE_TIMES,
   DESTINATIONS,
@@ -18,6 +19,7 @@ import {
   SOLD_OUT_PA,
   OPENING_PA,
   STEPS,
+  TAKEOFF_PA,
   WRONG_CODE_PA,
   WRONG_NAME_PA,
   type Destination,
@@ -29,11 +31,14 @@ import { downloadTicketImage, downloadTicketPdf } from "../lib/ticket-export";
 import { BoardingPass } from "./boarding-pass";
 import { BookingCodeInput } from "./booking-code";
 import { CaptainBar } from "./captain";
+import { FinalScene } from "./chibi-scenes";
 import { DepartureBoard } from "./departure-board";
 import { HeartBurst } from "./heart-burst";
 import { SeatMap } from "./seat-map";
 import { SecurityCheck } from "./security-check";
+import { Skywriting } from "./skywriting";
 import { Sky } from "./sky";
+import { Takeoff } from "./takeoff";
 import { WelcomeGate } from "./welcome-gate";
 
 interface DayOption {
@@ -212,16 +217,23 @@ export function FlightCheckIn() {
   const [timeRefusal, setTimeRefusal] = useState<{ time: string; text: string } | null>(null);
   /** Mọi giờ thường đã hết vé, chỉ còn khung giờ bí mật. */
   const [secretSlot, setSecretSlot] = useState(false);
-  /** Hẹn giờ mở khung giờ bí mật, giữ lại để huỷ được khi em đổi ngày. */
-  const secretTimer = useRef(0);
+  /** Các hẹn giờ của màn sold out giờ bay, giữ lại để huỷ hết khi em đổi ngày. */
+  const timeTimers = useRef<number[]>([]);
   const [time, setTime] = useState<string | null>(null);
   const [seat, setSeat] = useState<string | null>(null);
   const [partnerSeat, setPartnerSeat] = useState<string | null>(null);
   const [clearing, setClearing] = useState(false);
   const [departed, setDeparted] = useState(false);
+  const [torn, setTorn] = useState(false);
+  const [skywriting, setSkywriting] = useState(false);
   const [shared, setShared] = useState<string | null>(null);
   const [exporting, setExporting] = useState<"image" | "pdf" | null>(null);
   const [entered, setEntered] = useState(false);
+  /** Số chuyến em đã bấm huỷ trên bảng giờ bay, và chuyến bí mật đã lộ ra chưa. */
+  const [boardCancelled, setBoardCancelled] = useState(0);
+  const [boardRevealed, setBoardRevealed] = useState(false);
+  /** Đã bấm chọn chuyến bí mật trên bảng chưa. Chưa chọn thì chưa được nhập tên. */
+  const [pickedFlight, setPickedFlight] = useState(false);
   const [sound, setSound] = useState(true);
   const [shaking, setShaking] = useState(false);
   const [pa, setPa] = useState({ id: 0, text: OPENING_PA });
@@ -354,6 +366,14 @@ export function FlightCheckIn() {
    * Lịch thường ngày nào cũng hết vé: bấm vào là bị gạch, gắn tem SOLD OUT kèm một câu đùa.
    * Bấm hết cả tuần thì chuyên cơ riêng của cơ trưởng hiện ra.
    */
+  /** Nhịp đóng tem SOLD OUT dây chuyền cho các ngày và giờ còn lại. */
+  const CASCADE_START_MS = 900;
+  const CASCADE_STEP_MS = 140;
+
+  /**
+   * Bấm một ngày bất kỳ: ngày đó hết vé kèm câu đùa riêng, rồi cả tuần tự đóng tem SOLD OUT theo,
+   * xong thì chuyên cơ của cơ trưởng hiện ra. Chỉ cần bấm một lần.
+   */
   const pickDay = (option: DayOption) => {
     const refusal = SOLD_OUT_PA[option.weekday];
     playSound("buzz");
@@ -364,16 +384,27 @@ export function FlightCheckIn() {
       () => setDayRefusal((current) => (current ? { ...current, stamp: "" } : current)),
       450,
     );
-    if (soldOut.includes(option.stamp)) return;
-    const next = [...soldOut, option.stamp];
-    setSoldOut(next);
-    if (next.length === days.length) {
-      window.setTimeout(() => {
+    if (soldOut.length > 0) return;
+
+    setSoldOut([option.stamp]);
+    const rest = days.filter((other) => other.stamp !== option.stamp);
+    rest.forEach((other, index) => {
+      window.setTimeout(
+        () => {
+          playSound("flap");
+          setSoldOut((list) => [...list, other.stamp]);
+        },
+        CASCADE_START_MS + index * CASCADE_STEP_MS,
+      );
+    });
+    window.setTimeout(
+      () => {
         playSound("sparkle");
         announce(PRIVATE_JET_PA);
         setPrivateJet(true);
-      }, 1200);
-    }
+      },
+      CASCADE_START_MS + rest.length * CASCADE_STEP_MS + 700,
+    );
   };
 
   /** Giờ cũng như ngày: giờ nào cũng hết vé, hết sạch thì mở khung giờ bí mật 19:30. */
@@ -381,6 +412,10 @@ export function FlightCheckIn() {
   const isOpenTime = (value: string) =>
     day?.weekday === JET_OPEN_TIME.weekday && value === JET_OPEN_TIME.time;
 
+  /**
+   * Giờ cũng vậy: bấm một giờ hết vé là các giờ còn lại sold out theo.
+   * Thứ 2 thì chừa lại 19:00; thứ 3 thì hết sạch và mở khung giờ bí mật 19:30.
+   */
   const pickTime = (option: (typeof DEPARTURE_TIMES)[number]) => {
     if (!day) return;
     if (isOpenTime(option.time)) {
@@ -396,16 +431,32 @@ export function FlightCheckIn() {
       () => setTimeRefusal((current) => (current ? { ...current, time: "" } : current)),
       450,
     );
-    if (soldOutTimes.includes(option.time)) return;
-    const next = [...soldOutTimes, option.time];
-    setSoldOutTimes(next);
-    if (next.length === DEPARTURE_TIMES.length) {
-      secretTimer.current = window.setTimeout(() => {
-        playSound("sparkle");
-        announce(SECRET_TIME_PA);
-        setSecretSlot(true);
-      }, 1200);
-    }
+    if (soldOutTimes.length > 0) return;
+
+    setSoldOutTimes([option.time]);
+    const rest = DEPARTURE_TIMES.filter(
+      (other) => other.time !== option.time && !isOpenTime(other.time),
+    );
+    const later = (ms: number, run: () => void) =>
+      timeTimers.current.push(window.setTimeout(run, ms));
+    rest.forEach((other, index) => {
+      later(CASCADE_START_MS + index * CASCADE_STEP_MS, () => {
+        playSound("flap");
+        setSoldOutTimes((list) => [...list, other.time]);
+      });
+    });
+    const done = CASCADE_START_MS + rest.length * CASCADE_STEP_MS + 600;
+    const keptTime = DEPARTURE_TIMES.some((other) => isOpenTime(other.time));
+    later(done, () => {
+      if (keptTime) {
+        announce(JET_OPEN_TIME.left);
+        setTimeRefusal({ time: "", text: JET_OPEN_TIME.left });
+        return;
+      }
+      playSound("sparkle");
+      announce(SECRET_TIME_PA);
+      setSecretSlot(true);
+    });
   };
 
   /** Đổi sang ngày khác thì phần giờ phải chọn lại từ đầu: hết SOLD OUT, ẩn khung giờ bí mật. */
@@ -413,7 +464,8 @@ export function FlightCheckIn() {
     playSound("blip");
     if (day?.stamp === option.stamp) return;
     setDay(option);
-    window.clearTimeout(secretTimer.current);
+    timeTimers.current.forEach((id) => window.clearTimeout(id));
+    timeTimers.current = [];
     setTime(null);
     setSoldOutTimes([]);
     setTimeRefusal(null);
@@ -447,7 +499,20 @@ export function FlightCheckIn() {
       setClearing(false);
       announce("Security cleared. Your boarding pass is printing now. Do not lose it.");
       setStep(5);
+      // In vé xong thì cơ trưởng mời cầm cần ga.
+      window.setTimeout(() => announce(TAKEOFF_PA), 3200);
     }, 1500);
+  };
+
+  /** Giữ đủ ga: cuống vé tự xé, máy bay cất cánh rồi vẽ trái tim bằng khói trên trời. */
+  const liftoff = () => {
+    playSound("rip");
+    setTorn(true);
+    window.setTimeout(() => {
+      depart();
+      setSkywriting(true);
+      window.setTimeout(() => setSkywriting(false), 7200);
+    }, 700);
   };
 
   const depart = () => {
@@ -573,6 +638,17 @@ export function FlightCheckIn() {
           80% { opacity: 1; }
           100% { opacity: 0; transform: translateY(-14px); }
         }
+        @keyframes sky-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+        @keyframes sky-name {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes sky-fade { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes tap-hint {
+          0%, 100% { transform: translateY(10px); }
+          45% { transform: translateY(0) scale(0.92); }
+          60% { transform: translateY(2px) scale(0.92); }
+        }
         @keyframes heartbeat {
           0%, 100% { box-shadow: 0 0 20px rgba(255,45,120,0.4); filter: brightness(1); }
           30% { box-shadow: 0 0 50px rgba(255,45,120,0.9); filter: brightness(1.3); }
@@ -599,6 +675,19 @@ export function FlightCheckIn() {
           0% { transform: rotateY(0) scale(1); }
           50% { transform: rotateY(90deg) scale(1.3); }
           100% { transform: rotateY(0) scale(1.15); }
+        }
+        .chibi-blink { transform-box: fill-box; transform-origin: center; animation: chibi-blink 4.5s infinite; }
+        @keyframes chibi-blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+        .chibi-bob { animation: chibi-bob 1.6s ease-in-out infinite; }
+        @keyframes chibi-bob { 50% { transform: translateY(-3px); } }
+        @keyframes chibi-heart {
+          0% { opacity: 0; transform: translateY(0) scale(0.6); }
+          20% { opacity: 1; }
+          100% { opacity: 0; transform: translateY(-110px) scale(1.2); }
+        }
+        @keyframes chibi-pop {
+          0% { opacity: 0; transform: translateY(40px) scale(0.6); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes tooltip-in {
           0% { opacity: 0; transform: translateY(8px) scale(0.6); }
@@ -636,7 +725,7 @@ export function FlightCheckIn() {
         }
       `}</style>
 
-      <Sky />
+      <Sky banner={step > 0 || boardRevealed} />
 
       <button
         type="button"
@@ -650,6 +739,7 @@ export function FlightCheckIn() {
 
       {!entered && <WelcomeGate onEnter={enter} />}
 
+      {skywriting && <Skywriting name={passenger} />}
       {celebration && <HeartBurst x={celebration.x} y={celebration.y} count={160} />}
 
       {departed && (
@@ -694,14 +784,43 @@ export function FlightCheckIn() {
           {step === 0 && (
             <>
               <StepHeading eyebrow="Domestic terminal · This week" title="Departures" />
-              <p className="mt-3 max-w-md text-center text-sm text-white/60">
-                Every other flight is cancelled. Only one gate is still open. Tap a flight if you
-                don’t believe me.
+              <p
+                key={boardRevealed ? "revealed" : boardCancelled}
+                aria-live="polite"
+                className={cn(
+                  "step-in mt-3 max-w-md text-center text-sm",
+                  boardRevealed
+                    ? "font-semibold text-[#5cff9d]"
+                    : boardCancelled > 0
+                      ? "font-semibold text-[#ff8a8a]"
+                      : "text-white/60",
+                )}
+              >
+                {
+                  BOARD_SUBTITLES[
+                    boardRevealed
+                      ? BOARD_SUBTITLES.length - 1
+                      : Math.min(boardCancelled, BOARD_SUBTITLES.length - 2)
+                  ]
+                }
               </p>
               <div className="mt-8 w-full">
                 {/* Bảng chỉ bắt đầu lật sau khi em vào cổng, lúc đó âm thanh đã được mở khoá. */}
                 {entered ? (
-                  <DepartureBoard passenger={toTicketName(name)} onRowClick={announce} />
+                  <DepartureBoard
+                    passenger={toTicketName(name)}
+                    onAnnounce={announce}
+                    onProgress={(count, revealed) => {
+                      setBoardCancelled(count);
+                      setBoardRevealed(revealed);
+                    }}
+                    picked={pickedFlight}
+                    onPickOpen={() => {
+                      setPickedFlight(true);
+                      // Đợi ô tên mở khoá xong rồi mới đặt con trỏ vào.
+                      window.setTimeout(() => document.getElementById("passenger")?.focus(), 60);
+                    }}
+                  />
                 ) : (
                   <div className="h-56 w-full rounded-xl bg-[#0a0b0e] ring-1 ring-white/5" />
                 )}
@@ -730,13 +849,14 @@ export function FlightCheckIn() {
                       }
                     }}
                     onBlur={() => void submitName()}
-                    placeholder="Your name"
+                    disabled={!pickedFlight}
+                    placeholder={pickedFlight ? "Your name" : "Select your flight first"}
                     maxLength={14}
                     autoComplete="off"
                     aria-invalid={nameError}
                     aria-describedby="passenger-hint"
                     className={cn(
-                      "rounded-xl border bg-white/5 px-4 py-3 text-base outline-none placeholder:text-white/30",
+                      "rounded-xl border bg-white/5 px-4 py-3 text-base outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-40",
                       nameOk
                         ? "border-[#5cff9d] text-[#5cff9d] shadow-[0_0_18px_rgba(92,255,157,0.25)]"
                         : nameError
@@ -749,14 +869,22 @@ export function FlightCheckIn() {
                     aria-live="polite"
                     className={cn(
                       "text-xs",
-                      nameError ? "text-[#ff8a8a]" : nameOk ? "text-[#5cff9d]" : "text-white/40",
+                      nameError
+                        ? "text-[#ff8a8a]"
+                        : nameOk
+                          ? "text-[#5cff9d]"
+                          : pickedFlight
+                            ? "text-white/40"
+                            : "text-[#ffc94a]",
                     )}
                   >
                     {nameError
                       ? `📢 ${WRONG_NAME_PA[Math.min(wrongNames - 1, WRONG_NAME_PA.length - 1)]}`
                       : nameOk
                         ? "✓ Passenger found on the list."
-                        : "Name as it appears on your booking."}
+                        : pickedFlight
+                          ? "✓ Flight HH143 selected. Name as it appears on your booking."
+                          : "🔒 Pick a flight on the board to start check-in."}
                   </p>
                 </div>
                 <div
@@ -960,6 +1088,11 @@ export function FlightCheckIn() {
                           ? "border-[#ff5c5c]/40 bg-[#ff5c5c]/5 text-white/35 line-through"
                           : "border-white/15 hover:-translate-y-0.5 hover:border-white/40",
                       timeRefusal?.time === option.time && "animate-[row-shake_0.45s_ease-in-out]",
+                      // Thứ 2: các giờ khác hết vé rồi thì 19:00 nhấp nháy mời chọn.
+                      isOpenTime(option.time) &&
+                        soldOutTimes.length > 0 &&
+                        time !== option.time &&
+                        "animate-[seat-pulse_1.4s_ease-in-out_infinite] border-[#5cff9d]/60 text-[#b8ffd6]",
                     )}
                   >
                     {option.time}
@@ -1062,15 +1195,12 @@ export function FlightCheckIn() {
                 title={departed ? "Have a lovely flight" : "Here’s your ticket"}
               />
               <div className="mt-8 w-full">
-                <BoardingPass ticket={ticket} onTorn={depart} />
+                <BoardingPass ticket={ticket} torn={torn} />
               </div>
               {departed ? (
                 <div className="step-in flex flex-col items-center gap-5 text-center">
                   <Countdown target={departureAt(day, ticket.time)} />
-                  <p className="max-w-md text-white/75">
-                    {ticket.dateLabel}, {ticket.time}. I’ll pick you up at your door. No luggage
-                    needed, just bring yourself.
-                  </p>
+                  <FinalScene dateLabel={ticket.dateLabel} time={ticket.time} />
                   <div className="flex flex-wrap justify-center gap-3">
                     <button
                       type="button"
@@ -1115,9 +1245,7 @@ export function FlightCheckIn() {
                   )}
                 </div>
               ) : (
-                <p className="animate-pulse text-center text-sm text-white/55">
-                  ✂ Tear off the stub to board.
-                </p>
+                <Takeoff onTakeoff={liftoff} />
               )}
             </>
           )}

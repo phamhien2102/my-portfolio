@@ -4,17 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
-import {
-  ALONE_VERDICTS,
-  CAPTAIN_NAME,
-  CAPTCHA_TILES,
-  LOVE_LETTER,
-  NO_TILES,
-  SECURITY_PA,
-  SECURITY_QUESTIONS,
-} from "../data";
+import { ALONE_VERDICTS, CAPTCHA_TILES, NO_TILES, SECURITY_PA, SECURITY_QUESTIONS } from "../data";
 import { playSound } from "../lib/sound";
 import { HeartBurst } from "./heart-burst";
+import { LetterScene } from "./chibi-scenes";
 import { DateCaptcha } from "./date-captcha";
 
 type Answer = (typeof SECURITY_QUESTIONS)[number]["answers"][number];
@@ -427,16 +420,7 @@ export function SecurityCheck({
 
           {current.surprise === "letter" &&
             (letterOpen ? (
-              <div className="step-in max-w-sm rotate-[-1.5deg] rounded-xl bg-[#fff6ea] p-5 text-left font-serif text-[#3a2a1a] italic shadow-[0_20px_50px_rgba(255,45,120,0.25)]">
-                {LOVE_LETTER.map((line, index) => (
-                  <p key={index} className={index > 0 ? "mt-2" : undefined}>
-                    {line.replace("{name}", passenger)}
-                  </p>
-                ))}
-                <p className="mt-3 text-right">
-                  — {CAPTAIN_NAME.charAt(0)}. <span className="text-[#ff2d78]">♥</span>
-                </p>
-              </div>
+              <LetterScene name={passenger} />
             ) : (
               <button
                 type="button"

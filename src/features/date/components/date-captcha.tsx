@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 
 import { CAPTCHA_PA, CAPTCHA_TILES, CAPTAIN_NAME } from "../data";
 import { playSound } from "../lib/sound";
+import { Chibi } from "./chibi";
 
 type Stage = "checkbox" | "loading" | "challenge" | "verified";
 
@@ -166,14 +167,19 @@ export function DateCaptcha({
                 >
                   <span
                     className={cn(
-                      "flex size-full items-center justify-center text-4xl transition-transform duration-150",
+                      "flex size-full items-center justify-center overflow-hidden transition-transform duration-150",
                       on && "scale-[0.82]",
                     )}
                     style={{
                       background: `linear-gradient(135deg, hsl(${index * 40} 45% 78%), hsl(${index * 40 + 30} 40% 58%))`,
                     }}
                   >
-                    {tile.icon}
+                    <Chibi
+                      who="him"
+                      outfit={tile.outfit}
+                      mood={tile.mood}
+                      className="h-[92%] w-[92%] translate-y-[6%]"
+                    />
                     <span className="absolute right-1 bottom-0.5 font-mono text-[9px] font-bold text-black/50">
                       {tile.tag}
                     </span>

@@ -195,3 +195,62 @@ export function playSound(name: SoundName) {
       break;
   }
 }
+
+export interface Engine {
+  /** Ga từ 0 đến 1: càng cao động cơ càng gầm to và cao. */
+  set: (throttle: number) => void;
+  stop: () => void;
+}
+
+/**
+ * Tiếng động cơ máy bay chạy liên tục cho màn giữ để cất cánh.
+ * Trả về null khi đang tắt tiếng hoặc trình duyệt không hỗ trợ.
+ */
+export function startEngine(): Engine | null {
+  if (!enabled) return null;
+  const ctx = audio();
+  if (!ctx) return null;
+
+  const hum = ctx.createOscillator();
+  hum.type = "sawtooth";
+  hum.frequency.value = 70;
+  const humFilter = ctx.createBiquadFilter();
+  humFilter.type = "lowpass";
+  humFilter.frequency.value = 400;
+
+  const wind = ctx.createBufferSource();
+  wind.buffer = noise(ctx);
+  wind.loop = true;
+  const windFilter = ctx.createBiquadFilter();
+  windFilter.type = "bandpass";
+  windFilter.frequency.value = 600;
+  windFilter.Q.value = 0.6;
+
+  const volume = ctx.createGain();
+  volume.gain.value = 0.0001;
+  hum.connect(humFilter).connect(volume);
+  wind.connect(windFilter).connect(volume);
+  volume.connect(ctx.destination);
+  hum.start();
+  wind.start();
+
+  let stopped = false;
+  return {
+    set(throttle) {
+      if (stopped) return;
+      const t = ctx.currentTime;
+      hum.frequency.setTargetAtTime(70 + throttle * 190, t, 0.05);
+      humFilter.frequency.setTargetAtTime(400 + throttle * 1800, t, 0.05);
+      windFilter.frequency.setTargetAtTime(600 + throttle * 1600, t, 0.05);
+      volume.gain.setTargetAtTime(0.03 + throttle * 0.12, t, 0.05);
+    },
+    stop() {
+      if (stopped) return;
+      stopped = true;
+      const t = ctx.currentTime;
+      volume.gain.setTargetAtTime(0.0001, t, 0.08);
+      hum.stop(t + 0.5);
+      wind.stop(t + 0.5);
+    },
+  };
+}

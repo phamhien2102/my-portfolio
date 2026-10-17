@@ -1,33 +1,63 @@
-/** Chuyến bay trên bảng giờ bay. Bảng chỉ có chữ in hoa, giống bảng thật ở sân bay. */
+/**
+ * Chuyến bay trên bảng giờ bay lúc mới vào: trông như sân bay bình thường, không lộ gì.
+ * Bảng chỉ có chữ in hoa không dấu, giống bảng thật ở sân bay.
+ * Bấm vào chuyến nào thì chuyến đó bị huỷ với câu đùa riêng; huỷ hết thì lộ ra chuyến bí mật.
+ */
 export const DEPARTURES = [
   {
     flight: "HH101",
-    destination: "MY EX",
-    status: "CANCEL",
-    open: false,
-    pa: "Flight HH101 to My Ex has been cancelled. Permanently. Please do not ask again.",
+    destination: "DA LAT",
+    status: "ON TIME",
+    cancel: "Flight HH101 to Da Lat is cancelled. Too cold without someone to hold hands with.",
   },
   {
     flight: "HH204",
-    destination: "DOOMSCROLLING",
-    status: "DELAY",
-    open: false,
-    pa: "Flight HH204 to Doomscrolling is delayed until you are bored. Which is now.",
+    destination: "PHU QUOC",
+    status: "ON TIME",
+    cancel: "Flight HH204 to Phu Quoc is cancelled. The beach says it is not the same without you.",
   },
   {
     flight: "HH317",
-    destination: "SLEEP ALL DAY",
-    status: "CANCEL",
-    open: false,
-    pa: "Flight HH317 to Sleep All Day was cancelled by the pilot, who would rather see you.",
+    destination: "SEOUL",
+    status: "BOARD",
+    cancel:
+      "Flight HH317 to Seoul is cancelled. The pilot only knows one Korean word, and it is saranghae.",
   },
   {
-    flight: "HH143",
-    destination: "A DATE WITH ME",
-    status: "OPEN",
-    open: true,
-    pa: "Good choice. Flight HH143 is the only one worth boarding tonight.",
+    flight: "HH520",
+    destination: "TOKYO",
+    status: "ON TIME",
+    cancel:
+      "Flight HH520 to Tokyo is cancelled. Cherry blossom season is postponed until you say yes.",
   },
+] as const;
+
+/** Chuyến bí mật chỉ hiện ra ở dòng cuối sau khi em đã tự tay huỷ hết các chuyến khác. */
+export const SECRET_FLIGHT = {
+  flight: "HH143",
+  destination: "A DATE WITH RAYMOND",
+  status: "OPEN",
+} as const;
+
+export const BOARD_PA = {
+  alreadyCancelled: "That one is already cancelled. Please try another flight.",
+  revealed:
+    "Ladies and gentlemen, every flight tonight has been cancelled. Fortunately, one new flight has just opened.",
+  stillCancelled:
+    "That flight is still cancelled. There is a new flight at the bottom of the board.",
+  picked: "Excellent choice. Flight HH143 is now checking in. Please enter your name below.",
+} as const;
+
+/**
+ * Dòng chữ dưới tiêu đề bảng giờ bay, theo số chuyến em đã bấm huỷ.
+ * Phần tử cuối dùng khi chuyến bí mật đã lộ ra.
+ */
+export const BOARD_SUBTITLES = [
+  "Everything is on time tonight. Pick any flight you like.",
+  "Uh oh. Try another one.",
+  "That’s… unusual. Maybe the next one?",
+  "Last one. Surely this one works.",
+  "Only one flight left. What a coincidence.",
 ] as const;
 
 /** Độ dài mã đặt chỗ. Bản thân mã chỉ nằm trên server, xem actions.ts. */
@@ -48,7 +78,7 @@ export const WRONG_NAME_PA = [
 ] as const;
 
 export const OPENING_PA =
-  "Good evening, this is your captain speaking. Tonight's only departure is flight HH143. Please enter your name and booking code to check in.";
+  "Good evening, this is your captain speaking. All flights are on time tonight. Please select your flight on the board to begin check-in.";
 
 export const DESTINATIONS = [
   {
@@ -99,6 +129,7 @@ export const JET_OPEN_TIME = {
   weekday: 1,
   time: "19:00",
   note: "Monday 19:00 on the private jet: the one regular slot the captain kept just for you.",
+  left: "Every other slot just sold out. Only 19:00 is left, and the captain saved it for you.",
 } as const;
 
 /** Hết sạch giờ thường thì mở một khung giờ bí mật. */
@@ -236,27 +267,20 @@ export const NO_TILES = [
   { from: "MAYBE", to: "YES ♥" },
 ] as const;
 
-/** Lá thư tìm thấy trong vali. {name} được thay bằng tên hành khách. */
-export const LOVE_LETTER = [
-  "Dear {name},",
-  "Security checked everything twice. The only suspicious thing in my luggage is how nervous I am about our date.",
-  "See you on board.",
-] as const;
-
 /**
  * CAPTCHA ở câu 3: chín ô ảnh, ô nào cũng là anh trong một bộ đồ khác nhau.
  * Ô cuối là con gấu để em phân vân.
  */
 export const CAPTCHA_TILES = [
-  { icon: "😎", tag: "R." },
-  { icon: "🧑‍✈️", tag: "R." },
-  { icon: "🤵", tag: "R." },
-  { icon: "🥸", tag: "R." },
-  { icon: "🧑‍🍳", tag: "R." },
-  { icon: "🦸", tag: "R." },
-  { icon: "🧛", tag: "R." },
-  { icon: "🧑‍🚀", tag: "R." },
-  { icon: "🐻", tag: "R.?" },
+  { outfit: "sunglasses", mood: "smile", tag: "R." },
+  { outfit: "pilot", mood: "wink", tag: "R." },
+  { outfit: "tux", mood: "smile", tag: "R." },
+  { outfit: "disguise", mood: "smile", tag: "R." },
+  { outfit: "chef", mood: "happy", tag: "R." },
+  { outfit: "hero", mood: "smile", tag: "R." },
+  { outfit: "vampire", mood: "wink", tag: "R." },
+  { outfit: "astronaut", mood: "happy", tag: "R." },
+  { outfit: "bear", mood: "blush", tag: "R.?" },
 ] as const;
 
 /**
@@ -307,5 +331,16 @@ export const WITH_YOU_TROLLS = [
 ] as const;
 
 export const WITH_YOU_ACCEPTED_PA = "Much better. The whole airport heard that.";
+
+/** Buông tay trước khi đủ tốc độ cất cánh: mỗi lần một câu khác. */
+export const TAKEOFF_ABORTS = [
+  "Take-off aborted. Raymond got nervous.",
+  "Aborted again. Raymond is now sweating a little.",
+  "Please keep holding. The captain believes in you.",
+  "Almost! Raymond’s heart cannot take many more of these.",
+] as const;
+
+export const TAKEOFF_PA =
+  "Cabin crew, seats for take-off. Passenger, please hold the throttle until we leave the ground.";
 
 export const STEPS = ["Flight", "Destination", "Schedule", "Seat", "Security", "Boarding"];

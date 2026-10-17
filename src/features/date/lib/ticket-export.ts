@@ -43,11 +43,32 @@ function field(
 }
 
 /**
+ * Lấy SVG mặt hai chibi đang có trên tem của vé ngoài trang, đổi thành ảnh để vẽ lên canvas.
+ * Không tìm thấy hoặc không tải được thì trả về null, vé sẽ dùng tem chữ thay thế.
+ */
+async function loadStickerImage() {
+  const svg = document.querySelector("[data-couple-sticker] svg");
+  if (!svg) return null;
+  const markup = new XMLSerializer()
+    .serializeToString(svg)
+    .replace("<svg ", '<svg width="300" height="300" ');
+  const image = new Image();
+  image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(markup)}`;
+  try {
+    await image.decode();
+    return image;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Vẽ lại tấm vé lên canvas, không chụp DOM: trên trang vé đang nghiêng 3D và có hiệu ứng in,
  * chụp ra sẽ méo. Vẽ lại thì ảnh luôn thẳng và nét.
  */
 export async function drawTicket(ticket: Ticket, sans: string) {
   await document.fonts.ready;
+  const sticker = await loadStickerImage();
   const canvas = document.createElement("canvas");
   canvas.width = WIDTH * SCALE;
   canvas.height = HEIGHT * SCALE;
@@ -141,12 +162,20 @@ export async function drawTicket(ticket: Ticket, sans: string) {
   ctx.beginPath();
   ctx.arc(0, 0, 38, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
-  ctx.font = `900 10px ${MONO}`;
-  ctx.fillText("♥", 0, -10);
-  ctx.fillText("VERIFIED", 0, 4);
-  ctx.fillText("CUTE", 0, 17);
+  if (sticker) {
+    // Mặt hai chibi lấy từ tem trên trang.
+    ctx.save();
+    ctx.clip();
+    ctx.drawImage(sticker, -38, -38, 76, 76);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.font = `900 10px ${MONO}`;
+    ctx.fillText("♥", 0, -10);
+    ctx.fillText("VERIFIED", 0, 4);
+    ctx.fillText("CUTE", 0, 17);
+  }
   ctx.restore();
 
   // Các ô thông tin.
