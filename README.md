@@ -97,3 +97,31 @@ view. Tune it in `src/features/reveal/config.ts`.
 Accessibility: the word is exposed as a visually hidden `<h1>`, scroll-triggered fades and
 the skills ticker are disabled under `prefers-reduced-motion`, and content is visible
 without JavaScript.
+
+## The dating page
+
+`/dating` (`features/date`) is a date invite told as an airport check-in: departures board,
+passenger name and booking code, schedule, seat, security and a boarding pass to take off
+with. All copy lives in `src/features/date/data.ts`.
+
+The passenger name and booking code are checked on the server, so they never reach the
+browser. Override the defaults with environment variables:
+
+| Variable              | Purpose                            |
+| --------------------- | ---------------------------------- |
+| `DATE_PASSENGER_NAME` | The only name accepted at check-in |
+| `DATE_BOOKING_CODE`   | The 8-character booking code       |
+
+### Test shortcuts
+
+Going through every step to test the last one takes a while, so `npm run dev` accepts two
+query parameters. Open the URL, press **Turn on sound & enter**, and the shortcut applies.
+Production builds ignore both.
+
+| URL                               | What it does                                                    |
+| --------------------------------- | --------------------------------------------------------------- |
+| `/dating?jump=<step>`             | Opens that step directly, with sample answers for earlier steps |
+| `/dating?skip=security`           | After picking a seat, skips the three security questions        |
+| `/dating?jump=seat&skip=security` | Both together: pick a seat, then go straight to the ticket      |
+
+`<step>` is one of `board`, `destination`, `schedule`, `seat`, `security` or `ticket`.
