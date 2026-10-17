@@ -434,13 +434,16 @@ export function SecurityCheck({
               </button>
             ))}
 
-          <button
-            type="button"
-            onClick={next}
-            className="rounded-xl bg-[#ff2d78] px-6 py-3 font-bold text-white transition hover:brightness-110"
-          >
-            {question + 1 < SECURITY_QUESTIONS.length ? "Next bag" : "Pass security"}
-          </button>
+          {/* Câu có lá thư: phải mở thư ra đọc rồi mới được qua vali tiếp theo. */}
+          {(current.surprise !== "letter" || letterOpen) && (
+            <button
+              type="button"
+              onClick={next}
+              className="step-in rounded-xl bg-[#ff2d78] px-6 py-3 font-bold text-white transition hover:brightness-110"
+            >
+              {question + 1 < SECURITY_QUESTIONS.length ? "Next bag" : "Pass security"}
+            </button>
+          )}
         </div>
       ) : phase === "working" ? (
         <p
