@@ -114,9 +114,12 @@ browser. Override the defaults with environment variables:
 
 ### Test shortcuts
 
-Going through every step to test the last one takes a while, so `npm run dev` accepts two
-query parameters. Open the URL, press **Turn on sound & enter**, and the shortcut applies.
-Production builds ignore both.
+Going through every step to test the last one takes a while, so the page accepts two query
+parameters, in development and in production. Open the URL, press **Turn on sound &
+enter**, and the shortcut applies.
+
+`?jump=` also skips the passenger name and booking code, so anyone who knows the URL can see
+the ticket without them.
 
 | URL                               | What it does                                                    |
 | --------------------------------- | --------------------------------------------------------------- |

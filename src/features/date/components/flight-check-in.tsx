@@ -54,7 +54,7 @@ interface DayOption {
   forecast: string;
 }
 
-/** Tên các bước cho lối tắt ?jump= khi chạy dev, theo đúng thứ tự bước. */
+/** Tên các bước cho lối tắt ?jump=, theo đúng thứ tự bước. */
 const DEV_JUMPS = ["board", "destination", "schedule", "seat", "security", "ticket"] as const;
 
 /** Bảy ngày tới, bắt đầu từ ngày mai. Gọi trong lúc bấm nút nên không đụng tới render. */
@@ -255,16 +255,15 @@ export function FlightCheckIn() {
     window.setTimeout(() => setShaking(false), 500);
   };
 
-  /** Chỉ dùng khi chạy dev: bỏ qua bước an ninh sau khi chọn ghế (?skip=security). */
+  /** Bỏ qua bước an ninh sau khi chọn ghế (?skip=security). */
   const [skipSecurity, setSkipSecurity] = useState(false);
 
   /**
-   * Lối tắt để test nhanh, chỉ có tác dụng khi chạy dev:
+   * Lối tắt để test nhanh, chạy ở mọi môi trường kể cả production:
    * ?jump=board|destination|schedule|seat|security|ticket nhảy thẳng tới bước đó với dữ liệu mẫu,
-   * ?skip=security bỏ qua ba câu an ninh. Bản build thật bỏ qua hoàn toàn các tham số này.
+   * ?skip=security bỏ qua ba câu an ninh. Lưu ý: ?jump= bỏ qua luôn bước nhập tên và mã.
    */
-  const applyDevShortcuts = () => {
-    if (process.env.NODE_ENV !== "development") return;
+  const applyShortcuts = () => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("skip") === "security") setSkipSecurity(true);
 
@@ -297,7 +296,7 @@ export function FlightCheckIn() {
     setSound(true);
     setEntered(true);
     playSound("chime");
-    applyDevShortcuts();
+    applyShortcuts();
   };
 
   const toggleSound = () => {
