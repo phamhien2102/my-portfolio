@@ -51,6 +51,7 @@ import { FinalScene } from "./chibi-scenes";
 import { DepartureBoard } from "./departure-board";
 import { HeartBurst } from "./heart-burst";
 import { InvalidLink } from "./invalid-link";
+import { BOOT_MS, BOOT_REDUCED_MS, BootScreen } from "./boot-screen";
 import { SeatMap } from "./seat-map";
 import { SecurityCheck } from "./security-check";
 import { Skywriting } from "./skywriting";
@@ -288,6 +289,14 @@ export function FlightCheckIn() {
   const [celebration, setCelebration] = useState<{ x: number; y: number } | null>(null);
 
   // Đang có popup chào, dấu CLEARED hoặc trái tim bằng khói thì không cho cuộn trang.
+  /** Vừa vào trang: hiện màn chờ máy bay bay một lúc, xong mới soát link. */
+  const [booting, setBooting] = useState(true);
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const id = window.setTimeout(() => setBooting(false), reduce ? BOOT_REDUCED_MS : BOOT_MS);
+    return () => window.clearTimeout(id);
+  }, []);
+
   /** Link có tham số sai quy tắc thì không vào sân bay, mà hiện trang "Boarding denied". */
   const linkProblems = useLinkProblems();
   useScrollLock((!entered && linkProblems.length === 0) || clearing || skywriting);
@@ -731,6 +740,7 @@ export function FlightCheckIn() {
     }
   };
 
+  if (booting) return <BootScreen />;
   if (linkProblems.length > 0) return <InvalidLink problems={linkProblems} />;
 
   return (
