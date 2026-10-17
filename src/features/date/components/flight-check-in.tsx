@@ -31,6 +31,7 @@ import {
 } from "../data";
 import { playSound, setSoundEnabled, unlockSound } from "../lib/sound";
 import { normalizeName, toTicketName } from "../lib/ticket-name";
+import { JUMP_STEPS, useLinkProblems } from "../lib/link-rules";
 import { PilotProvider, usePilotFromUrl, withPilot } from "../lib/pilot";
 import { useScrollLock } from "../lib/use-scroll-lock";
 import { type Ticket } from "../lib/ticket";
@@ -49,6 +50,7 @@ import { GlitchyCheckButton } from "./glitchy-check-button";
 import { FinalScene } from "./chibi-scenes";
 import { DepartureBoard } from "./departure-board";
 import { HeartBurst } from "./heart-burst";
+import { InvalidLink } from "./invalid-link";
 import { SeatMap } from "./seat-map";
 import { SecurityCheck } from "./security-check";
 import { Skywriting } from "./skywriting";
@@ -67,9 +69,6 @@ interface DayOption {
   date: number;
   forecast: string;
 }
-
-/** Tên các bước cho lối tắt ?jump=, theo đúng thứ tự bước. */
-const DEV_JUMPS = ["board", "destination", "schedule", "seat", "security", "ticket"] as const;
 
 /** Số ngày mở bán trên lịch thường (để troll lâu hơn). */
 const SCHEDULE_DAYS = 14;
@@ -289,7 +288,9 @@ export function FlightCheckIn() {
   const [celebration, setCelebration] = useState<{ x: number; y: number } | null>(null);
 
   // Đang có popup chào, dấu CLEARED hoặc trái tim bằng khói thì không cho cuộn trang.
-  useScrollLock(!entered || clearing || skywriting);
+  /** Link có tham số sai quy tắc thì không vào sân bay, mà hiện trang "Boarding denied". */
+  const linkProblems = useLinkProblems();
+  useScrollLock((!entered && linkProblems.length === 0) || clearing || skywriting);
 
   const passenger = toTicketName(name) || "YOU";
 
@@ -326,7 +327,7 @@ export function FlightCheckIn() {
     const codeFromLink = normalizeCode(params.get("code") ?? "", MAX_CODE_LENGTH);
     if (codeFromLink) setExpectedCode(codeFromLink);
 
-    const target = DEV_JUMPS.indexOf(params.get("jump") as (typeof DEV_JUMPS)[number]);
+    const target = JUMP_STEPS.indexOf(params.get("jump") as (typeof JUMP_STEPS)[number]);
     if (target <= 0) return;
     const sampleDays = upcomingDays();
     const monday = sampleDays.find((option) => option.weekday === 1) ?? sampleDays[0];
@@ -729,6 +730,8 @@ export function FlightCheckIn() {
       setShared("Couldn't send it. A screenshot works too.");
     }
   };
+
+  if (linkProblems.length > 0) return <InvalidLink problems={linkProblems} />;
 
   return (
     <PilotProvider value={pilotName}>
