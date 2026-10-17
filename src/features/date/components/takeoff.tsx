@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/cn";
 
-import { CAPTAIN_NAME, TAKEOFF_ABORTS } from "../data";
+import { CAPTAIN_NAME, TAKEOFF_ABORTS, TAKEOFF_TAP } from "../data";
 import { playSound, startEngine, type Engine } from "../lib/sound";
 
 /** Giữ liên tục chừng này thì đủ tốc độ cất cánh. */
@@ -13,6 +14,8 @@ const HOLD_MS = 3000;
 const DECAY_MS = 1200;
 /** Buông tay khi đã chạy được chừng này mới tính là "huỷ cất cánh". */
 const ABORT_FROM = 0.15;
+/** Nhấn rồi thả nhanh hơn chừng này là "bấm" chứ không phải "giữ". */
+const TAP_MS = 350;
 
 function vibrate(pattern: number | number[]) {
   if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(pattern);
@@ -27,6 +30,11 @@ export function Takeoff({ onTakeoff }: { onTakeoff: () => void }) {
   const [holding, setHolding] = useState(false);
   const [aborts, setAborts] = useState(0);
   const [done, setDone] = useState(false);
+  /** Đã từng nhấn nút chưa: chưa thì hiện ngón tay làm mẫu. */
+  const [tried, setTried] = useState(false);
+  /** Số lần bấm nhanh một cái; đổi giá trị để nút rung lại. */
+  const [taps, setTaps] = useState(0);
+  const pressedAt = useRef(0);
 
   const holdingRef = useRef(false);
   const progressRef = useRef(0);
@@ -39,6 +47,29 @@ export function Takeoff({ onTakeoff }: { onTakeoff: () => void }) {
   useEffect(() => {
     onTakeoffRef.current = onTakeoff;
   }, [onTakeoff]);
+
+  /** Buồng lái có đang nằm trong màn hình không; không thì hiện nút nổi nhắc cuộn xuống. */
+  const [inView, setInView] = useState(true);
+
+  const scrollToCockpit = () => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    cardRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+  };
+
+  // In vé xong thì tự cuộn xuống buồng lái, để nút giữ cất cánh không bị khuất dưới vé.
+  useEffect(() => {
+    const id = window.setTimeout(scrollToCockpit, 2800);
+    const card = cardRef.current;
+    if (!card) return () => window.clearTimeout(id);
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      threshold: 0.45,
+    });
+    observer.observe(card);
+    return () => {
+      window.clearTimeout(id);
+      observer.disconnect();
+    };
+  }, []);
 
   // Vòng lặp theo khung hình: cập nhật tiến độ, đường băng, độ rung và tiếng động cơ.
   useEffect(() => {
@@ -101,7 +132,9 @@ export function Takeoff({ onTakeoff }: { onTakeoff: () => void }) {
   const press = () => {
     if (doneRef.current || holdingRef.current) return;
     holdingRef.current = true;
+    pressedAt.current = performance.now();
     setHolding(true);
+    setTried(true);
     engine.current = startEngine();
   };
 
@@ -111,10 +144,16 @@ export function Takeoff({ onTakeoff }: { onTakeoff: () => void }) {
     setHolding(false);
     engine.current?.stop();
     engine.current = null;
-    if (!doneRef.current && progressRef.current >= ABORT_FROM) {
+    if (doneRef.current) return;
+    if (progressRef.current >= ABORT_FROM) {
       playSound("buzz");
       vibrate(0);
       setAborts((count) => count + 1);
+    } else if (performance.now() - pressedAt.current < TAP_MS) {
+      // Bấm nhanh một cái: nhắc là phải giữ, và làm mẫu lại bằng ngón tay.
+      playSound("buzz");
+      setTaps((count) => count + 1);
+      setTried(false);
     }
   };
 
@@ -134,9 +173,12 @@ export function Takeoff({ onTakeoff }: { onTakeoff: () => void }) {
       ? progress > 0.7
         ? "Almost there. Do not let go!"
         : "Keep holding…"
-      : aborts > 0
-        ? TAKEOFF_ABORTS[(aborts - 1) % TAKEOFF_ABORTS.length]
-        : "Press and hold the throttle to take off.";
+      : taps > 0 && aborts === 0
+        ? TAKEOFF_TAP
+        : aborts > 0
+          ? TAKEOFF_ABORTS[(aborts - 1) % TAKEOFF_ABORTS.length]
+          : "Press and hold the button (or hold Space) until we take off.";
+  const showDemo = !tried && !done;
 
   return (
     <div
@@ -209,52 +251,93 @@ export function Takeoff({ onTakeoff }: { onTakeoff: () => void }) {
       </div>
 
       <div className="mt-5 flex flex-col items-center gap-3">
-        <button
-          type="button"
-          disabled={done}
-          onPointerDown={(event) => {
-            event.currentTarget.setPointerCapture(event.pointerId);
-            press();
-          }}
-          onPointerUp={release}
-          onPointerCancel={release}
-          onLostPointerCapture={release}
-          onKeyDown={(event) => onKey(event, true)}
-          onKeyUp={(event) => onKey(event, false)}
-          onContextMenu={(event) => event.preventDefault()}
-          aria-label="Hold to take off"
-          className={cn(
-            "relative flex size-32 touch-none items-center justify-center rounded-full p-1.5 transition-transform select-none [-webkit-touch-callout:none]",
-            holding ? "scale-95" : "hover:scale-105",
-          )}
-          style={{
-            background: `conic-gradient(#ff2d78 ${progress * 360}deg, rgba(255,255,255,0.12) 0)`,
-          }}
+        <div
+          key={taps}
+          className={cn("relative", taps > 0 && "animate-[row-shake_0.45s_ease-in-out]")}
         >
-          <span
+          <button
+            type="button"
+            disabled={done}
+            onPointerDown={(event) => {
+              event.currentTarget.setPointerCapture(event.pointerId);
+              press();
+            }}
+            onPointerUp={release}
+            onPointerCancel={release}
+            onLostPointerCapture={release}
+            onKeyDown={(event) => onKey(event, true)}
+            onKeyUp={(event) => onKey(event, false)}
+            onContextMenu={(event) => event.preventDefault()}
+            aria-label="Hold to take off"
             className={cn(
-              "flex size-full flex-col items-center justify-center rounded-full bg-[#0b0f1c] font-extrabold text-white",
-              holding && "shadow-[inset_0_0_30px_rgba(255,45,120,0.5)]",
+              "relative flex size-32 touch-none items-center justify-center rounded-full p-1.5 transition-transform select-none [-webkit-touch-callout:none]",
+              holding ? "scale-95" : "hover:scale-105",
             )}
+            style={{
+              background: `conic-gradient(#ff2d78 ${progress * 360}deg, rgba(255,255,255,0.12) 0)`,
+            }}
           >
-            <span className="text-2xl">{done ? "🛫" : "✈"}</span>
-            <span className="mt-1 text-[11px] leading-tight tracking-wider">
-              {done ? "AIRBORNE" : "HOLD TO"}
-              <br />
-              {done ? "" : "TAKE OFF"}
+            {/* Vòng mờ làm mẫu: tự đầy dần như đang giữ, cùng nhịp với ngón tay. */}
+            {showDemo && (
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background:
+                    "conic-gradient(rgba(255,45,120,0.55) var(--hold-demo), transparent 0)",
+                  animation: "hold-demo 2.6s ease-in-out infinite",
+                }}
+              />
+            )}
+            <span
+              className={cn(
+                "relative flex size-full flex-col items-center justify-center rounded-full bg-[#0b0f1c] font-extrabold text-white",
+                holding && "shadow-[inset_0_0_30px_rgba(255,45,120,0.5)]",
+              )}
+            >
+              <span className="text-2xl">{done ? "🛫" : "✈"}</span>
+              <span className="mt-1 text-[11px] leading-tight tracking-wider">
+                {done ? "AIRBORNE" : "HOLD TO"}
+                <br />
+                {done ? "" : "TAKE OFF"}
+              </span>
             </span>
-          </span>
-        </button>
+          </button>
+          {/* Ngón tay nhấn xuống và giữ nguyên, để em hiểu là phải giữ chứ không phải bấm. */}
+          {showDemo && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute right-2 bottom-0 text-4xl drop-shadow-[0_6px_10px_rgba(0,0,0,0.6)]"
+              style={{ animation: "hold-hint 2.6s ease-in-out infinite" }}
+            >
+              👆
+            </span>
+          )}
+        </div>
         <p
           aria-live="polite"
           className={cn(
             "min-h-[1.5em] text-center text-sm",
-            !holding && aborts > 0 && !done ? "text-[#ff8a8a]" : "text-white/70",
+            !holding && (aborts > 0 || taps > 0) && !done ? "text-[#ff8a8a]" : "text-white/70",
           )}
         >
           {message}
         </p>
       </div>
+
+      {/* Nút nổi ở đáy màn hình khi buồng lái bị cuộn khuất. Đưa ra body vì khung bước có transform. */}
+      {!inView &&
+        !done &&
+        createPortal(
+          <button
+            type="button"
+            onClick={scrollToCockpit}
+            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-bounce rounded-full bg-gradient-to-r from-[#ff2d78] to-[#ff5c9a] px-5 py-3 text-sm font-bold whitespace-nowrap text-white shadow-[0_10px_30px_rgba(255,45,120,0.5)]"
+          >
+            ✈ Take off below ↓
+          </button>,
+          document.body,
+        )}
     </div>
   );
 }

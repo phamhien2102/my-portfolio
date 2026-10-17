@@ -340,6 +340,9 @@ export const TAKEOFF_ABORTS = [
   "Almost! Raymond’s heart cannot take many more of these.",
 ] as const;
 
+/** Bấm nhanh một cái thay vì giữ: nhắc lại cách cất cánh. */
+export const TAKEOFF_TAP = "Don’t just tap — press and hold! ✋";
+
 export const TAKEOFF_PA =
   "Cabin crew, seats for take-off. Passenger, please hold the throttle until we leave the ground.";
 

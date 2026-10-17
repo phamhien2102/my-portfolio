@@ -689,6 +689,19 @@ export function FlightCheckIn() {
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes sky-fade { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
+        @property --hold-demo { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+        @keyframes hold-demo {
+          0%, 18% { --hold-demo: 0deg; }
+          70%, 82% { --hold-demo: 300deg; }
+          100% { --hold-demo: 0deg; }
+        }
+        @keyframes hold-hint {
+          0% { opacity: 0; transform: translate(14px, 22px); }
+          10% { opacity: 1; transform: translate(8px, 14px); }
+          18%, 70% { opacity: 1; transform: translate(2px, 4px) scale(0.88); }
+          82% { opacity: 1; transform: translate(10px, 18px); }
+          100% { opacity: 0; transform: translate(14px, 22px); }
+        }
         @keyframes tap-hint {
           0%, 100% { transform: translateY(10px); }
           45% { transform: translateY(0) scale(0.92); }
