@@ -23,10 +23,11 @@ import {
   TAKEOFF_PA,
   WRONG_CODE_PA,
   WRONG_NAME_PA,
+  wrongNameHints,
   type Destination,
 } from "../data";
 import { playSound, setSoundEnabled, unlockSound } from "../lib/sound";
-import { toTicketName } from "../lib/ticket-name";
+import { normalizeName, toTicketName } from "../lib/ticket-name";
 import { type Ticket } from "../lib/ticket";
 import { downloadTicketImage, downloadTicketPdf } from "../lib/ticket-export";
 import { BoardingPass } from "./boarding-pass";
@@ -201,6 +202,15 @@ export function FlightCheckIn() {
   const [nameError, setNameError] = useState(false);
   const [wrongNames, setWrongNames] = useState(0);
   const latestName = useRef("");
+  /**
+   * Tên đúng lấy từ link (?passenger=), đã chuẩn hoá. Không có thì hỏi server,
+   * nơi giữ tên mặc định trong biến môi trường DATE_PASSENGER_NAME.
+   */
+  const [expectedName, setExpectedName] = useState<string | null>(null);
+  const nameHints = expectedName ? wrongNameHints(expectedName) : WRONG_NAME_PA;
+
+  const checkName = async (value: string) =>
+    expectedName ? normalizeName(value) === expectedName : verifyPassenger(value);
   const nameTimer = useRef(0);
   const [code, setCode] = useState("");
   const [wrongTries, setWrongTries] = useState(0);
@@ -267,6 +277,10 @@ export function FlightCheckIn() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("skip") === "security") setSkipSecurity(true);
 
+    // Link gửi riêng có ?passenger=<tên>: đó là tên đúng em phải tự gõ vào.
+    const fromLink = (params.get("passenger") ?? "").trim().slice(0, 14);
+    if (normalizeName(fromLink)) setExpectedName(normalizeName(fromLink));
+
     const target = DEV_JUMPS.indexOf(params.get("jump") as (typeof DEV_JUMPS)[number]);
     if (target <= 0) return;
     const sampleDays = upcomingDays();
@@ -274,7 +288,7 @@ export function FlightCheckIn() {
     setBoardCancelled(DEPARTURES.length);
     setBoardRevealed(true);
     setPickedFlight(true);
-    setName("HVAN");
+    setName(fromLink || "HVAN");
     setNameOk(true);
     if (target >= 2) {
       setDestination(DESTINATIONS[2]);
@@ -365,7 +379,7 @@ export function FlightCheckIn() {
   const rejectName = () => {
     playSound("buzz");
     setNameError(true);
-    announce(WRONG_NAME_PA[Math.min(wrongNames, WRONG_NAME_PA.length - 1)]);
+    announce(nameHints[Math.min(wrongNames, nameHints.length - 1)]);
     setWrongNames(wrongNames + 1);
     const input = document.getElementById("passenger");
     if (input instanceof HTMLInputElement) input.select();
@@ -380,7 +394,7 @@ export function FlightCheckIn() {
     window.clearTimeout(nameTimer.current);
     if (!value.trim()) return;
     nameTimer.current = window.setTimeout(async () => {
-      const ok = await verifyPassenger(value);
+      const ok = await checkName(value);
       if (ok && latestName.current === value) confirmName();
     }, 450);
   };
@@ -390,7 +404,7 @@ export function FlightCheckIn() {
     const value = latestName.current;
     if (!value.trim() || nameOk) return;
     window.clearTimeout(nameTimer.current);
-    const ok = await verifyPassenger(value);
+    const ok = await checkName(value);
     if (latestName.current !== value) return;
     if (ok) confirmName();
     else rejectName();
@@ -937,7 +951,7 @@ export function FlightCheckIn() {
                     )}
                   >
                     {nameError
-                      ? `📢 ${WRONG_NAME_PA[Math.min(wrongNames - 1, WRONG_NAME_PA.length - 1)]}`
+                      ? `📢 ${nameHints[Math.min(wrongNames - 1, nameHints.length - 1)]}`
                       : nameOk
                         ? "✓ Passenger found on the list."
                         : pickedFlight

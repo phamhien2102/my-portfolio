@@ -77,6 +77,15 @@ export const WRONG_NAME_PA = [
   "Final hint: it starts with H, and the captain says it every day.",
 ] as const;
 
+/** Gợi ý khi tên đúng được lấy từ link (?passenger=): tính theo chính tên đó thay vì cố định. */
+export function wrongNameHints(expected: string) {
+  return [
+    WRONG_NAME_PA[0],
+    `Hint from the captain: the name on the list has ${expected.length} letters, no spaces.`,
+    `Final hint: it starts with ${expected.charAt(0)}, and the captain says it every day.`,
+  ];
+}
+
 export const OPENING_PA =
   "Good evening, this is your captain speaking. All flights are on time tonight. Please select your flight on the board to begin check-in.";
 

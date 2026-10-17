@@ -3,7 +3,7 @@
 import { timingSafeEqual } from "node:crypto";
 
 import { CODE_LENGTH } from "./data";
-import { toTicketName } from "./lib/ticket-name";
+import { normalizeName } from "./lib/ticket-name";
 
 /**
  * Mã đặt chỗ chỉ nằm trên server, không bao giờ bị gửi xuống trình duyệt.
@@ -18,11 +18,6 @@ export async function verifyBookingCode(code: unknown): Promise<boolean> {
   const expected = Buffer.from(BOOKING_CODE);
   // So sánh với thời gian cố định để không đoán được mã qua độ trễ của từng ký tự.
   return given.length === expected.length && timingSafeEqual(given, expected);
-}
-
-/** Bỏ dấu, viết hoa và bỏ khoảng trắng, để "hvan", "H Van" hay "HVÂN" đều được tính là một. */
-function normalizeName(name: string) {
-  return toTicketName(name).replace(/\s+/g, "");
 }
 
 /**

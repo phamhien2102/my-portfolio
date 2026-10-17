@@ -112,6 +112,11 @@ browser. Override the defaults with environment variables:
 | `DATE_PASSENGER_NAME` | The only name accepted at check-in |
 | `DATE_BOOKING_CODE`   | The 8-character booking code       |
 
+To send the invite to someone specific, add their name to the link:
+`/dating?passenger=hvan`. They still type their name at check-in, and it must match the one
+in the link (case, accents and spaces are ignored). Without `?passenger=`, the name falls
+back to `DATE_PASSENGER_NAME`. The booking code is always checked on the server.
+
 ### Test shortcuts
 
 Going through every step to test the last one takes a while, so the page accepts two query
