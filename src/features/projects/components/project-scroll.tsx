@@ -6,6 +6,7 @@ import { accentAt } from "@/config/theme";
 
 import { PROJECTS } from "../data";
 import { ProjectBackdrop } from "./project-backdrop";
+import { NewBadge } from "./new-badge";
 
 const COUNT = PROJECTS.length;
 
@@ -95,7 +96,7 @@ export function ProjectScroll({ fallback }: ProjectScrollProps) {
   return (
     <div>
       {/* The stack: motion allowed. `--stick-top` clears the taller phone header. */}
-      <ol className="hidden [perspective:1800px] [--stick-top:8.25rem] motion-safe:block sm:[--stick-top:5.5rem]">
+      <ol className="hidden [--stick-top:8.25rem] [perspective:1800px] motion-safe:block sm:[--stick-top:5.5rem]">
         {PROJECTS.map((project, i) => {
           const accent = accentAt(i);
           const last = i === COUNT - 1;
@@ -132,12 +133,15 @@ export function ProjectScroll({ fallback }: ProjectScrollProps) {
 
                   <a
                     href={project.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="group grid min-h-[min(60svh,32rem)] gap-8 p-6 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-(--accent) lg:grid-cols-[1fr_1.15fr] lg:gap-12 lg:p-8"
                   >
                     <div className="flex flex-col justify-between gap-8 py-2">
                       <p className="font-mono text-xs tracking-widest text-zinc-500">
                         <span style={{ color: accent }}>{String(i + 1).padStart(2, "0")}</span> /{" "}
                         {String(COUNT).padStart(2, "0")} &middot; {project.year}
+                        <NewBadge project={project} className="ml-3 align-middle" />
                       </p>
 
                       <div>

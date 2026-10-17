@@ -5,6 +5,7 @@ import { useRef, type CSSProperties, type PointerEvent } from "react";
 import { accentAt } from "@/config/theme";
 
 import type { Project } from "../data";
+import { LaunchedPill } from "./new-badge";
 import { ProjectBackdrop } from "./project-backdrop";
 
 /** Maximum tilt in degrees on each axis. */
@@ -55,6 +56,8 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
     <a
       ref={ref}
       href={project.href}
+      target="_blank"
+      rel="noopener noreferrer"
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
       style={{ "--accent": accent } as CSSProperties}
@@ -67,6 +70,7 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
           index={index}
           sizes="(min-width: 1152px) 540px, (min-width: 640px) 45vw, 100vw"
         />
+        <LaunchedPill project={project} />
 
         {/* Pointer-following glare. */}
         <div
@@ -77,9 +81,6 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
           }}
         />
 
-        <span className="absolute top-3 left-3 rounded-full bg-black/55 px-3 py-1 font-mono text-[11px] tracking-widest text-zinc-200 backdrop-blur-sm">
-          {project.year}
-        </span>
         <span
           aria-hidden="true"
           className="absolute right-3 bottom-3 flex size-11 items-center justify-center rounded-full bg-white text-xl text-black transition-[transform,background-color] duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:bg-(--accent) group-hover:text-white"

@@ -3,6 +3,8 @@ import * as THREE from "three";
 import { THEME, accentAt } from "@/config/theme";
 
 import { PROJECTS, type Project } from "../data";
+import { LIVE, pulsePhase } from "./live-marker";
+import { isNewProject } from "./is-new";
 
 export interface GalleryScene {
   /** Bring this project to the front. */
@@ -65,13 +67,15 @@ function makeCanvas(w: number, h: number) {
   return { canvas, ctx: canvas.getContext("2d") };
 }
 
-/** Paint a project's screen: its image (or a generated backdrop), plus title and year. */
+/** Paint a project's screen: its image (or a generated backdrop), plus its title. */
 function paintScreen(
   ctx: CanvasRenderingContext2D,
   project: Project,
   index: number,
   font: string,
   image: HTMLImageElement | null,
+  /** Pulse of the "Just launched" dot, 0 → 1. */
+  pulse = 0,
 ) {
   const radius = 44;
   ctx.clearRect(0, 0, TEX_W, TEX_H);
@@ -140,15 +144,49 @@ function paintScreen(
   ctx.font = `900 76px ${font}`;
   ctx.fillText(project.title, 56, TEX_H - 62);
 
-  // Year chip, top left.
-  ctx.font = `600 30px ui-monospace, Menlo, monospace`;
-  const chipW = ctx.measureText(project.year).width + 44;
-  ctx.fillStyle = "rgba(0,0,0,0.55)";
-  roundedRect(ctx, 40, 40, chipW, 54, 27);
-  ctx.fill();
-  ctx.fillStyle = "#e4e4e7";
-  ctx.textBaseline = "middle";
-  ctx.fillText(project.year, 62, 68);
+  // "Just launched" pill, top right, for 30 days after the project's launch date.
+  if (isNewProject(project, Date.now())) {
+    ctx.font = `700 26px ui-monospace, Menlo, monospace`;
+    const label = "NEW";
+    const textW = ctx.measureText(label).width + label.length * 4;
+    const pillW = textW + 92;
+    const pillX = TEX_W - 40 - pillW;
+    // Frosted glass: redraw the picture under the pill, blurred, then tint it.
+    ctx.save();
+    roundedRect(ctx, pillX, 40, pillW, 54, 27);
+    ctx.clip();
+    ctx.filter = "blur(14px) saturate(1.5)";
+    ctx.drawImage(ctx.canvas, pillX - 30, 10, pillW + 60, 114, pillX - 30, 10, pillW + 60, 114);
+    ctx.filter = "none";
+    ctx.fillStyle = LIVE.pill;
+    ctx.fillRect(pillX, 40, pillW, 54);
+    ctx.restore();
+    roundedRect(ctx, pillX, 40, pillW, 54, 27);
+    ctx.strokeStyle = LIVE.border;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    const dotX = pillX + 34;
+    // Ring rippling out of the dot.
+    ctx.beginPath();
+    ctx.arc(dotX, 67, 8 + pulse * 16, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${LIVE.ring}, ${(0.6 * (1 - pulse)).toFixed(3)})`;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(dotX, 67, 8, 0, Math.PI * 2);
+    ctx.fillStyle = LIVE.dot;
+    ctx.shadowColor = `rgba(${LIVE.ring}, 0.9)`;
+    ctx.shadowBlur = 14;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = LIVE.text;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "4px";
+    ctx.fillText(label, dotX + 26, 68);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+  }
 
   ctx.restore();
 }
@@ -272,20 +310,34 @@ export function createGalleryScene({ host, onSelect, onOpen }: GallerySceneOptio
   const glowGeometry = new THREE.PlaneGeometry(PANEL_W * 1.7, PANEL_H * 1.9);
   disposables.push(planeGeometry, glowGeometry);
 
+  /** Repaint callbacks for screens that carry the "Just launched" marker. */
+  const shimmers: Array<(pulse: number) => void> = [];
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let lastPulsePaint = 0;
+
   const screens: Screen[] = PROJECTS.map((project, i) => {
     const accent = accentAt(i);
     const { canvas: art2d, ctx } = makeCanvas(TEX_W, TEX_H);
     const texture = new THREE.CanvasTexture(art2d);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    let picture: HTMLImageElement | null = null;
     if (ctx) paintScreen(ctx, project, i, font, null);
     if (ctx && project.image) {
-      const picture = new Image();
-      picture.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        picture = image;
         paintScreen(ctx, project, i, font, picture);
         texture.needsUpdate = true;
       };
-      picture.src = project.image;
+      image.src = project.image;
+    }
+    // New projects repaint their screen so the "Just launched" dot can pulse.
+    if (ctx && isNewProject(project, Date.now()) && !reduceMotion) {
+      shimmers.push((pulse) => {
+        paintScreen(ctx, project, i, font, picture, pulse);
+        texture.needsUpdate = true;
+      });
     }
     disposables.push(texture);
 
@@ -503,6 +555,13 @@ export function createGalleryScene({ host, onSelect, onOpen }: GallerySceneOptio
     lastTime = now;
     const f = (a: number) => 1 - Math.pow(1 - a, dt * 60);
     const elapsed = clock.getElapsedTime();
+
+    // Pulse the "Just launched" dot: repaint about 20 times a second.
+    if (shimmers.length && now - lastPulsePaint > 50) {
+      lastPulsePaint = now;
+      const pulse = pulsePhase(elapsed);
+      for (const repaint of shimmers) repaint(pulse);
+    }
 
     const target = nearestCopy(active, position) - dragFraction;
     position += (target - position) * f(dragging ? 0.4 : 0.09);

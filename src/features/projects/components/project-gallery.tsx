@@ -14,6 +14,7 @@ import { accentAt } from "@/config/theme";
 
 import { PROJECTS } from "../data";
 import { createGalleryScene, type GalleryScene } from "../lib/create-gallery-scene";
+import { NewBadge } from "./new-badge";
 
 /** Run whenever the visitor hasn't asked for less motion. */
 const GALLERY_QUERY = "(prefers-reduced-motion: no-preference)";
@@ -130,6 +131,7 @@ export function ProjectGallery({ fallback }: ProjectGalleryProps) {
             <p className="font-mono text-xs tracking-widest text-zinc-500">
               <span style={{ color: accent }}>{String(active + 1).padStart(2, "0")}</span> /{" "}
               {String(PROJECTS.length).padStart(2, "0")} &middot; {project.year}
+              <NewBadge project={project} className="ml-3 align-middle" />
             </p>
             <h3 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">{project.title}</h3>
             <p className="mt-3 max-w-xl text-zinc-400">{project.summary}</p>
@@ -149,6 +151,8 @@ export function ProjectGallery({ fallback }: ProjectGalleryProps) {
             <a
               ref={linkRef}
               href={project.href}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-bold text-black transition-[opacity,transform] duration-300 hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
             >
               View project
@@ -160,7 +164,8 @@ export function ProjectGallery({ fallback }: ProjectGalleryProps) {
               </span>
             </a>
 
-            <div className="flex items-center gap-4">
+            {/* Điện thoại vuốt để chuyển dự án, nên ẩn mũi tên và chấm cho gọn. */}
+            <div className="hidden items-center gap-4 sm:flex">
               <ArrowButton direction="prev" onClick={() => go(active - 1)} />
               <div className="flex items-center gap-2">
                 {PROJECTS.map((item, i) => (
@@ -188,13 +193,7 @@ export function ProjectGallery({ fallback }: ProjectGalleryProps) {
   );
 }
 
-function ArrowButton({
-  direction,
-  onClick,
-}: {
-  direction: "prev" | "next";
-  onClick: () => void;
-}) {
+function ArrowButton({ direction, onClick }: { direction: "prev" | "next"; onClick: () => void }) {
   return (
     <button
       type="button"

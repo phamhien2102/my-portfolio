@@ -9,10 +9,22 @@ export interface Project {
    * Without it the card shows a generated gradient backdrop.
    */
   image?: string;
+  /** Launch date (YYYY-MM-DD). The card shows a NEW badge for 30 days after it. */
+  addedAt?: string;
 }
 
 // PLACEHOLDER content: replace with your real projects and links.
 export const PROJECTS: readonly Project[] = [
+  {
+    title: "Date Airways",
+    summary:
+      "A date invite told as an airport check-in: a split-flap board that cancels every flight but one, a CAPTCHA full of Raymonds, and a hold-to-take-off cockpit.",
+    tags: ["Next.js", "TypeScript", "Web Audio", "SVG"],
+    year: "Oct 17, 2026",
+    href: "/dating",
+    image: "/projects/date-airways.png",
+    addedAt: "2026-10-17",
+  },
   {
     title: "Project Alpha",
     summary: "Cross-platform fitness app with offline-first sync and real-time coaching.",
