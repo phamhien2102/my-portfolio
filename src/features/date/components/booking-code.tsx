@@ -6,15 +6,18 @@ import { cn } from "@/lib/cn";
 
 import { CODE_LENGTH } from "../data";
 
+/** Mã lấy từ link dài tối đa chừng này ký tự, để các ô vẫn vừa màn hình điện thoại. */
+export const MAX_CODE_LENGTH = 12;
+
 /** Ký tự vừa gõ hiện ra trong chừng này rồi mới bị che, giống ô nhập mật khẩu trên điện thoại. */
 const PEEK_MS = 600;
 
 /** Chỉ giữ chữ và số, viết hoa, tối đa bằng độ dài mã. */
-function normalizeCode(value: string) {
+export function normalizeCode(value: string, length: number = CODE_LENGTH) {
   return value
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, "")
-    .slice(0, CODE_LENGTH);
+    .slice(0, length);
 }
 
 /**
@@ -27,12 +30,15 @@ export function BookingCodeInput({
   invalid,
   verified,
   disabled,
+  length = CODE_LENGTH,
 }: {
   value: string;
   onChange: (value: string) => void;
   invalid: boolean;
   verified: boolean;
   disabled: boolean;
+  /** Số ký tự của mã: 8 theo mặc định, hoặc theo mã lấy từ link. */
+  length?: number;
 }) {
   const [focused, setFocused] = useState(false);
   const [reveal, setReveal] = useState(false);
@@ -40,7 +46,7 @@ export function BookingCodeInput({
   const peekTimer = useRef(0);
 
   const change = (raw: string) => {
-    const next = normalizeCode(raw);
+    const next = normalizeCode(raw, length);
     window.clearTimeout(peekTimer.current);
     if (next.length > value.length) {
       setPeek(next.length - 1);
@@ -55,16 +61,16 @@ export function BookingCodeInput({
     <div className={cn("flex gap-2 transition-opacity", disabled && !verified && "opacity-40")}>
       <div className="relative flex-1">
         <div aria-hidden="true" className="flex justify-between gap-1 sm:gap-1.5">
-          {Array.from({ length: CODE_LENGTH }, (_, index) => {
+          {Array.from({ length }, (_, index) => {
             const char = value[index];
             const shown = reveal || index === peek;
-            const active =
-              focused && !verified && index === Math.min(value.length, CODE_LENGTH - 1);
+            const active = focused && !verified && index === Math.min(value.length, length - 1);
             return (
               <span
                 key={index}
                 className={cn(
-                  "relative flex h-12 flex-1 items-center justify-center overflow-hidden rounded-lg border font-mono text-xl font-bold transition-all duration-200",
+                  "relative flex h-12 flex-1 items-center justify-center overflow-hidden rounded-lg border font-mono font-bold transition-all duration-200",
+                  length > 8 ? "text-base" : "text-xl",
                   verified
                     ? "border-[#5cff9d] bg-[#5cff9d]/15 text-[#5cff9d] shadow-[0_0_18px_rgba(92,255,157,0.35)]"
                     : invalid
@@ -94,7 +100,7 @@ export function BookingCodeInput({
           onChange={(event) => change(event.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          maxLength={CODE_LENGTH}
+          maxLength={length}
           disabled={disabled}
           autoComplete="off"
           autoCapitalize="characters"

@@ -77,6 +77,15 @@ export const WRONG_NAME_PA = [
   "Final hint: it starts with H, and the captain says it every day.",
 ] as const;
 
+/** Gợi ý khi mã đúng được lấy từ link (?code=): tính theo chính mã đó. */
+export function wrongCodeHints(expected: string) {
+  return [
+    WRONG_CODE_PA[0],
+    `Hint from the captain: the code has ${expected.length} characters. Check the message from your pilot.`,
+    `Final hint: it starts with ${expected.charAt(0)} and ends with ${expected.charAt(expected.length - 1)}.`,
+  ];
+}
+
 /** Gợi ý khi tên đúng được lấy từ link (?passenger=): tính theo chính tên đó thay vì cố định. */
 export function wrongNameHints(expected: string) {
   return [

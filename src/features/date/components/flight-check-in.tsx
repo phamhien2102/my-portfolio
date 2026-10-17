@@ -23,6 +23,7 @@ import {
   TAKEOFF_PA,
   WRONG_CODE_PA,
   WRONG_NAME_PA,
+  wrongCodeHints,
   wrongNameHints,
   type Destination,
 } from "../data";
@@ -31,7 +32,7 @@ import { normalizeName, toTicketName } from "../lib/ticket-name";
 import { type Ticket } from "../lib/ticket";
 import { downloadTicketImage, downloadTicketPdf } from "../lib/ticket-export";
 import { BoardingPass } from "./boarding-pass";
-import { BookingCodeInput } from "./booking-code";
+import { BookingCodeInput, MAX_CODE_LENGTH, normalizeCode } from "./booking-code";
 import { CaptainBar } from "./captain";
 import { FinalScene } from "./chibi-scenes";
 import { DepartureBoard } from "./departure-board";
@@ -209,6 +210,11 @@ export function FlightCheckIn() {
   const [expectedName, setExpectedName] = useState<string | null>(null);
   const nameHints = expectedName ? wrongNameHints(expectedName) : WRONG_NAME_PA;
 
+  /** Mã đúng lấy từ link (?code=), đã chuẩn hoá. Không có thì hỏi server (DATE_BOOKING_CODE). */
+  const [expectedCode, setExpectedCode] = useState<string | null>(null);
+  const codeLength = expectedCode ? expectedCode.length : CODE_LENGTH;
+  const codeHints = expectedCode ? wrongCodeHints(expectedCode) : WRONG_CODE_PA;
+
   const checkName = async (value: string) =>
     expectedName ? normalizeName(value) === expectedName : verifyPassenger(value);
   const nameTimer = useRef(0);
@@ -281,6 +287,10 @@ export function FlightCheckIn() {
     const fromLink = (params.get("passenger") ?? "").trim().slice(0, 14);
     if (normalizeName(fromLink)) setExpectedName(normalizeName(fromLink));
 
+    // Tương tự với mã đặt chỗ: ?code=<mã> là mã đúng em phải tự gõ vào.
+    const codeFromLink = normalizeCode(params.get("code") ?? "", MAX_CODE_LENGTH);
+    if (codeFromLink) setExpectedCode(codeFromLink);
+
     const target = DEV_JUMPS.indexOf(params.get("jump") as (typeof DEV_JUMPS)[number]);
     if (target <= 0) return;
     const sampleDays = upcomingDays();
@@ -321,7 +331,7 @@ export function FlightCheckIn() {
 
   /** Hỏi server mã có đúng không. Mã đúng không bao giờ được gửi xuống trình duyệt. */
   const checkCode = async (value: string) => {
-    const ok = await verifyBookingCode(value);
+    const ok = expectedCode ? value === expectedCode : await verifyBookingCode(value);
     if (latestCode.current !== value) return null;
     setVerified(ok);
     return ok;
@@ -331,7 +341,7 @@ export function FlightCheckIn() {
     playSound("buzz");
     setCodeError(true);
     shake();
-    announce(WRONG_CODE_PA[Math.min(wrongTries, WRONG_CODE_PA.length - 1)]);
+    announce(codeHints[Math.min(wrongTries, codeHints.length - 1)]);
     setWrongTries(wrongTries + 1);
     // Mã sai thì xoá trắng và đặt con trỏ lại vào ô mã để em nhập lại ngay.
     latestCode.current = "";
@@ -346,7 +356,7 @@ export function FlightCheckIn() {
     setCode(value);
     setCodeError(false);
     setVerified(false);
-    if (value.length !== CODE_LENGTH) return;
+    if (value.length !== codeLength) return;
 
     setChecking(true);
     const ok = await checkCode(value);
@@ -973,7 +983,7 @@ export function FlightCheckIn() {
                       Booking code
                     </label>
                     <span className="font-mono text-[10px] text-white/35">
-                      {code.length}/{CODE_LENGTH}
+                      {code.length}/{codeLength}
                     </span>
                   </div>
                   <BookingCodeInput
@@ -982,6 +992,7 @@ export function FlightCheckIn() {
                     invalid={codeError}
                     verified={verified}
                     disabled={!hasName || verified}
+                    length={codeLength}
                   />
                   <p
                     id="booking-code-hint"
@@ -998,13 +1009,13 @@ export function FlightCheckIn() {
                   >
                     {/* Lặp lại gợi ý ngay dưới ô nhập, vì lúc này khung cơ trưởng có thể đã bị cuộn khuất. */}
                     {codeError
-                      ? `📢 ${WRONG_CODE_PA[Math.min(wrongTries - 1, WRONG_CODE_PA.length - 1)]}`
+                      ? `📢 ${codeHints[Math.min(wrongTries - 1, codeHints.length - 1)]}`
                       : verified
                         ? "Booking found. Boarding you now…"
                         : checking
                           ? "Checking your booking…"
                           : hasName
-                            ? "8 characters. The pilot sent it to you privately."
+                            ? `${codeLength} characters. The pilot sent it to you privately.`
                             : "Confirm the passenger name first to unlock the booking code."}
                   </p>
                 </div>
