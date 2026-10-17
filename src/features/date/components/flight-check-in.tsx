@@ -8,6 +8,7 @@ import { verifyBookingCode, verifyPassenger } from "../actions";
 import {
   BOARD_SUBTITLES,
   CODE_LENGTH,
+  DEPARTURES,
   DEPARTURE_TIMES,
   DESTINATIONS,
   FORECASTS,
@@ -52,6 +53,9 @@ interface DayOption {
   date: number;
   forecast: string;
 }
+
+/** Tên các bước cho lối tắt ?jump= khi chạy dev, theo đúng thứ tự bước. */
+const DEV_JUMPS = ["board", "destination", "schedule", "seat", "security", "ticket"] as const;
 
 /** Bảy ngày tới, bắt đầu từ ngày mai. Gọi trong lúc bấm nút nên không đụng tới render. */
 function upcomingDays(): DayOption[] {
@@ -251,11 +255,49 @@ export function FlightCheckIn() {
     window.setTimeout(() => setShaking(false), 500);
   };
 
+  /** Chỉ dùng khi chạy dev: bỏ qua bước an ninh sau khi chọn ghế (?skip=security). */
+  const [skipSecurity, setSkipSecurity] = useState(false);
+
+  /**
+   * Lối tắt để test nhanh, chỉ có tác dụng khi chạy dev:
+   * ?jump=board|destination|schedule|seat|security|ticket nhảy thẳng tới bước đó với dữ liệu mẫu,
+   * ?skip=security bỏ qua ba câu an ninh. Bản build thật bỏ qua hoàn toàn các tham số này.
+   */
+  const applyDevShortcuts = () => {
+    if (process.env.NODE_ENV !== "development") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("skip") === "security") setSkipSecurity(true);
+
+    const target = DEV_JUMPS.indexOf(params.get("jump") as (typeof DEV_JUMPS)[number]);
+    if (target <= 0) return;
+    const sampleDays = upcomingDays();
+    const monday = sampleDays.find((option) => option.weekday === 1) ?? sampleDays[0];
+    setBoardCancelled(DEPARTURES.length);
+    setBoardRevealed(true);
+    setPickedFlight(true);
+    setName("HVAN");
+    setNameOk(true);
+    if (target >= 2) {
+      setDestination(DESTINATIONS[2]);
+      setDays(sampleDays);
+    }
+    if (target >= 3) {
+      setDay(monday);
+      setTime("19:00");
+    }
+    if (target >= 4) {
+      setSeat("2B");
+      setPartnerSeat("2A");
+    }
+    setStep(target);
+  };
+
   const enter = () => {
     unlockSound();
     setSound(true);
     setEntered(true);
     playSound("chime");
+    applyDevShortcuts();
   };
 
   const toggleSound = () => {
@@ -483,6 +525,10 @@ export function FlightCheckIn() {
   const pickSeat = (picked: string, partner: string) => {
     setSeat(picked);
     setPartnerSeat(partner);
+    if (skipSecurity) {
+      passSecurity();
+      return;
+    }
     announce(
       `Seat ${picked} confirmed. Armrest sharing is mandatory on this flight. Please proceed to security.`,
     );
