@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
-import { CAPTCHA_PA, CAPTCHA_TILES, CAPTAIN_NAME } from "../data";
+import { CAPTCHA_PA, CAPTCHA_TILES } from "../data";
 import { playSound } from "../lib/sound";
 import { Chibi } from "./chibi";
+import { usePilot } from "../lib/pilot";
 
 type Stage = "checkbox" | "loading" | "challenge" | "verified";
 
@@ -28,6 +29,7 @@ export function DateCaptcha({
   /** Gọi khi xong, kèm số ô em đã tự tay chọn (không tính các ô hệ thống tick giùm). */
   onVerified: (selfPicked: number) => void;
 }) {
+  const pilot = usePilot();
   const [stage, setStage] = useState<Stage>("checkbox");
   const [selected, setSelected] = useState<number[]>([]);
   const [message, setMessage] = useState<string | null>(null);
@@ -71,7 +73,7 @@ export function DateCaptcha({
   const finish = (selfPicked: number) => {
     playSound("sparkle");
     setStage("verified");
-    onAnnounce(CAPTCHA_PA.verified);
+    onAnnounce(pilot.say(CAPTCHA_PA.verified));
     later(1100, () => onVerified(selfPicked));
   };
 
@@ -80,7 +82,7 @@ export function DateCaptcha({
     playSound("buzz");
     shake();
     setMessage(CAPTCHA_PA.skip);
-    onAnnounce(CAPTCHA_PA.skip);
+    onAnnounce(pilot.say(CAPTCHA_PA.skip));
   };
 
   const verify = () => {
@@ -95,8 +97,8 @@ export function DateCaptcha({
     playSound("buzz");
     shake();
     setBusy(true);
-    setMessage(`You missed ${missing.length}. Hint: they're ALL ${CAPTAIN_NAME}.`);
-    onAnnounce(CAPTCHA_PA.missed);
+    setMessage(`You missed ${missing.length}. Hint: they're ALL ${pilot.name}.`);
+    onAnnounce(pilot.say(CAPTCHA_PA.missed));
     missing.forEach((index, order) => {
       later(700 + order * AUTO_PICK_MS, () => {
         playSound("flap");
@@ -181,7 +183,7 @@ export function DateCaptcha({
                       className="h-[92%] w-[92%] translate-y-[6%]"
                     />
                     <span className="absolute right-1 bottom-0.5 font-mono text-[9px] font-bold text-black/50">
-                      {tile.tag}
+                      {tile.tag.replace("R", pilot.initial)}
                     </span>
                   </span>
                   {on && (

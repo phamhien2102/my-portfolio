@@ -1,4 +1,4 @@
-import { CAPTAIN_NAME } from "../data";
+import { usePilot } from "../lib/pilot";
 
 /** Đường vẽ trái tim cho vệt khói, trong khung 400 × 320. */
 const HEART =
@@ -10,6 +10,7 @@ const DRAW_S = 2.8;
  * rồi tên em hiện ra bằng khói ở giữa. Tự mờ đi sau vài giây.
  */
 export function Skywriting({ name }: { name: string }) {
+  const pilot = usePilot();
   return (
     <div
       role="img"
@@ -83,7 +84,7 @@ export function Skywriting({ name }: { name: string }) {
           fontFamily='"Snell Roundhand", "Brush Script MT", "Segoe Script", cursive'
           style={{ animation: `sky-name 1.2s ${DRAW_S + 0.5}s ease-out both` }}
         >
-          ♥ {CAPTAIN_NAME}
+          ♥ {pilot.name}
         </text>
       </svg>
     </div>

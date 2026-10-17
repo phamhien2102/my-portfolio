@@ -1,9 +1,12 @@
 "use client";
 
+import { usePilot } from "../lib/pilot";
+
 const BARS = [0.5, 0.9, 0.6, 1, 0.7, 0.85, 0.45];
 
 /** Màn chào bắt buộc: bấm bật âm thanh rồi mới vào sân bay, để tiếng ô lật kêu ngay từ đầu. */
 export function WelcomeGate({ onEnter }: { onEnter: () => void }) {
+  const pilot = usePilot();
   return (
     <div
       role="dialog"
@@ -23,7 +26,7 @@ export function WelcomeGate({ onEnter }: { onEnter: () => void }) {
           id="welcome-title"
           className="relative mt-3 text-3xl font-extrabold tracking-tight text-white"
         >
-          Welcome to the Raymond airport
+          Welcome to the {pilot.name} airport
         </h2>
         <p className="relative mt-3 text-sm leading-relaxed text-white/65">
           This trip comes with sound: flapping boards, airport chimes, and a captain who talks too

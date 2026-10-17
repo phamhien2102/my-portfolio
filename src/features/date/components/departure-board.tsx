@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 
 import { BOARD_PA, DEPARTURES, SECRET_FLIGHT, type SceneName } from "../data";
 import { playSound } from "../lib/sound";
+import { usePilot } from "../lib/pilot";
 
 const CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const TICK_MS = 45;
@@ -111,6 +112,7 @@ export function DepartureBoard({
   /** Bấm một chuyến chưa huỷ: cho nền hiện cảnh nơi đó trước khi chuyến bị huỷ. */
   onPreview: (scene: SceneName) => void;
 }) {
+  const pilot = usePilot();
   const [shaking, setShaking] = useState<string | null>(null);
   const [cancelled, setCancelled] = useState<string[]>([]);
   const [revealed, setRevealed] = useState(false);
@@ -229,7 +231,7 @@ export function DepartureBoard({
                 type="button"
                 onClick={pickSecret}
                 aria-pressed={picked}
-                aria-label={`${SECRET_FLIGHT.flight} to ${SECRET_FLIGHT.destination}, ${SECRET_FLIGHT.status}`}
+                aria-label={`${SECRET_FLIGHT.flight} to ${pilot.say(SECRET_FLIGHT.destination)}, ${SECRET_FLIGHT.status}`}
                 className={cn(
                   "flex gap-[0.55em] rounded-sm text-left transition hover:brightness-125",
                   picked
@@ -238,7 +240,11 @@ export function DepartureBoard({
                 )}
               >
                 <FlapCells text={SECRET_FLIGHT.flight} width={5} delay={0} />
-                <FlapCells text={SECRET_FLIGHT.destination} width={DESTINATION_CELLS} delay={3} />
+                <FlapCells
+                  text={pilot.say(SECRET_FLIGHT.destination)}
+                  width={DESTINATION_CELLS}
+                  delay={3}
+                />
                 <span className="animate-[board-blink_1.2s_steps(2)_1.5s_infinite] text-[#5cff9d]">
                   <FlapCells text={SECRET_FLIGHT.status} width={STATUS_CELLS} delay={10} />
                 </span>

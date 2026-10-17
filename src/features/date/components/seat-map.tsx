@@ -4,17 +4,11 @@ import { useState } from "react";
 
 import { cn } from "@/lib/cn";
 
-import {
-  CAPTAIN_NAME,
-  FREE_SEATS,
-  PLOT_TWIST_PA,
-  SEAT_LETTERS,
-  SEAT_OCCUPANTS,
-  SEAT_ROWS,
-} from "../data";
+import { FREE_SEATS, PLOT_TWIST_PA, SEAT_LETTERS, SEAT_OCCUPANTS, SEAT_ROWS } from "../data";
 import { playSound } from "../lib/sound";
 import { PlotTwistScene } from "./chibi-scenes";
 import { HeartBurst } from "./heart-burst";
+import { usePilot } from "../lib/pilot";
 
 const GRID = "grid grid-cols-[repeat(2,2.75rem)_1.5rem_repeat(2,2.75rem)] gap-2";
 /** Thời gian hồi hộp trước khi lộ ra ai ngồi bên cạnh. */
@@ -219,6 +213,7 @@ function SeatCell({
   bubbleKey: number;
   onClick: () => void;
 }) {
+  const pilot = usePilot();
   const labels: Record<SeatKind, string> = {
     taken: `Seat ${seat}, taken`,
     free: `Seat ${seat}, available`,
@@ -274,7 +269,7 @@ function SeatCell({
             role="tooltip"
             className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2.5 -translate-x-1/2 animate-[tooltip-in_0.45s_0.65s_cubic-bezier(.3,1.6,.6,1)_both] rounded-lg bg-white px-2.5 py-1 font-sans text-xs font-extrabold whitespace-nowrap text-[#1d1500] shadow-[0_8px_24px_rgba(255,201,74,0.45)]"
           >
-            {CAPTAIN_NAME} 👋
+            {pilot.name} 👋
             <span
               aria-hidden="true"
               className="absolute top-full left-1/2 -translate-x-1/2 border-x-[6px] border-t-[6px] border-x-transparent border-t-white"

@@ -9,6 +9,7 @@ import { playSound } from "../lib/sound";
 import { HeartBurst } from "./heart-burst";
 import { LetterScene } from "./chibi-scenes";
 import { DateCaptcha } from "./date-captcha";
+import { usePilot } from "../lib/pilot";
 
 type Answer = (typeof SECURITY_QUESTIONS)[number]["answers"][number];
 type Phase = "idle" | "working" | "revealed";
@@ -30,7 +31,7 @@ const EFFECT_LABEL: Record<Exclude<Effect, null>, string> = {
 
 const XRAY = "[filter:grayscale(1)_brightness(1.4)_sepia(1)_hue-rotate(70deg)_saturate(4)]";
 
-/** Chọn Alone mà vẫn tự tay bấm vào Raymond: dùng chính số ô đó làm bằng chứng. */
+/** Chọn Alone mà vẫn tự tay bấm vào phi công: dùng chính số ô đó làm bằng chứng. */
 function aloneVerdict(selfPicked: number) {
   const total = CAPTCHA_TILES.length;
   if (selfPicked >= total) return ALONE_VERDICTS.all;
@@ -54,6 +55,7 @@ export function SecurityCheck({
   onAnnounce: (text: string) => void;
   onDone: () => void;
 }) {
+  const pilot = usePilot();
   const [question, setQuestion] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [effect, setEffect] = useState<Effect>(null);
@@ -415,7 +417,7 @@ export function SecurityCheck({
       {phase === "revealed" && picked ? (
         <div className="step-in mt-6 flex flex-col items-center gap-4">
           <p aria-live="polite" className="max-w-sm text-center text-white/80">
-            {verdict ?? picked.reply}
+            {pilot.say(verdict ?? picked.reply)}
           </p>
 
           {current.surprise === "letter" &&

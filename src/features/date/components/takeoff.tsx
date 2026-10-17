@@ -5,8 +5,9 @@ import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/cn";
 
-import { CAPTAIN_NAME, TAKEOFF_ABORTS, TAKEOFF_TAP } from "../data";
+import { TAKEOFF_ABORTS, TAKEOFF_TAP } from "../data";
 import { playSound, startEngine, type Engine } from "../lib/sound";
+import { usePilot } from "../lib/pilot";
 
 /** Giữ liên tục chừng này thì đủ tốc độ cất cánh. */
 const HOLD_MS = 3000;
@@ -26,6 +27,7 @@ function vibrate(pattern: number | number[]) {
  * cả bảng rung và điện thoại rung theo. Buông sớm là bị huỷ cất cánh; giữ đủ thì gọi onTakeoff.
  */
 export function Takeoff({ onTakeoff }: { onTakeoff: () => void }) {
+  const pilot = usePilot();
   const [progress, setProgress] = useState(0);
   const [holding, setHolding] = useState(false);
   const [aborts, setAborts] = useState(0);
@@ -176,7 +178,7 @@ export function Takeoff({ onTakeoff }: { onTakeoff: () => void }) {
       : taps > 0 && aborts === 0
         ? TAKEOFF_TAP
         : aborts > 0
-          ? TAKEOFF_ABORTS[(aborts - 1) % TAKEOFF_ABORTS.length]
+          ? pilot.say(TAKEOFF_ABORTS[(aborts - 1) % TAKEOFF_ABORTS.length])
           : "Press and hold the button (or hold Space) until we take off.";
   const showDemo = !tried && !done;
 
@@ -221,7 +223,7 @@ export function Takeoff({ onTakeoff }: { onTakeoff: () => void }) {
         </span>
       </div>
 
-      {/* Đồng hồ tốc độ và nhịp tim của Raymond. */}
+      {/* Đồng hồ tốc độ và nhịp tim của phi công. */}
       <div className="mt-4 grid grid-cols-2 gap-3 font-mono">
         <div className="rounded-xl bg-black/40 px-3 py-2 ring-1 ring-white/5">
           <p className="text-[9px] tracking-[0.25em] text-white/40">SPEED</p>
@@ -231,9 +233,7 @@ export function Takeoff({ onTakeoff }: { onTakeoff: () => void }) {
           </p>
         </div>
         <div className="rounded-xl bg-black/40 px-3 py-2 ring-1 ring-white/5">
-          <p className="text-[9px] tracking-[0.25em] text-white/40">
-            {CAPTAIN_NAME.toUpperCase()}&apos;S HEART
-          </p>
+          <p className="text-[9px] tracking-[0.25em] text-white/40">{pilot.board}&apos;S HEART</p>
           <p className="flex items-baseline gap-1 text-2xl font-bold text-[#ff8ab3] tabular-nums">
             <span
               aria-hidden="true"

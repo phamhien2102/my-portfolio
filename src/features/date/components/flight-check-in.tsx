@@ -18,6 +18,7 @@ import {
   SECRET_TIME,
   SECRET_TIME_PA,
   SOLD_OUT_PA,
+  SOLD_OUT_PA_WEEK2,
   OPENING_PA,
   STEPS,
   TAKEOFF_PA,
@@ -30,6 +31,7 @@ import {
 } from "../data";
 import { playSound, setSoundEnabled, unlockSound } from "../lib/sound";
 import { normalizeName, toTicketName } from "../lib/ticket-name";
+import { PilotProvider, usePilotFromUrl, withPilot } from "../lib/pilot";
 import { useScrollLock } from "../lib/use-scroll-lock";
 import { type Ticket } from "../lib/ticket";
 import {
@@ -42,6 +44,8 @@ import {
 import { BoardingPass } from "./boarding-pass";
 import { BookingCodeInput, MAX_CODE_LENGTH, normalizeCode } from "./booking-code";
 import { CaptainBar } from "./captain";
+import { CheckAllButton } from "./check-all-button";
+import { GlitchyCheckButton } from "./glitchy-check-button";
 import { FinalScene } from "./chibi-scenes";
 import { DepartureBoard } from "./departure-board";
 import { HeartBurst } from "./heart-burst";
@@ -67,7 +71,10 @@ interface DayOption {
 /** Tên các bước cho lối tắt ?jump=, theo đúng thứ tự bước. */
 const DEV_JUMPS = ["board", "destination", "schedule", "seat", "security", "ticket"] as const;
 
-/** Bảy ngày tới, bắt đầu từ ngày mai. Gọi trong lúc bấm nút nên không đụng tới render. */
+/** Số ngày mở bán trên lịch thường (để troll lâu hơn). */
+const SCHEDULE_DAYS = 14;
+
+/** Mười bốn ngày tới, bắt đầu từ ngày mai. Gọi trong lúc bấm nút nên không đụng tới render. */
 function upcomingDays(): DayOption[] {
   const format = new Intl.DateTimeFormat("en-US", {
     weekday: "short",
@@ -75,7 +82,7 @@ function upcomingDays(): DayOption[] {
     day: "numeric",
   });
   const today = new Date();
-  return Array.from({ length: 7 }, (_, index) => {
+  return Array.from({ length: SCHEDULE_DAYS }, (_, index) => {
     const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() + index + 1);
     const year = day.getFullYear();
     const month = day.getMonth() + 1;
@@ -160,6 +167,11 @@ function Progress({ step }: { step: number }) {
   );
 }
 
+/** Số ngày / giờ em phải tự bấm hết vé trước khi nút "Check all" hiện ra. */
+const DAYS_BEFORE_CHECK_ALL = 5;
+
+const TIMES_BEFORE_CHECK_ALL = 3;
+
 /** Đồng hồ đếm ngược tới giờ cất cánh. */
 function Countdown({ target }: { target: number }) {
   const [now, setNow] = useState<number | null>(null);
@@ -241,6 +253,9 @@ export function FlightCheckIn() {
   const [dayRefusal, setDayRefusal] = useState<{ stamp: string; text: string } | null>(null);
   /** Cả tuần đã hết vé, chỉ còn chuyên cơ riêng. */
   const [privateJet, setPrivateJet] = useState(false);
+  /** Đang chạy nút "Check all": khoá nút để không bấm hai lần. */
+  const [checkingDays, setCheckingDays] = useState(false);
+  const [checkingTimes, setCheckingTimes] = useState(false);
   const [soldOutTimes, setSoldOutTimes] = useState<string[]>([]);
   const [timeRefusal, setTimeRefusal] = useState<{ time: string; text: string } | null>(null);
   /** Mọi giờ thường đã hết vé, chỉ còn khung giờ bí mật. */
@@ -278,9 +293,12 @@ export function FlightCheckIn() {
 
   const passenger = toTicketName(name) || "YOU";
 
+  /** Tên phi công lấy từ link (?pilot=), mặc định là Raymond. */
+  const pilotName = usePilotFromUrl();
+
   const announce = (text: string) => {
     playSound("chime");
-    setPa((current) => ({ id: current.id + 1, text }));
+    setPa((current) => ({ id: current.id + 1, text: withPilot(text, pilotName) }));
   };
 
   const shake = () => {
@@ -448,16 +466,34 @@ export function FlightCheckIn() {
    * Lịch thường ngày nào cũng hết vé: bấm vào là bị gạch, gắn tem SOLD OUT kèm một câu đùa.
    * Bấm hết cả tuần thì chuyên cơ riêng của cơ trưởng hiện ra.
    */
-  /** Nhịp đóng tem SOLD OUT dây chuyền cho các ngày và giờ còn lại. */
-  const CASCADE_START_MS = 900;
-  const CASCADE_STEP_MS = 140;
+  /** Nhịp đóng tem SOLD OUT dây chuyền khi bấm nút "Check all". */
+  const CASCADE_STEP_MS = 160;
+
+  const openPrivateJet = () => {
+    playSound("sparkle");
+    announce(PRIVATE_JET_PA);
+    setPrivateJet(true);
+  };
+
+  /** Hết sạch giờ thường: thứ 2 còn đúng 19:00, thứ 3 thì mở khung giờ bí mật 19:30. */
+  const finishTimes = () => {
+    if (DEPARTURE_TIMES.some((other) => isOpenTime(other.time))) {
+      announce(JET_OPEN_TIME.left);
+      setTimeRefusal({ time: "", text: JET_OPEN_TIME.left });
+      return;
+    }
+    playSound("sparkle");
+    announce(SECRET_TIME_PA);
+    setSecretSlot(true);
+  };
 
   /**
-   * Bấm một ngày bất kỳ: ngày đó hết vé kèm câu đùa riêng, rồi cả tuần tự đóng tem SOLD OUT theo,
-   * xong thì chuyên cơ của cơ trưởng hiện ra. Chỉ cần bấm một lần.
+   * Bấm một ngày: chỉ ngày đó hết vé, kèm câu đùa riêng. Em có thể tự bấm tiếp từng ngày,
+   * hoặc bấm "Check all other days" để cả tuần đóng tem SOLD OUT. Hết sạch thì hiện chuyên cơ.
    */
   const pickDay = (option: DayOption) => {
-    const refusal = SOLD_OUT_PA[option.weekday];
+    const secondWeek = days.indexOf(option) >= 7;
+    const refusal = (secondWeek ? SOLD_OUT_PA_WEEK2 : SOLD_OUT_PA)[option.weekday];
     playSound("buzz");
     setDayRefusal({ stamp: option.stamp, text: refusal });
     announce(refusal);
@@ -466,37 +502,39 @@ export function FlightCheckIn() {
       () => setDayRefusal((current) => (current ? { ...current, stamp: "" } : current)),
       450,
     );
-    if (soldOut.length > 0) return;
+    if (soldOut.includes(option.stamp)) return;
+    const next = [...soldOut, option.stamp];
+    setSoldOut(next);
+    if (next.length === days.length) window.setTimeout(openPrivateJet, 900);
+  };
 
-    setSoldOut([option.stamp]);
-    const rest = days.filter((other) => other.stamp !== option.stamp);
+  const checkAllDays = () => {
+    if (checkingDays) return;
+    setCheckingDays(true);
+    playSound("print");
+    const rest = days.filter((other) => !soldOut.includes(other.stamp));
     rest.forEach((other, index) => {
       window.setTimeout(
         () => {
           playSound("flap");
-          setSoldOut((list) => [...list, other.stamp]);
+          setSoldOut((list) => (list.includes(other.stamp) ? list : [...list, other.stamp]));
         },
-        CASCADE_START_MS + index * CASCADE_STEP_MS,
+        300 + index * CASCADE_STEP_MS,
       );
     });
-    window.setTimeout(
-      () => {
-        playSound("sparkle");
-        announce(PRIVATE_JET_PA);
-        setPrivateJet(true);
-      },
-      CASCADE_START_MS + rest.length * CASCADE_STEP_MS + 700,
-    );
+    window.setTimeout(openPrivateJet, 300 + rest.length * CASCADE_STEP_MS + 700);
   };
 
-  /** Giờ cũng như ngày: giờ nào cũng hết vé, hết sạch thì mở khung giờ bí mật 19:30. */
   /** Giờ còn chọn được với ngày đang chọn (thứ 2 đi chuyên cơ thì 19:00 không bị sold out). */
   const isOpenTime = (value: string) =>
     day?.weekday === JET_OPEN_TIME.weekday && value === JET_OPEN_TIME.time;
 
+  /** Các giờ thường có thể hết vé với ngày đang chọn. */
+  const sellableTimes = DEPARTURE_TIMES.filter((option) => !isOpenTime(option.time));
+
   /**
-   * Giờ cũng vậy: bấm một giờ hết vé là các giờ còn lại sold out theo.
-   * Thứ 2 thì chừa lại 19:00; thứ 3 thì hết sạch và mở khung giờ bí mật 19:30.
+   * Giờ cũng vậy: bấm một giờ thì chỉ giờ đó hết vé. Em tự bấm tiếp, hoặc bấm
+   * "Check all other times" để các giờ còn lại sold out cùng lúc.
    */
   const pickTime = (option: (typeof DEPARTURE_TIMES)[number]) => {
     if (!day) return;
@@ -513,32 +551,33 @@ export function FlightCheckIn() {
       () => setTimeRefusal((current) => (current ? { ...current, time: "" } : current)),
       450,
     );
-    if (soldOutTimes.length > 0) return;
+    if (soldOutTimes.includes(option.time)) return;
+    const next = [...soldOutTimes, option.time];
+    setSoldOutTimes(next);
+    if (next.length === sellableTimes.length) {
+      timeTimers.current.push(window.setTimeout(finishTimes, 900));
+    }
+  };
 
-    setSoldOutTimes([option.time]);
-    const rest = DEPARTURE_TIMES.filter(
-      (other) => other.time !== option.time && !isOpenTime(other.time),
-    );
-    const later = (ms: number, run: () => void) =>
-      timeTimers.current.push(window.setTimeout(run, ms));
+  const checkAllTimes = () => {
+    if (checkingTimes) return;
+    setCheckingTimes(true);
+    playSound("print");
+    const rest = sellableTimes.filter((other) => !soldOutTimes.includes(other.time));
     rest.forEach((other, index) => {
-      later(CASCADE_START_MS + index * CASCADE_STEP_MS, () => {
-        playSound("flap");
-        setSoldOutTimes((list) => [...list, other.time]);
-      });
+      timeTimers.current.push(
+        window.setTimeout(
+          () => {
+            playSound("flap");
+            setSoldOutTimes((list) => (list.includes(other.time) ? list : [...list, other.time]));
+          },
+          300 + index * CASCADE_STEP_MS,
+        ),
+      );
     });
-    const done = CASCADE_START_MS + rest.length * CASCADE_STEP_MS + 600;
-    const keptTime = DEPARTURE_TIMES.some((other) => isOpenTime(other.time));
-    later(done, () => {
-      if (keptTime) {
-        announce(JET_OPEN_TIME.left);
-        setTimeRefusal({ time: "", text: JET_OPEN_TIME.left });
-        return;
-      }
-      playSound("sparkle");
-      announce(SECRET_TIME_PA);
-      setSecretSlot(true);
-    });
+    timeTimers.current.push(
+      window.setTimeout(finishTimes, 300 + rest.length * CASCADE_STEP_MS + 600),
+    );
   };
 
   /** Đổi sang ngày khác thì phần giờ phải chọn lại từ đầu: hết SOLD OUT, ẩn khung giờ bí mật. */
@@ -550,6 +589,7 @@ export function FlightCheckIn() {
     timeTimers.current = [];
     setTime(null);
     setSoldOutTimes([]);
+    setCheckingTimes(false);
     setTimeRefusal(null);
     setSecretSlot(false);
   };
@@ -691,14 +731,15 @@ export function FlightCheckIn() {
   };
 
   return (
-    <div
-      ref={rootRef}
-      className={cn(
-        "relative min-h-svh overflow-hidden bg-[#070a12] text-[#f4f1ea]",
-        shaking && "animate-[screen-shake_0.45s_ease-in-out]",
-      )}
-    >
-      <style>{`
+    <PilotProvider value={pilotName}>
+      <div
+        ref={rootRef}
+        className={cn(
+          "relative min-h-svh overflow-hidden bg-[#070a12] text-[#f4f1ea]",
+          shaking && "animate-[screen-shake_0.45s_ease-in-out]",
+        )}
+      >
+        <style>{`
         @property --holo-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
         @keyframes holo-spin { to { --holo-angle: 360deg; } }
         @keyframes board-blink { 50% { opacity: 0.35; } }
@@ -786,6 +827,18 @@ export function FlightCheckIn() {
           10% { opacity: 1; }
           100% { transform: translate(-12vw, 105vh) rotate(540deg); opacity: 0.8; }
         }
+        @keyframes check-all-in {
+          0% { opacity: 0; transform: translateY(14px) scale(0.6); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes check-all-glow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(255,201,74,0.0), 0 0 12px rgba(255,201,74,0.25); }
+          50% { box-shadow: 0 0 0 6px rgba(255,201,74,0.18), 0 0 26px rgba(255,201,74,0.55); }
+        }
+        @keyframes tip-bob {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
+        }
         @keyframes tap-hint {
           0%, 100% { transform: translateY(10px); }
           45% { transform: translateY(0) scale(0.92); }
@@ -867,534 +920,563 @@ export function FlightCheckIn() {
         }
       `}</style>
 
-      <Sky banner={step > 0 || boardRevealed} scene={scene} />
+        <Sky banner={step > 0 || boardRevealed} scene={scene} />
 
-      <button
-        type="button"
-        onClick={toggleSound}
-        aria-label={sound ? "Mute sounds" : "Turn sounds on"}
-        aria-pressed={sound}
-        className="fixed top-3 right-3 z-50 flex size-9 items-center justify-center rounded-full border border-white/15 bg-black/40 text-lg backdrop-blur transition hover:scale-110 sm:top-4 sm:right-4 sm:size-10"
-      >
-        {sound ? "🔊" : "🔇"}
-      </button>
-
-      {!entered && <WelcomeGate onEnter={enter} />}
-
-      {skywriting && <Skywriting name={passenger} />}
-      {celebration && <HeartBurst x={celebration.x} y={celebration.y} count={160} />}
-
-      {departed && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed top-0 left-0 z-40 flex items-center gap-2"
-          style={{ animation: "fly-by 3.4s ease-in forwards" }}
+        <button
+          type="button"
+          onClick={toggleSound}
+          aria-label={sound ? "Mute sounds" : "Turn sounds on"}
+          aria-pressed={sound}
+          className="fixed top-3 right-3 z-50 flex size-9 items-center justify-center rounded-full border border-white/15 bg-black/40 text-lg backdrop-blur transition hover:scale-110 sm:top-4 sm:right-4 sm:size-10"
         >
-          {Array.from({ length: 6 }, (_, index) => (
-            <span
-              key={index}
-              className="text-[#ff8ab3]"
-              style={{
-                fontSize: `${0.8 + index * 0.25}rem`,
-                animation: `heart-trail 0.6s ${index * 0.1}s ease-out infinite alternate`,
-              }}
-            >
-              ♥
+          {sound ? "🔊" : "🔇"}
+        </button>
+
+        {!entered && <WelcomeGate onEnter={enter} />}
+
+        {skywriting && <Skywriting name={passenger} />}
+        {celebration && <HeartBurst x={celebration.x} y={celebration.y} count={160} />}
+
+        {departed && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none fixed top-0 left-0 z-40 flex items-center gap-2"
+            style={{ animation: "fly-by 3.4s ease-in forwards" }}
+          >
+            {Array.from({ length: 6 }, (_, index) => (
+              <span
+                key={index}
+                className="text-[#ff8ab3]"
+                style={{
+                  fontSize: `${0.8 + index * 0.25}rem`,
+                  animation: `heart-trail 0.6s ${index * 0.1}s ease-out infinite alternate`,
+                }}
+              >
+                ♥
+              </span>
+            ))}
+            <span className="text-7xl text-white drop-shadow-[0_0_24px_rgba(255,45,120,0.9)]">
+              ✈
             </span>
-          ))}
-          <span className="text-7xl text-white drop-shadow-[0_0_24px_rgba(255,45,120,0.9)]">✈</span>
-        </div>
-      )}
-
-      {clearing && (
-        <div
-          role="status"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-        >
-          <div className="[rotate:-10deg] animate-[stamp_0.4s_cubic-bezier(.3,1.6,.6,1)_both] rounded-2xl border-[6px] border-[#5cff9d] px-8 py-4 text-center text-[#5cff9d] shadow-[0_0_60px_rgba(92,255,157,0.35)]">
-            <p className="font-mono text-5xl font-black tracking-[0.15em] sm:text-7xl">CLEARED</p>
-            <p className="mt-1 font-mono text-xs tracking-[0.4em]">♥ SECURITY · LANE 3 ♥</p>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="relative z-10 mx-auto flex min-h-svh max-w-3xl flex-col items-center px-5 pt-10 pb-24 [text-shadow:0_1px_10px_rgba(0,0,0,0.65)] sm:pt-14">
-        <Progress step={step} />
-        <CaptainBar announcement={entered ? pa : null} />
+        {clearing && (
+          <div
+            role="status"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          >
+            <div className="[rotate:-10deg] animate-[stamp_0.4s_cubic-bezier(.3,1.6,.6,1)_both] rounded-2xl border-[6px] border-[#5cff9d] px-8 py-4 text-center text-[#5cff9d] shadow-[0_0_60px_rgba(92,255,157,0.35)]">
+              <p className="font-mono text-5xl font-black tracking-[0.15em] sm:text-7xl">CLEARED</p>
+              <p className="mt-1 font-mono text-xs tracking-[0.4em]">♥ SECURITY · LANE 3 ♥</p>
+            </div>
+          </div>
+        )}
 
-        <div key={step} className="step-in mt-8 flex w-full flex-1 flex-col items-center">
-          {step === 0 && (
-            <>
-              <StepHeading eyebrow="Domestic terminal · This week" title="Departures" />
-              <p
-                key={boardRevealed ? "revealed" : boardCancelled}
-                aria-live="polite"
-                className={cn(
-                  "step-in mt-3 max-w-md text-center text-sm",
-                  boardRevealed
-                    ? "font-semibold text-[#5cff9d]"
-                    : boardCancelled > 0
-                      ? "font-semibold text-[#ff8a8a]"
-                      : "text-white/60",
-                )}
-              >
-                {
-                  BOARD_SUBTITLES[
-                    boardRevealed
-                      ? BOARD_SUBTITLES.length - 1
-                      : Math.min(boardCancelled, BOARD_SUBTITLES.length - 2)
-                  ]
-                }
-              </p>
-              <div className="mt-8 w-full">
-                {/* Bảng chỉ bắt đầu lật sau khi em vào cổng, lúc đó âm thanh đã được mở khoá. */}
-                {entered ? (
-                  <DepartureBoard
-                    passenger={toTicketName(name)}
-                    onAnnounce={announce}
-                    onPreview={previewFlight}
-                    onProgress={(count, revealed) => {
-                      setBoardCancelled(count);
-                      setBoardRevealed(revealed);
-                    }}
-                    picked={pickedFlight}
-                    onPickOpen={() => {
-                      setPickedFlight(true);
-                      // Đợi ô tên mở khoá xong rồi mới đặt con trỏ vào.
-                      window.setTimeout(() => document.getElementById("passenger")?.focus(), 60);
-                    }}
-                  />
-                ) : (
-                  <div className="h-56 w-full rounded-xl bg-[#0a0b0e] ring-1 ring-white/5" />
-                )}
-              </div>
-              <form
-                onSubmit={(event: FormEvent) => event.preventDefault()}
-                className="mt-8 flex w-full max-w-md flex-col gap-5 rounded-2xl border border-white/10 bg-[#0b0f1c]/95 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-lg"
-              >
-                <div className="flex flex-col gap-2">
-                  <label
-                    htmlFor="passenger"
-                    className="text-[11px] tracking-[0.2em] text-white/50 uppercase"
-                  >
-                    Passenger name
-                  </label>
-                  <input
-                    id="passenger"
-                    value={name}
-                    onChange={(event) => changeName(event.target.value)}
-                    onKeyDown={(event) => {
-                      // Không có nút Check-in nên form không tự gửi khi nhấn Enter; tự kiểm tra tên.
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        if (nameOk) document.getElementById("booking-code")?.focus();
-                        else void submitName();
-                      }
-                    }}
-                    onBlur={() => void submitName()}
-                    disabled={!pickedFlight}
-                    placeholder={pickedFlight ? "Your name" : "Select your flight first"}
-                    maxLength={14}
-                    autoComplete="off"
-                    aria-invalid={nameError}
-                    aria-describedby="passenger-hint"
-                    className={cn(
-                      "rounded-xl border bg-[#05070d]/80 px-4 py-3 text-base outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-40",
-                      nameOk
-                        ? "border-[#5cff9d] text-[#5cff9d] shadow-[0_0_18px_rgba(92,255,157,0.25)]"
-                        : nameError
-                          ? "animate-[row-shake_0.45s_ease-in-out] border-[#ff5c5c]/70 bg-[#ff5c5c]/10"
-                          : "border-white/15 focus:border-[#ffc94a] focus:shadow-[0_0_0_4px_rgba(255,201,74,0.15)]",
-                    )}
-                  />
-                  <p
-                    id="passenger-hint"
-                    aria-live="polite"
-                    className={cn(
-                      "text-xs",
-                      nameError
-                        ? "text-[#ff8a8a]"
-                        : nameOk
-                          ? "text-[#5cff9d]"
-                          : pickedFlight
-                            ? "text-white/40"
-                            : "text-[#ffc94a]",
-                    )}
-                  >
-                    {nameError
-                      ? `📢 ${nameHints[Math.min(wrongNames - 1, nameHints.length - 1)]}`
-                      : nameOk
-                        ? "✓ Passenger found on the list."
-                        : pickedFlight
-                          ? "✓ Flight HH143 selected. Name as it appears on your booking."
-                          : "🔒 Pick a flight on the board to start check-in."}
-                  </p>
-                </div>
-                <div
+        <div className="relative z-10 mx-auto flex min-h-svh max-w-3xl flex-col items-center px-5 pt-10 pb-24 [text-shadow:0_1px_10px_rgba(0,0,0,0.65)] sm:pt-14">
+          <Progress step={step} />
+          <CaptainBar announcement={entered ? pa : null} />
+
+          <div key={step} className="step-in mt-8 flex w-full flex-1 flex-col items-center">
+            {step === 0 && (
+              <>
+                <StepHeading eyebrow="Domestic terminal · This week" title="Departures" />
+                <p
+                  key={boardRevealed ? "revealed" : boardCancelled}
+                  aria-live="polite"
                   className={cn(
-                    "flex flex-col gap-2",
-                    codeError && "animate-[row-shake_0.45s_ease-in-out]",
+                    "step-in mt-3 max-w-md text-center text-sm",
+                    boardRevealed
+                      ? "font-semibold text-[#5cff9d]"
+                      : boardCancelled > 0
+                        ? "font-semibold text-[#ff8a8a]"
+                        : "text-white/60",
                   )}
                 >
-                  <div className="flex items-baseline justify-between">
+                  {
+                    BOARD_SUBTITLES[
+                      boardRevealed
+                        ? BOARD_SUBTITLES.length - 1
+                        : Math.min(boardCancelled, BOARD_SUBTITLES.length - 2)
+                    ]
+                  }
+                </p>
+                <div className="mt-8 w-full">
+                  {/* Bảng chỉ bắt đầu lật sau khi em vào cổng, lúc đó âm thanh đã được mở khoá. */}
+                  {entered ? (
+                    <DepartureBoard
+                      passenger={toTicketName(name)}
+                      onAnnounce={announce}
+                      onPreview={previewFlight}
+                      onProgress={(count, revealed) => {
+                        setBoardCancelled(count);
+                        setBoardRevealed(revealed);
+                      }}
+                      picked={pickedFlight}
+                      onPickOpen={() => {
+                        setPickedFlight(true);
+                        // Đợi ô tên mở khoá xong rồi mới đặt con trỏ vào.
+                        window.setTimeout(() => document.getElementById("passenger")?.focus(), 60);
+                      }}
+                    />
+                  ) : (
+                    <div className="h-56 w-full rounded-xl bg-[#0a0b0e] ring-1 ring-white/5" />
+                  )}
+                </div>
+                <form
+                  onSubmit={(event: FormEvent) => event.preventDefault()}
+                  className="mt-8 flex w-full max-w-md flex-col gap-5 rounded-2xl border border-white/10 bg-[#0b0f1c]/95 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-lg"
+                >
+                  <div className="flex flex-col gap-2">
                     <label
-                      htmlFor="booking-code"
+                      htmlFor="passenger"
                       className="text-[11px] tracking-[0.2em] text-white/50 uppercase"
                     >
-                      Booking code
+                      Passenger name
                     </label>
-                    <span className="font-mono text-[10px] text-white/35">
-                      {code.length}/{codeLength}
-                    </span>
-                  </div>
-                  <BookingCodeInput
-                    value={code}
-                    onChange={(value) => void changeCode(value)}
-                    invalid={codeError}
-                    verified={verified}
-                    disabled={!hasName || verified}
-                    length={codeLength}
-                  />
-                  <p
-                    id="booking-code-hint"
-                    className={cn(
-                      "text-xs",
-                      codeError
-                        ? "text-[#ff8a8a]"
-                        : verified
-                          ? "text-[#5cff9d]"
-                          : checking
-                            ? "text-[#ffc94a]"
-                            : "text-white/40",
-                    )}
-                  >
-                    {/* Lặp lại gợi ý ngay dưới ô nhập, vì lúc này khung cơ trưởng có thể đã bị cuộn khuất. */}
-                    {codeError
-                      ? `📢 ${codeHints[Math.min(wrongTries - 1, codeHints.length - 1)]}`
-                      : verified
-                        ? "Booking found. Boarding you now…"
-                        : checking
-                          ? "Checking your booking…"
-                          : hasName
-                            ? `${codeLength} characters. The pilot sent it to you privately.`
-                            : "Confirm the passenger name first to unlock the booking code."}
-                  </p>
-                </div>
-              </form>
-            </>
-          )}
-
-          {step === 1 && (
-            <>
-              <StepHeading eyebrow={`Hello, ${passenger}`} title="Where would you like to fly?" />
-              <div className="mt-8 grid w-full max-w-xl gap-3 sm:grid-cols-2">
-                {DESTINATIONS.map((option, index) => (
-                  <button
-                    key={option.code}
-                    type="button"
-                    onClick={() => chooseDestination(option)}
-                    className="step-in group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b0f1c]/85 p-5 text-left backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:rotate-[-0.6deg] hover:border-[#ffc94a]/60 hover:bg-[#151b2e]/90 hover:shadow-[0_20px_50px_rgba(255,201,74,0.12)]"
-                    style={{ animationDelay: `${index * 80}ms` }}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="absolute -right-3 -bottom-4 text-7xl opacity-20 transition duration-300 group-hover:scale-125 group-hover:rotate-12 group-hover:opacity-90"
+                    <input
+                      id="passenger"
+                      value={name}
+                      onChange={(event) => changeName(event.target.value)}
+                      onKeyDown={(event) => {
+                        // Không có nút Check-in nên form không tự gửi khi nhấn Enter; tự kiểm tra tên.
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          if (nameOk) document.getElementById("booking-code")?.focus();
+                          else void submitName();
+                        }
+                      }}
+                      onBlur={() => void submitName()}
+                      disabled={!pickedFlight}
+                      placeholder={pickedFlight ? "Your name" : "Select your flight first"}
+                      maxLength={14}
+                      autoComplete="off"
+                      aria-invalid={nameError}
+                      aria-describedby="passenger-hint"
+                      className={cn(
+                        "rounded-xl border bg-[#05070d]/80 px-4 py-3 text-base outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-40",
+                        nameOk
+                          ? "border-[#5cff9d] text-[#5cff9d] shadow-[0_0_18px_rgba(92,255,157,0.25)]"
+                          : nameError
+                            ? "animate-[row-shake_0.45s_ease-in-out] border-[#ff5c5c]/70 bg-[#ff5c5c]/10"
+                            : "border-white/15 focus:border-[#ffc94a] focus:shadow-[0_0_0_4px_rgba(255,201,74,0.15)]",
+                      )}
+                    />
+                    <p
+                      id="passenger-hint"
+                      aria-live="polite"
+                      className={cn(
+                        "text-xs",
+                        nameError
+                          ? "text-[#ff8a8a]"
+                          : nameOk
+                            ? "text-[#5cff9d]"
+                            : pickedFlight
+                              ? "text-white/40"
+                              : "text-[#ffc94a]",
+                      )}
                     >
-                      {option.icon}
-                    </span>
-                    <p className="font-mono text-3xl font-extrabold text-[#ffc94a]">
-                      {option.code}
+                      {nameError
+                        ? `📢 ${nameHints[Math.min(wrongNames - 1, nameHints.length - 1)]}`
+                        : nameOk
+                          ? "✓ Passenger found on the list."
+                          : pickedFlight
+                            ? "✓ Flight HH143 selected. Name as it appears on your booking."
+                            : "🔒 Pick a flight on the board to start check-in."}
                     </p>
-                    <p className="mt-2 font-bold">{option.name}</p>
-                    <p className="mt-1 max-w-[80%] text-sm text-white/55">{option.note}</p>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <StepHeading
-                eyebrow={`Destination · ${destination?.icon} ${destination?.name}`}
-                title="Pick a schedule"
-              />
-              <p className="mt-3 text-center text-sm text-white/60">
-                This flight runs daily. The pilot is free every day.
-              </p>
-              <div className="mt-8 flex w-full max-w-xl flex-wrap justify-center gap-2">
-                {days.map((option) => (
-                  <button
-                    key={option.stamp}
-                    type="button"
-                    onClick={() => pickDay(option)}
-                    className={cn(
-                      "relative rounded-xl border px-4 py-3 font-mono text-sm transition",
-                      // Lịch thường không bao giờ được chọn: ngày nào bấm vào cũng thành SOLD OUT.
-                      soldOut.includes(option.stamp)
-                        ? "border-[#ff5c5c]/40 bg-[#ff5c5c]/5 text-white/35 line-through"
-                        : "border-white/15 bg-[#0b0f1c]/80 backdrop-blur-md hover:-translate-y-0.5 hover:border-white/40",
-                      dayRefusal?.stamp === option.stamp && "animate-[row-shake_0.45s_ease-in-out]",
-                    )}
-                  >
-                    {option.label}
-                    {soldOut.includes(option.stamp) && (
-                      <span className="absolute -top-2.5 -right-2 [rotate:8deg] animate-[stamp_0.35s_cubic-bezier(.3,1.6,.6,1)_both] rounded border-2 border-[#ff3b5c] bg-[#070a12] px-1 font-mono text-[9px] font-black tracking-wider text-[#ff3b5c] no-underline">
-                        SOLD OUT
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-              {dayRefusal && !privateJet && (
-                <p
-                  key={dayRefusal.text}
-                  aria-live="polite"
-                  className="step-in mt-4 max-w-md rounded-2xl border border-[#ff5c5c]/30 bg-[#ff5c5c]/10 px-4 py-2 text-center text-sm text-[#ffb3b3]"
-                >
-                  📢 {dayRefusal.text}
-                </p>
-              )}
-              {privateJet && (
-                <div className="step-in relative mt-6 w-full max-w-md overflow-hidden rounded-3xl border border-[#ffc94a]/50 bg-gradient-to-br from-[#2a1d05] via-[#14101f] to-[#2a0b1a] p-5 text-center shadow-[0_0_60px_rgba(255,201,74,0.2)]">
-                  <span
-                    aria-hidden="true"
-                    className="absolute -top-6 -right-4 [rotate:-20deg] text-7xl opacity-20"
-                  >
-                    🛩️
-                  </span>
-                  <p className="font-mono text-[10px] tracking-[0.35em] text-[#ffc94a]">
-                    ✨ CAPTAIN&apos;S PRIVATE JET ✨
-                  </p>
-                  <p className="mt-2 text-lg font-extrabold text-white">
-                    Whole week sold out. Good thing I own a jet.
-                  </p>
-                  <p className="mt-1 text-sm text-white/60">
-                    One passenger only. Champagne optional, me included.
-                  </p>
-                  <div className="mt-4 flex justify-center gap-3">
-                    {days
-                      .filter((option) =>
-                        (PRIVATE_JET_WEEKDAYS as readonly number[]).includes(option.weekday),
-                      )
-                      .map((option) => (
-                        <button
-                          key={option.stamp}
-                          type="button"
-                          onClick={() => pickJetDay(option)}
-                          aria-pressed={day?.stamp === option.stamp}
-                          className={cn(
-                            "rounded-xl border px-4 py-3 font-mono text-sm font-bold transition",
-                            day?.stamp === option.stamp
-                              ? "scale-105 border-[#ffc94a] bg-[#ffc94a] text-[#1d1500] shadow-[0_0_24px_rgba(255,201,74,0.5)]"
-                              : "border-[#ffc94a]/40 bg-[#ffc94a]/10 text-[#ffe3a3] hover:-translate-y-0.5 hover:border-[#ffc94a]",
-                          )}
-                        >
-                          🛩️ {option.label}
-                        </button>
-                      ))}
                   </div>
-                </div>
-              )}
-              {day && (
-                <p
-                  key={day.stamp}
-                  className="step-in mt-4 rounded-full bg-[#0b0f1c]/85 px-4 py-2 text-center text-sm text-white/75 backdrop-blur-md"
-                >
-                  ☀️ Forecast: {day.forecast}
-                </p>
-              )}
-              {/* Phải chọn ngày trước rồi mới được chọn giờ. */}
-              {!day && (
-                <p className="mt-6 text-center font-mono text-[11px] tracking-[0.2em] text-white/40 uppercase">
-                  🔒 Pick a date first to unlock departure times
-                </p>
-              )}
-              <div
-                className={cn(
-                  "mt-4 flex flex-wrap justify-center gap-2 transition-opacity duration-500",
-                  !day && "opacity-25",
-                )}
-              >
-                {DEPARTURE_TIMES.map((option) => (
-                  <button
-                    key={option.time}
-                    type="button"
-                    onClick={() => pickTime(option)}
-                    disabled={!day}
-                    aria-pressed={isOpenTime(option.time) ? time === option.time : undefined}
+                  <div
                     className={cn(
-                      "relative rounded-full border px-5 py-2 font-mono text-sm transition",
-                      !day && "cursor-not-allowed",
-                      time === option.time
-                        ? "scale-105 border-[#ff2d78] bg-[#ff2d78] font-bold text-white shadow-[0_0_24px_rgba(255,45,120,0.4)]"
-                        : soldOutTimes.includes(option.time)
+                      "flex flex-col gap-2",
+                      codeError && "animate-[row-shake_0.45s_ease-in-out]",
+                    )}
+                  >
+                    <div className="flex items-baseline justify-between">
+                      <label
+                        htmlFor="booking-code"
+                        className="text-[11px] tracking-[0.2em] text-white/50 uppercase"
+                      >
+                        Booking code
+                      </label>
+                      <span className="font-mono text-[10px] text-white/35">
+                        {code.length}/{codeLength}
+                      </span>
+                    </div>
+                    <BookingCodeInput
+                      value={code}
+                      onChange={(value) => void changeCode(value)}
+                      invalid={codeError}
+                      verified={verified}
+                      disabled={!hasName || verified}
+                      length={codeLength}
+                    />
+                    <p
+                      id="booking-code-hint"
+                      className={cn(
+                        "text-xs",
+                        codeError
+                          ? "text-[#ff8a8a]"
+                          : verified
+                            ? "text-[#5cff9d]"
+                            : checking
+                              ? "text-[#ffc94a]"
+                              : "text-white/40",
+                      )}
+                    >
+                      {/* Lặp lại gợi ý ngay dưới ô nhập, vì lúc này khung cơ trưởng có thể đã bị cuộn khuất. */}
+                      {codeError
+                        ? `📢 ${codeHints[Math.min(wrongTries - 1, codeHints.length - 1)]}`
+                        : verified
+                          ? "Booking found. Boarding you now…"
+                          : checking
+                            ? "Checking your booking…"
+                            : hasName
+                              ? `${codeLength} characters. The pilot sent it to you privately.`
+                              : "Confirm the passenger name first to unlock the booking code."}
+                    </p>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {step === 1 && (
+              <>
+                <StepHeading eyebrow={`Hello, ${passenger}`} title="Where would you like to fly?" />
+                <div className="mt-8 grid w-full max-w-xl gap-3 sm:grid-cols-2">
+                  {DESTINATIONS.map((option, index) => (
+                    <button
+                      key={option.code}
+                      type="button"
+                      onClick={() => chooseDestination(option)}
+                      className="step-in group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b0f1c]/85 p-5 text-left backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:rotate-[-0.6deg] hover:border-[#ffc94a]/60 hover:bg-[#151b2e]/90 hover:shadow-[0_20px_50px_rgba(255,201,74,0.12)]"
+                      style={{ animationDelay: `${index * 80}ms` }}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="absolute -right-3 -bottom-4 text-7xl opacity-20 transition duration-300 group-hover:scale-125 group-hover:rotate-12 group-hover:opacity-90"
+                      >
+                        {option.icon}
+                      </span>
+                      <p className="font-mono text-3xl font-extrabold text-[#ffc94a]">
+                        {option.code}
+                      </p>
+                      <p className="mt-2 font-bold">{option.name}</p>
+                      <p className="mt-1 max-w-[80%] text-sm text-white/55">{option.note}</p>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {step === 2 && (
+              <>
+                <StepHeading
+                  eyebrow={`Destination · ${destination?.icon} ${destination?.name}`}
+                  title="Pick a schedule"
+                />
+                <p className="mt-3 text-center text-sm text-white/60">
+                  This flight runs daily. The pilot is free every day.
+                </p>
+                <div className="mt-8 flex w-full max-w-xl flex-wrap justify-center gap-2">
+                  {days.map((option) => (
+                    <button
+                      key={option.stamp}
+                      type="button"
+                      onClick={() => pickDay(option)}
+                      className={cn(
+                        "relative rounded-xl border px-3 py-2.5 font-mono text-xs transition sm:px-4 sm:py-3 sm:text-sm",
+                        // Lịch thường không bao giờ được chọn: ngày nào bấm vào cũng thành SOLD OUT.
+                        soldOut.includes(option.stamp)
                           ? "border-[#ff5c5c]/40 bg-[#ff5c5c]/5 text-white/35 line-through"
                           : "border-white/15 bg-[#0b0f1c]/80 backdrop-blur-md hover:-translate-y-0.5 hover:border-white/40",
-                      timeRefusal?.time === option.time && "animate-[row-shake_0.45s_ease-in-out]",
-                      // Thứ 2: các giờ khác hết vé rồi thì 19:00 nhấp nháy mời chọn.
-                      isOpenTime(option.time) &&
-                        soldOutTimes.length > 0 &&
-                        time !== option.time &&
-                        "animate-[seat-pulse_1.4s_ease-in-out_infinite] border-[#5cff9d]/60 text-[#b8ffd6]",
-                    )}
-                  >
-                    {option.time}
-                    {soldOutTimes.includes(option.time) && (
-                      <span className="absolute -top-2.5 -right-3 [rotate:10deg] animate-[stamp_0.35s_cubic-bezier(.3,1.6,.6,1)_both] rounded border-2 border-[#ff3b5c] bg-[#070a12] px-1 font-mono text-[8px] font-black tracking-wider text-[#ff3b5c]">
-                        SOLD OUT
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-              {time && isOpenTime(time) && !timeRefusal && (
-                <p
-                  aria-live="polite"
-                  className="step-in mt-4 max-w-md rounded-2xl border border-[#5cff9d]/30 bg-[#5cff9d]/10 px-4 py-2 text-center text-sm text-[#b8ffd6]"
-                >
-                  ✈ {JET_OPEN_TIME.note}
-                </p>
-              )}
-              {timeRefusal && !secretSlot && (
-                <p
-                  key={timeRefusal.text}
-                  aria-live="polite"
-                  className="step-in mt-4 max-w-md rounded-2xl border border-[#ff5c5c]/30 bg-[#ff5c5c]/10 px-4 py-2 text-center text-sm text-[#ffb3b3]"
-                >
-                  📢 {timeRefusal.text}
-                </p>
-              )}
-              {secretSlot && (
-                <div className="step-in relative mt-6 w-full max-w-md overflow-hidden rounded-3xl border border-[#ff8ab3]/50 bg-gradient-to-br from-[#2a0b1a] via-[#14101f] to-[#1a0b2a] p-5 text-center shadow-[0_0_60px_rgba(255,45,120,0.2)]">
-                  <span
-                    aria-hidden="true"
-                    className="absolute -top-5 -left-3 [rotate:15deg] text-7xl opacity-20"
-                  >
-                    🌙
-                  </span>
-                  <p className="font-mono text-[10px] tracking-[0.35em] text-[#ff8ab3]">
-                    🤫 SECRET DEPARTURE 🤫
-                  </p>
-                  <p className="mt-2 text-lg font-extrabold text-white">
-                    Every slot is gone. Except this one.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      playSound("blip");
-                      setTime(SECRET_TIME.time);
-                    }}
-                    aria-pressed={time === SECRET_TIME.time}
-                    className={cn(
-                      "mt-4 rounded-full border px-8 py-3 font-mono text-lg font-bold transition",
-                      time === SECRET_TIME.time
-                        ? "scale-105 border-[#ff2d78] bg-[#ff2d78] text-white shadow-[0_0_30px_rgba(255,45,120,0.5)]"
-                        : "animate-[seat-pulse_1.4s_ease-in-out_infinite] border-[#ff8ab3]/60 bg-[#ff2d78]/15 text-[#ffd6e7] hover:-translate-y-0.5",
-                    )}
-                  >
-                    🌙 {SECRET_TIME.time}
-                  </button>
-                  {time === SECRET_TIME.time && (
-                    <p className="step-in mt-3 text-sm text-[#ff8ab3]">{SECRET_TIME.vibe}</p>
-                  )}
-                </div>
-              )}
-              <button
-                type="button"
-                disabled={!day || !time}
-                onClick={confirmSchedule}
-                className="mt-8 rounded-xl bg-gradient-to-r from-[#ff2d78] to-[#ff5c9a] px-6 py-3 font-bold text-white transition enabled:hover:-translate-y-0.5 enabled:hover:brightness-110 disabled:opacity-30"
-              >
-                Continue to seats
-              </button>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
-              <StepHeading eyebrow="Aircraft HH-143 · 20 seats" title="Choose your seat" />
-              <div className="mt-6">
-                <SeatMap
-                  onPick={pickSeat}
-                  onAnnounce={announce}
-                  onPokeMany={() =>
-                    announce(
-                      "Passenger near the front, please stop poking other passengers. The blue seats are free, I promise.",
-                    )
-                  }
-                />
-              </div>
-            </>
-          )}
-
-          {step === 4 && (
-            <SecurityCheck passenger={passenger} onAnnounce={announce} onDone={passSecurity} />
-          )}
-
-          {step === 5 && ticket && day && (
-            <>
-              <StepHeading
-                eyebrow="Now boarding · Gate 14"
-                title={departed ? "Have a lovely flight" : "Here’s your ticket"}
-              />
-              <div className="mt-8 w-full">
-                <BoardingPass ticket={ticket} torn={torn} />
-              </div>
-              {departed ? (
-                <div className="step-in flex flex-col items-center gap-5 text-center">
-                  <Countdown target={departureAt(day, ticket.time)} />
-                  <FinalScene dateLabel={ticket.dateLabel} time={ticket.time} />
-                  <div className="flex flex-wrap justify-center gap-3">
-                    <button
-                      type="button"
-                      onClick={(event) => void share(event.currentTarget)}
-                      className="rounded-xl bg-[#ffc94a] px-6 py-3 font-bold text-[#1d1500] transition hover:-translate-y-0.5 hover:brightness-110"
+                        dayRefusal?.stamp === option.stamp &&
+                          "animate-[row-shake_0.45s_ease-in-out]",
+                      )}
                     >
-                      Send me the ticket
+                      {option.label}
+                      {soldOut.includes(option.stamp) && (
+                        <span className="absolute -top-2.5 -right-2 [rotate:8deg] animate-[stamp_0.35s_cubic-bezier(.3,1.6,.6,1)_both] rounded border-2 border-[#ff3b5c] bg-[#070a12] px-1 font-mono text-[9px] font-black tracking-wider text-[#ff3b5c] no-underline">
+                          SOLD OUT
+                        </span>
+                      )}
                     </button>
+                  ))}
+                </div>
+                {dayRefusal && !privateJet && (
+                  <p
+                    key={dayRefusal.text}
+                    aria-live="polite"
+                    className="step-in mt-4 max-w-md rounded-2xl border border-[#ff5c5c]/30 bg-[#ff5c5c]/10 px-4 py-2 text-center text-sm text-[#ffb3b3]"
+                  >
+                    📢 {dayRefusal.text}
+                  </p>
+                )}
+                {/* Bấm thử 3 ngày đều hết vé thì mới hiện nút kiểm tra cả tuần, kèm bong bóng nhắc. */}
+                {soldOut.length >= DAYS_BEFORE_CHECK_ALL &&
+                  soldOut.length < days.length &&
+                  !privateJet && (
+                    <CheckAllButton
+                      onClick={checkAllDays}
+                      busy={checkingDays}
+                      label="🔍 Check all other days"
+                      busyLabel="Checking both weeks…"
+                      tip="Tired of trying? Let the captain check both weeks ✈"
+                    />
+                  )}
+                {privateJet && (
+                  <div className="step-in relative mt-6 w-full max-w-md overflow-hidden rounded-3xl border border-[#ffc94a]/50 bg-gradient-to-br from-[#2a1d05] via-[#14101f] to-[#2a0b1a] p-5 text-center shadow-[0_0_60px_rgba(255,201,74,0.2)]">
+                    <span
+                      aria-hidden="true"
+                      className="absolute -top-6 -right-4 [rotate:-20deg] text-7xl opacity-20"
+                    >
+                      🛩️
+                    </span>
+                    <p className="font-mono text-[10px] tracking-[0.35em] text-[#ffc94a]">
+                      ✨ CAPTAIN&apos;S PRIVATE JET ✨
+                    </p>
+                    <p className="mt-2 text-lg font-extrabold text-white">
+                      Two whole weeks sold out. Good thing I own a jet.
+                    </p>
+                    <p className="mt-1 text-sm text-white/60">
+                      One passenger only. Champagne optional, me included.
+                    </p>
+                    <div className="mt-4 flex justify-center gap-3">
+                      {days
+                        .slice(0, 7)
+                        .filter((option) =>
+                          (PRIVATE_JET_WEEKDAYS as readonly number[]).includes(option.weekday),
+                        )
+                        .map((option) => (
+                          <button
+                            key={option.stamp}
+                            type="button"
+                            onClick={() => pickJetDay(option)}
+                            aria-pressed={day?.stamp === option.stamp}
+                            className={cn(
+                              "rounded-xl border px-4 py-3 font-mono text-sm font-bold transition",
+                              day?.stamp === option.stamp
+                                ? "scale-105 border-[#ffc94a] bg-[#ffc94a] text-[#1d1500] shadow-[0_0_24px_rgba(255,201,74,0.5)]"
+                                : "border-[#ffc94a]/40 bg-[#ffc94a]/10 text-[#ffe3a3] hover:-translate-y-0.5 hover:border-[#ffc94a]",
+                            )}
+                          >
+                            🛩️ {option.label}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+                {day && (
+                  <p
+                    key={day.stamp}
+                    className="step-in mt-4 rounded-full bg-[#0b0f1c]/85 px-4 py-2 text-center text-sm text-white/75 backdrop-blur-md"
+                  >
+                    ☀️ Forecast: {day.forecast}
+                  </p>
+                )}
+                {/* Phải chọn ngày trước rồi mới được chọn giờ. */}
+                {!day && (
+                  <p className="mt-6 text-center font-mono text-[11px] tracking-[0.2em] text-white/40 uppercase">
+                    🔒 Pick a date first to unlock departure times
+                  </p>
+                )}
+                <div
+                  className={cn(
+                    "mt-4 flex flex-wrap justify-center gap-2 transition-opacity duration-500",
+                    !day && "opacity-25",
+                  )}
+                >
+                  {DEPARTURE_TIMES.map((option) => (
+                    <button
+                      key={option.time}
+                      type="button"
+                      onClick={() => pickTime(option)}
+                      disabled={!day}
+                      aria-pressed={isOpenTime(option.time) ? time === option.time : undefined}
+                      className={cn(
+                        "relative rounded-full border px-3.5 py-1.5 font-mono text-xs transition sm:px-5 sm:py-2 sm:text-sm",
+                        !day && "cursor-not-allowed",
+                        time === option.time
+                          ? "scale-105 border-[#ff2d78] bg-[#ff2d78] font-bold text-white shadow-[0_0_24px_rgba(255,45,120,0.4)]"
+                          : soldOutTimes.includes(option.time)
+                            ? "border-[#ff5c5c]/40 bg-[#ff5c5c]/5 text-white/35 line-through"
+                            : "border-white/15 bg-[#0b0f1c]/80 backdrop-blur-md hover:-translate-y-0.5 hover:border-white/40",
+                        timeRefusal?.time === option.time &&
+                          "animate-[row-shake_0.45s_ease-in-out]",
+                        // Thứ 2: các giờ khác hết vé rồi thì 19:00 nhấp nháy mời chọn.
+                        isOpenTime(option.time) &&
+                          soldOutTimes.length > 0 &&
+                          time !== option.time &&
+                          "animate-[seat-pulse_1.4s_ease-in-out_infinite] border-[#5cff9d]/60 text-[#b8ffd6]",
+                      )}
+                    >
+                      {option.time}
+                      {soldOutTimes.includes(option.time) && (
+                        <span className="absolute -top-2.5 -right-3 [rotate:10deg] animate-[stamp_0.35s_cubic-bezier(.3,1.6,.6,1)_both] rounded border-2 border-[#ff3b5c] bg-[#070a12] px-1 font-mono text-[8px] font-black tracking-wider text-[#ff3b5c]">
+                          SOLD OUT
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {time && isOpenTime(time) && !timeRefusal && (
+                  <p
+                    aria-live="polite"
+                    className="step-in mt-4 max-w-md rounded-2xl border border-[#5cff9d]/30 bg-[#5cff9d]/10 px-4 py-2 text-center text-sm text-[#b8ffd6]"
+                  >
+                    ✈ {JET_OPEN_TIME.note}
+                  </p>
+                )}
+                {timeRefusal && !secretSlot && (
+                  <p
+                    key={timeRefusal.text}
+                    aria-live="polite"
+                    className="step-in mt-4 max-w-md rounded-2xl border border-[#ff5c5c]/30 bg-[#ff5c5c]/10 px-4 py-2 text-center text-sm text-[#ffb3b3]"
+                  >
+                    📢 {timeRefusal.text}
+                  </p>
+                )}
+                {soldOutTimes.length >= TIMES_BEFORE_CHECK_ALL &&
+                  soldOutTimes.length < sellableTimes.length &&
+                  !secretSlot &&
+                  time === null && (
+                    // Nút giờ troll kiểu khác: báo lỗi hai lần, nhảy chỗ hai lần, lần thứ năm mới chạy.
+                    <GlitchyCheckButton
+                      onSuccess={checkAllTimes}
+                      label="🔍 Check all other times"
+                      tip="Still no luck? Let the captain check every slot ⏱"
+                    />
+                  )}
+                {secretSlot && (
+                  <div className="step-in relative mt-6 w-full max-w-md overflow-hidden rounded-3xl border border-[#ff8ab3]/50 bg-gradient-to-br from-[#2a0b1a] via-[#14101f] to-[#1a0b2a] p-5 text-center shadow-[0_0_60px_rgba(255,45,120,0.2)]">
+                    <span
+                      aria-hidden="true"
+                      className="absolute -top-5 -left-3 [rotate:15deg] text-7xl opacity-20"
+                    >
+                      🌙
+                    </span>
+                    <p className="font-mono text-[10px] tracking-[0.35em] text-[#ff8ab3]">
+                      🤫 SECRET DEPARTURE 🤫
+                    </p>
+                    <p className="mt-2 text-lg font-extrabold text-white">
+                      Every slot is gone. Except this one.
+                    </p>
                     <button
                       type="button"
                       onClick={() => {
                         playSound("blip");
-                        downloadCalendar(ticket, day);
+                        setTime(SECRET_TIME.time);
                       }}
-                      className="rounded-xl border border-white/20 px-6 py-3 font-bold transition hover:-translate-y-0.5 hover:border-white/50"
+                      aria-pressed={time === SECRET_TIME.time}
+                      className={cn(
+                        "mt-4 rounded-full border px-8 py-3 font-mono text-lg font-bold transition",
+                        time === SECRET_TIME.time
+                          ? "scale-105 border-[#ff2d78] bg-[#ff2d78] text-white shadow-[0_0_30px_rgba(255,45,120,0.5)]"
+                          : "animate-[seat-pulse_1.4s_ease-in-out_infinite] border-[#ff8ab3]/60 bg-[#ff2d78]/15 text-[#ffd6e7] hover:-translate-y-0.5",
+                      )}
                     >
-                      📅 Add to calendar
+                      🌙 {SECRET_TIME.time}
                     </button>
+                    {time === SECRET_TIME.time && (
+                      <p className="step-in mt-3 text-sm text-[#ff8ab3]">{SECRET_TIME.vibe}</p>
+                    )}
                   </div>
-                  <div className="flex flex-wrap justify-center gap-3">
-                    <button
-                      type="button"
-                      onClick={(event) => void saveTicket("image", event.currentTarget)}
-                      disabled={exporting !== null}
-                      className="rounded-xl border border-white/20 px-5 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 hover:border-white/50 disabled:opacity-50"
-                    >
-                      {exporting === "image" ? "Printing…" : "🖼 Save as image"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(event) => void saveTicket("pdf", event.currentTarget)}
-                      disabled={exporting !== null}
-                      className="rounded-xl border border-white/20 px-5 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 hover:border-white/50 disabled:opacity-50"
-                    >
-                      {exporting === "pdf" ? "Printing…" : "📄 Save as PDF"}
-                    </button>
-                  </div>
-                  {shared && (
-                    <p aria-live="polite" className="text-sm text-white/55">
-                      {shared}
-                    </p>
-                  )}
+                )}
+                <button
+                  type="button"
+                  disabled={!day || !time}
+                  onClick={confirmSchedule}
+                  className="mt-8 rounded-xl bg-gradient-to-r from-[#ff2d78] to-[#ff5c9a] px-6 py-3 font-bold text-white transition enabled:hover:-translate-y-0.5 enabled:hover:brightness-110 disabled:opacity-30"
+                >
+                  Continue to seats
+                </button>
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <StepHeading eyebrow="Aircraft HH-143 · 20 seats" title="Choose your seat" />
+                <div className="mt-6">
+                  <SeatMap
+                    onPick={pickSeat}
+                    onAnnounce={announce}
+                    onPokeMany={() =>
+                      announce(
+                        "Passenger near the front, please stop poking other passengers. The blue seats are free, I promise.",
+                      )
+                    }
+                  />
                 </div>
-              ) : (
-                <Takeoff onTakeoff={liftoff} />
-              )}
-            </>
-          )}
+              </>
+            )}
+
+            {step === 4 && (
+              <SecurityCheck passenger={passenger} onAnnounce={announce} onDone={passSecurity} />
+            )}
+
+            {step === 5 && ticket && day && (
+              <>
+                <StepHeading
+                  eyebrow="Now boarding · Gate 14"
+                  title={departed ? "Have a lovely flight" : "Here’s your ticket"}
+                />
+                <div className="mt-8 w-full">
+                  <BoardingPass ticket={ticket} torn={torn} />
+                </div>
+                {departed ? (
+                  <div className="step-in flex flex-col items-center gap-5 text-center">
+                    <Countdown target={departureAt(day, ticket.time)} />
+                    <FinalScene dateLabel={ticket.dateLabel} time={ticket.time} />
+                    <div className="flex flex-wrap justify-center gap-3">
+                      <button
+                        type="button"
+                        onClick={(event) => void share(event.currentTarget)}
+                        className="rounded-xl bg-[#ffc94a] px-6 py-3 font-bold text-[#1d1500] transition hover:-translate-y-0.5 hover:brightness-110"
+                      >
+                        Send me the ticket
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          playSound("blip");
+                          downloadCalendar(ticket, day);
+                        }}
+                        className="rounded-xl border border-white/20 px-6 py-3 font-bold transition hover:-translate-y-0.5 hover:border-white/50"
+                      >
+                        📅 Add to calendar
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      <button
+                        type="button"
+                        onClick={(event) => void saveTicket("image", event.currentTarget)}
+                        disabled={exporting !== null}
+                        className="rounded-xl border border-white/20 px-5 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 hover:border-white/50 disabled:opacity-50"
+                      >
+                        {exporting === "image" ? "Printing…" : "🖼 Save as image"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(event) => void saveTicket("pdf", event.currentTarget)}
+                        disabled={exporting !== null}
+                        className="rounded-xl border border-white/20 px-5 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 hover:border-white/50 disabled:opacity-50"
+                      >
+                        {exporting === "pdf" ? "Printing…" : "📄 Save as PDF"}
+                      </button>
+                    </div>
+                    {shared && (
+                      <p aria-live="polite" className="text-sm text-white/55">
+                        {shared}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <Takeoff onTakeoff={liftoff} />
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </PilotProvider>
   );
 }

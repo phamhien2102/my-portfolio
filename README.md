@@ -118,6 +118,10 @@ the link (case, accents and spaces are ignored). The code can be up to 12 letter
 and the code boxes follow its length. Without these parameters, the page falls back to
 `DATE_PASSENGER_NAME` and `DATE_BOOKING_CODE`, checked on the server.
 
+The inviter's name defaults to Raymond. Add `?pilot=<name>` to sign the invite with another
+name: it replaces "Raymond" everywhere, from the welcome screen and the secret flight to the
+CAPTCHA, the letter and the skywriting. Letters and spaces only, up to 12 characters.
+
 ### Test shortcuts
 
 Going through every step to test the last one takes a while, so the page accepts two query

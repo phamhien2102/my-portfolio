@@ -140,10 +140,16 @@ export type Destination = (typeof DESTINATIONS)[number];
 
 /** Giờ bay thường: giờ nào bấm vào cũng hết vé, mỗi giờ một câu đùa riêng. */
 export const DEPARTURE_TIMES = [
+  { time: "07:00", soldOut: "07:00 is sold out. Nobody is that in love before coffee." },
+  { time: "08:30", soldOut: "08:30 is taken by a very punctual rooster." },
   { time: "10:00", soldOut: "10:00 is sold out. The captain is not a morning person." },
+  { time: "12:00", soldOut: "12:00 is lunch. The pilot is busy eating your share of dessert." },
+  { time: "13:30", soldOut: "13:30 is nap o'clock. Every seat is reclined." },
   { time: "15:00", soldOut: "15:00 is gone. An afternoon nap booked every seat." },
+  { time: "17:00", soldOut: "17:00 is stuck in traffic. So is the plane." },
   { time: "19:00", soldOut: "19:00 is sold out. Dinner rush, apparently." },
   { time: "21:00", soldOut: "21:00 is fully booked by a parliament of sleepy owls." },
+  { time: "22:30", soldOut: "22:30 is past the captain's bedtime. Mum said no." },
 ] as const;
 
 /**
@@ -180,11 +186,22 @@ export const SOLD_OUT_PA: Record<number, string> = {
   0: "On Sundays this plane visits its grandma.",
 };
 
-/** Hết sạch vé cả tuần thì cơ trưởng mở chuyên cơ riêng, chỉ bay thứ 2 hoặc thứ 3. */
+/** Tuần thứ hai cũng hết vé, nhưng với một bộ câu đùa khác. */
+export const SOLD_OUT_PA_WEEK2: Record<number, string> = {
+  1: "Next Monday? Also sold out. Mondays are very popular this year.",
+  2: "Next Tuesday was bought by the penguins again. They loved it.",
+  3: "Next Wednesday is reserved for the plane's therapy session.",
+  4: "Next Thursday is sold out. The sunset fans came back.",
+  5: "Next Friday is gone. Someone booked it as a backup plan.",
+  6: "Next Saturday is the captain's laundry day. Very serious business.",
+  0: "Next Sunday the plane visits grandma again. She makes great soup.",
+};
+
+/** Hết sạch vé cả hai tuần thì cơ trưởng mở chuyên cơ riêng, chỉ bay thứ 2 hoặc thứ 3 tuần tới. */
 export const PRIVATE_JET_WEEKDAYS = [1, 2] as const;
 
 export const PRIVATE_JET_PA =
-  "Ladies and gentlemen, every flight this week is sold out. Fortunately, the captain owns a private jet. It flies on Monday or Tuesday, for one passenger only.";
+  "Ladies and gentlemen, every flight for the next two weeks is sold out. Fortunately, the captain owns a private jet. It flies on Monday or Tuesday, for one passenger only.";
 
 export const FORECASTS = [
   "100% chance of butterflies. Light giggles in the evening.",

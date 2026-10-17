@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
-import { CAPTAIN_NAME } from "../data";
 import { Chibi, FloatingHearts, type ChibiMood } from "./chibi";
+import { usePilot } from "../lib/pilot";
 
 /** Lá thư tình: thay đoạn chữ bằng chibi anh đỏ mặt cầm thư, chỉ kèm một dòng ngắn. */
 export function LetterScene({ name }: { name: string }) {
+  const pilot = usePilot();
   return (
     <div className="step-in relative w-full max-w-xs rotate-[-1.5deg] overflow-hidden rounded-2xl bg-[#fff6ea] px-5 pt-4 pb-5 text-center shadow-[0_20px_50px_rgba(255,45,120,0.3)]">
       <FloatingHearts count={6} />
@@ -18,14 +19,12 @@ export function LetterScene({ name }: { name: string }) {
         pose="hold"
         item="letter"
         className="relative mx-auto h-40 w-36"
-        title={`${CAPTAIN_NAME}, blushing, holding a love letter`}
+        title={`${pilot.name}, blushing, holding a love letter`}
       />
       <p className="relative mt-1 font-serif text-lg text-[#3a2a1a] italic">
         For {name} <span className="text-[#ff2d78]">♥</span>
       </p>
-      <p className="relative font-serif text-sm text-[#8a6a52] italic">
-        — {CAPTAIN_NAME.charAt(0)}.
-      </p>
+      <p className="relative font-serif text-sm text-[#8a6a52] italic">— {pilot.initial}.</p>
     </div>
   );
 }
@@ -35,6 +34,7 @@ export function LetterScene({ name }: { name: string }) {
  * trái tim hiện ra ở giữa.
  */
 export function PlotTwistScene() {
+  const pilot = usePilot();
   const [herMood, setHerMood] = useState<ChibiMood>("shock");
   const [heart, setHeart] = useState(false);
 
@@ -50,7 +50,7 @@ export function PlotTwistScene() {
   return (
     <div
       role="img"
-      aria-label={`Plot twist: the passenger next to you is ${CAPTAIN_NAME}`}
+      aria-label={`Plot twist: the passenger next to you is ${pilot.name}`}
       className="relative flex h-32 items-end justify-center gap-1"
     >
       <Chibi
@@ -83,11 +83,12 @@ export function PlotTwistScene() {
 
 /** Màn cuối: hai chibi nắm tay ngồi bên cửa sổ máy bay, tim bay lên. */
 export function FinalScene({ dateLabel, time }: { dateLabel: string; time: string }) {
+  const pilot = usePilot();
   return (
     <div className="step-in flex flex-col items-center gap-3">
       <div
         role="img"
-        aria-label={`You and ${CAPTAIN_NAME} holding hands on the plane, ${dateLabel} at ${time}`}
+        aria-label={`You and ${pilot.name} holding hands on the plane, ${dateLabel} at ${time}`}
         className="relative h-52 w-72 overflow-hidden rounded-[3rem] border-[10px] border-[#e9e4dc] bg-gradient-to-b from-[#2a1d4a] via-[#7a3b6e] to-[#ff9a76] shadow-[inset_0_0_30px_rgba(0,0,0,0.4),0_20px_60px_rgba(0,0,0,0.5)]"
       >
         {/* Mây trôi ngoài cửa sổ. */}

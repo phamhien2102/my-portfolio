@@ -4,9 +4,10 @@ import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/cn";
 
-import { CAPTAIN_NAME, type SceneName } from "../data";
+import { type SceneName } from "../data";
 import { r1, scatter } from "../lib/scatter";
 import { DalatScene, NightScene, PhuQuocScene, SeoulScene, TokyoScene } from "./scenes";
+import { usePilot } from "../lib/pilot";
 
 /** Khung vẽ của cảnh núi; SVG phủ kín màn hình và neo vào đáy. */
 const W = 1440;
@@ -94,6 +95,7 @@ export function Sky({
   /** Cảnh đang hiện: đêm sân bay, cảnh từng chuyến khi bấm, hoặc Hà Giang. */
   scene: SceneName;
 }) {
+  const pilot = usePilot();
   const layers = useRef<Record<keyof typeof PARALLAX, SVGGElement | null>>({
     far: null,
     mid: null,
@@ -303,7 +305,7 @@ export function Sky({
           <span className="text-2xl">✈</span>
           <span className="h-px w-6 bg-white/40" />
           <span className="rounded-sm bg-[#ff2d78]/80 px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.2em] text-white [clip-path:polygon(0_0,100%_0,94%_50%,100%_100%,0_100%)]">
-            ♥ GO OUT WITH {CAPTAIN_NAME.toUpperCase()} ♥
+            ♥ GO OUT WITH {pilot.board} ♥
           </span>
         </div>
       )}
