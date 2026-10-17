@@ -18,10 +18,11 @@ export const PROJECTS: readonly Project[] = [
   {
     title: "Date Airways",
     summary:
-      "A date invite told as an airport check-in: a split-flap board that cancels every flight but one, a CAPTCHA full of Raymonds, and a hold-to-take-off cockpit.",
+      "A date invite told as an airport check-in: a split-flap board that cancels every flight but one, a CAPTCHA full of Raymonds, and a hold-to-take-off cockpit. Try it: name guest, code DEMO2026.",
     tags: ["Next.js", "TypeScript", "Web Audio", "SVG"],
     year: "Oct 17, 2026",
-    href: "/dating",
+    // Demo link for portfolio visitors: the check-in hints reveal this name and code.
+    href: "/dating?passenger=guest&code=DEMO2026",
     image: "/projects/date-airways.png",
     addedAt: "2026-10-17",
   },
