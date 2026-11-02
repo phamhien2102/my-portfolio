@@ -9,33 +9,32 @@ export interface SkillGroup {
   items: readonly Skill[];
 }
 
-// PLACEHOLDER content: replace with your real stack and an honest self-assessment.
 export const SKILL_GROUPS: readonly SkillGroup[] = [
   {
     title: "Mobile",
     items: [
       { name: "React Native", level: 90 },
-      { name: "Expo", level: 85 },
-      { name: "Swift", level: 65 },
-      { name: "Kotlin", level: 60 },
+      { name: "Flutter", level: 82 },
+      { name: "MQTT", level: 80 },
+      { name: "Swift", level: 55 },
     ],
   },
   {
     title: "Frontend",
     items: [
-      { name: "React", level: 92 },
-      { name: "Next.js", level: 88 },
-      { name: "TypeScript", level: 90 },
-      { name: "Tailwind CSS", level: 85 },
+      { name: "React", level: 90 },
+      { name: "TypeScript", level: 88 },
+      { name: "Next.js", level: 80 },
+      { name: "Redux", level: 82 },
     ],
   },
   {
     title: "Backend",
     items: [
-      { name: "Node.js", level: 85 },
-      { name: "NestJS", level: 75 },
-      { name: "PostgreSQL", level: 75 },
-      { name: "GraphQL", level: 70 },
+      { name: "Firebase", level: 78 },
+      { name: "Python", level: 72 },
+      { name: "PostgreSQL", level: 70 },
+      { name: "MySQL", level: 68 },
     ],
   },
   {
@@ -43,8 +42,8 @@ export const SKILL_GROUPS: readonly SkillGroup[] = [
     items: [
       { name: "Git", level: 90 },
       { name: "Docker", level: 70 },
-      { name: "CI/CD", level: 72 },
-      { name: "Figma", level: 55 },
+      { name: "CI/CD", level: 70 },
+      { name: "GCP / AWS", level: 62 },
     ],
   },
 ];

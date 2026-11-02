@@ -1,14 +1,14 @@
-// PLACEHOLDER content: replace the name, email and social links with your own.
 export const SITE = {
   name: "Raymond Pham",
-  role: "Mobile & Fullstack Developer",
-  title: "Raymond Pham | Mobile & Fullstack Developer",
-  description: "Portfolio of Raymond Pham, a mobile and fullstack developer.",
+  role: "Senior Mobile Developer · React Native & ReactJS",
+  title: "Raymond Pham | Senior Mobile Developer",
+  description:
+    "Portfolio of Raymond Pham, a senior mobile developer building mobile and web products.",
   email: "phamhien2102@gmail.com",
   availability: "Available for new projects",
   socials: [
-    { label: "GitHub", href: "https://github.com/" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/" },
+    { label: "GitHub", href: "https://github.com/phamhien2102" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/hien-pham-a6787319a/" },
   ],
   nav: [
     { label: "About", href: "#about" },

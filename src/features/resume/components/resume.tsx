@@ -4,8 +4,36 @@ import { SITE } from "@/config/site";
 import { THEME, accentAt } from "@/config/theme";
 import { ABOUT } from "@/features/about";
 import { EXPERIENCE } from "@/features/experience";
-import { PROJECTS } from "@/features/projects";
 import { SKILL_GROUPS } from "@/features/skills";
+
+/** Resume-only skills: tools used day to day that are not part of the website's skill bars. */
+const EXTRA_SKILLS = [
+  {
+    title: "Quality",
+    items: ["Jest", "Fastlane", "Firebase App Distribution"],
+  },
+  { title: "Platform", items: ["Contentful (CMS)", "Feature flags", "Remote config", "OneTrust"] },
+] as const;
+
+const HONORS = [
+  { date: "Dec 2022", name: "Certificate, Neural Networks and Deep Learning", place: "Coursera" },
+  { date: "Nov 2022", name: "Certificate, Convolutional Neural Networks", place: "Coursera" },
+  {
+    date: "Sep 2015",
+    name: "Certificate, 10th Annual International Microelectronics Olympiad of Armenia (AMO2015)",
+    place: "Ho Chi Minh City",
+  },
+  {
+    date: "May 2015",
+    name: "Euréka encouragement award, Student Scientific Research Competition",
+    place: "Ho Chi Minh City",
+  },
+  {
+    date: "2012 — 2016",
+    name: "Certificate, Outstanding Scholarships Every Semester for UIT Students",
+    place: "Ho Chi Minh City",
+  },
+] as const;
 
 /** `https://www.github.com/foo/` -> `github.com/foo` */
 function displayUrl(href: string): string {
@@ -28,17 +56,29 @@ export function Resume() {
   const location = ABOUT.facts.find((fact) => fact.label === "Based in")?.value;
 
   return (
-    <article className="hidden bg-white p-[14mm] text-[9.5pt] leading-snug text-zinc-900 [-webkit-print-color-adjust:exact] [print-color-adjust:exact] print:block">
+    <article className="hidden bg-white box-decoration-clone p-[14mm] text-[9.5pt] leading-snug text-zinc-900 [-webkit-print-color-adjust:exact] [print-color-adjust:exact] print:block">
       <header>
-        <h1 className="text-[26pt] leading-none font-black tracking-tight">{SITE.name}</h1>
-        <p className="mt-[2mm] text-[12pt] font-semibold text-zinc-600">{SITE.role}</p>
-        <ul className="mt-[3mm] flex flex-wrap gap-x-[5mm] gap-y-[1mm] font-mono text-[8.5pt] text-zinc-600">
-          <li>{SITE.email}</li>
-          {SITE.socials.map((social) => (
-            <li key={social.label}>{displayUrl(social.href)}</li>
-          ))}
-          {location && <li>{location}</li>}
-        </ul>
+        <div className="flex items-center justify-between gap-[6mm]">
+          <div>
+            <h1 className="text-[26pt] leading-none font-black tracking-tight">{SITE.name}</h1>
+            <p className="mt-[2mm] text-[12pt] font-semibold text-zinc-600">{SITE.role}</p>
+            <ul className="mt-[3mm] flex flex-wrap gap-x-[5mm] gap-y-[1mm] font-mono text-[8.5pt] text-zinc-600">
+              <li>{SITE.email}</li>
+              {SITE.socials
+                .filter((social) => displayUrl(social.href).includes("/"))
+                .map((social) => (
+                  <li key={social.label}>{displayUrl(social.href)}</li>
+                ))}
+              {location && <li>{location}</li>}
+            </ul>
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element -- print-only, no optimization needed */}
+          <img
+            src="/cv-photo.png"
+            alt={`Portrait of ${SITE.name}`}
+            className="size-[28mm] shrink-0 rounded-full object-cover"
+          />
+        </div>
         {/* A thin band in the portfolio's palette. */}
         <div className="mt-[4mm] flex h-[1.2mm] overflow-hidden rounded-full">
           {THEME.palette.map((color) => (
@@ -50,6 +90,26 @@ export function Resume() {
       <section>
         <Heading>Profile</Heading>
         <p className="text-zinc-700">{ABOUT.paragraphs[0]}</p>
+      </section>
+
+      <section>
+        <Heading>Education</Heading>
+        <ul className="space-y-[2mm]">
+          <li>
+            <p className="font-bold">
+              University of Technology (UT)
+              <span className="font-normal text-zinc-600"> &middot; Ho Chi Minh City</span>
+            </p>
+            <p className="text-zinc-700">Master of Data Science &middot; Apr 2025</p>
+          </li>
+          <li>
+            <p className="font-bold">
+              University of Information Technology (UIT)
+              <span className="font-normal text-zinc-600"> &middot; Ho Chi Minh City</span>
+            </p>
+            <p className="text-zinc-700">Engineer of Embedded Systems &middot; May 2017</p>
+          </li>
+        </ul>
       </section>
 
       <section>
@@ -83,25 +143,6 @@ export function Resume() {
       </section>
 
       <section>
-        <Heading>Selected projects</Heading>
-        <ul className="space-y-[2.5mm]">
-          {PROJECTS.map((project) => (
-            <li key={project.title} className="break-inside-avoid">
-              <p className="font-bold">
-                {project.title}
-                <span className="font-mono text-[8pt] font-normal text-zinc-500">
-                  {" "}
-                  &middot; {project.year}
-                </span>
-              </p>
-              <p className="text-zinc-700">{project.summary}</p>
-              <p className="font-mono text-[8pt] text-zinc-500">{project.tags.join(" / ")}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section>
         <Heading>Skills</Heading>
         <dl className="grid grid-cols-[22mm_1fr] gap-x-[3mm] gap-y-[1.2mm]">
           {SKILL_GROUPS.map((group) => (
@@ -112,7 +153,32 @@ export function Resume() {
               <dd className="text-zinc-800">{group.items.map((item) => item.name).join(", ")}</dd>
             </div>
           ))}
+          {EXTRA_SKILLS.map((group) => (
+            <div key={group.title} className="contents">
+              <dt className="font-mono text-[8pt] tracking-widest text-zinc-500 uppercase">
+                {group.title}
+              </dt>
+              <dd className="text-zinc-800">{group.items.join(", ")}</dd>
+            </div>
+          ))}
         </dl>
+      </section>
+
+      <section>
+        <Heading>Honors &amp; Awards</Heading>
+        <ul className="space-y-[1mm]">
+          {HONORS.map((honor) => (
+            <li key={honor.name} className="grid grid-cols-[26mm_1fr] gap-x-[3mm]">
+              <span className="font-mono text-[8pt] tracking-widest text-zinc-500 uppercase">
+                {honor.date}
+              </span>
+              <span>
+                <span className="font-bold">{honor.name}</span>
+                <span className="text-zinc-600"> &middot; {honor.place}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
     </article>
   );

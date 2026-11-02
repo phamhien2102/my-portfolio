@@ -13,7 +13,6 @@ export interface Project {
   addedAt?: string;
 }
 
-// PLACEHOLDER content: replace with your real projects and links.
 export const PROJECTS: readonly Project[] = [
   {
     title: "Date Airways",
@@ -27,31 +26,51 @@ export const PROJECTS: readonly Project[] = [
     addedAt: "2026-10-17",
   },
   {
-    title: "Project Alpha",
-    summary: "Cross-platform fitness app with offline-first sync and real-time coaching.",
-    tags: ["React Native", "TypeScript", "Firebase"],
-    year: "2026",
+    title: "My Epic (Vail Resorts)",
+    summary:
+      "Commerce and passes in the My Epic mobile app: pass and lift-ticket browsing, product pages, cart and checkout, driven by CMS content and feature flags.",
+    tags: ["React Native", "TypeScript", "iOS", "Android"],
+    year: "2025 — Present",
     href: "#",
   },
   {
-    title: "Project Beta",
-    summary: "Marketplace platform with a Next.js storefront and a Node.js order pipeline.",
-    tags: ["Next.js", "Node.js", "PostgreSQL"],
+    title: "The Ring (boxing news app)",
+    summary:
+      "A boxing app with news and articles, fight schedules, rankings and fighter profiles, plus push notifications, consent management and iPad support.",
+    tags: ["React Native", "TypeScript", "Contentful", "iOS", "Android"],
     year: "2025",
     href: "#",
   },
   {
-    title: "Project Gamma",
-    summary: "Native iOS and Android companion app for a smart-home device line.",
-    tags: ["Swift", "Kotlin", "Bluetooth"],
-    year: "2025",
+    title: "AI Chat (ChatGPT-style)",
+    summary:
+      "A Flutter mobile app and a Next.js website where people chat with AI agents or switch between them.",
+    tags: ["Flutter", "Next.js", "AI"],
+    year: "2023 — 2024",
     href: "#",
   },
   {
-    title: "Project Delta",
-    summary: "Internal analytics dashboard with a GraphQL API and live charts.",
-    tags: ["React", "GraphQL", "AWS"],
-    year: "2024",
+    title: "Blockchain Game Store",
+    summary:
+      "A game store plus Pikachu, Block Puzzle and Jumps, built in Flutter for Android, iOS and web.",
+    tags: ["Flutter", "Blockchain"],
+    year: "2022",
+    href: "#",
+  },
+  {
+    title: "Autonomous Connect",
+    summary:
+      "A mobile app that controls smart desks, lights and thermals, and sends NFTs to a Raspberry Pi Smart Frame.",
+    tags: ["React Native", "MQTT", "Redux Saga", "Python"],
+    year: "2021 — 2022",
+    href: "#",
+  },
+  {
+    title: "SmartDesk 4",
+    summary:
+      "Controls a desk over Bluetooth and MQTT, with schedules, sit/stand reports, a child lock and notifications.",
+    tags: ["React Native", "MQTT", "Redux Saga"],
+    year: "2020",
     href: "#",
   },
 ];

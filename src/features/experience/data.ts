@@ -5,33 +5,64 @@ export interface Role {
   highlights: readonly string[];
 }
 
-// PLACEHOLDER content: replace with your real experience.
 export const EXPERIENCE: readonly Role[] = [
   {
-    period: "2024 — Present",
-    title: "Senior Mobile Developer",
-    company: "Company Name",
+    period: "Dec 2025 — Present",
+    title: "UI Engineer",
+    company: "Huge",
     highlights: [
-      "Led the rebuild of a flagship React Native app used by 500k+ people.",
-      "Cut cold-start time by 40% and introduced an automated release pipeline.",
+      "Own the pass browsing, product detail, cart and checkout screens of the My Epic app (React Native, iOS and Android), from list page to order confirmation, with cart API integration and off-sale handling. 95 merged pull requests across 71 tickets so far.",
+      "Moved pass content, icons and entry points to CMS and feature flags, so they can change without an app release.",
+      "Restructured the app-wide Redux store and wrote the optimization strategy the team follows; audited pass API contracts and found 11 typing gaps in four root-cause patterns, with a plan to fix them.",
+      "Ran technical spikes on app-startup observability and the APM SDK, and wrote the docs that came out of them.",
     ],
   },
   {
-    period: "2022 — 2024",
-    title: "Fullstack Developer",
-    company: "Another Company",
+    period: "Jun 2025 — Nov 2025",
+    title: "UI Engineer",
+    company: "Huge",
     highlights: [
-      "Shipped Next.js and Node.js features across web and mobile clients.",
-      "Designed a GraphQL API that unified three legacy services.",
+      "Joined The Ring app (React Native) in its first months and became its most active contributor in a team of six or more: 306 merged pull requests across 133 tickets. Built the shared component library and the sign-in flows (Google, Apple, email, account linking).",
+      "Delivered the news experience end to end: hero carousel, article pages with video, galleries and fight cards, and related articles, with content from Contentful.",
+      "Built schedules, event listings and results, rankings, and push notifications that open the right event.",
+      "Added consent management with OneTrust, remote config, image caching and iPad support, and wrote the notification, auth and analytics docs.",
     ],
   },
   {
-    period: "2020 — 2022",
-    title: "Junior Developer",
-    company: "First Company",
+    period: "Dec 2024 — May 2025",
+    title: "Master's thesis",
+    company: "University of Technology (UT)",
     highlights: [
-      "Built and maintained customer-facing features in React.",
-      "Grew test coverage from 20% to 70% on the core codebase.",
+      "Took a break from work to focus full time on the thesis for my Master of Data Science, completed in April 2025.",
+    ],
+  },
+  {
+    period: "Mar 2023 — Dec 2024",
+    title: "Mobile and Web Developer",
+    company: "Autonomous Company",
+    highlights: [
+      "Built a ChatGPT-style Flutter app so people can chat with AI agents or switch between them.",
+      "Shipped the same product on the web with Next.js.",
+    ],
+  },
+  {
+    period: "Mar 2020 — Feb 2023",
+    title: "Mobile & Hardware Developer",
+    company: "Autonomous Company",
+    highlights: [
+      "Built Autonomous Connect in React Native (MQTT, Redux Saga): a phone app for smart desks, lights, thermals and frames, plus a Python service on Raspberry Pi 4 that shows NFTs on Smart Frames.",
+      "Shipped blockchain games in Flutter (Pikachu, Block Puzzle, Jumps) for Android, iOS and web.",
+      "Improved the furniture e-commerce site in React (Redux Thunk, Facebook Conversions API, Google Tag Manager).",
+      "Shipped SmartDesk 4 — Bluetooth provisioning, MQTT control, scheduling, sit/stand reports, lock mode and Facebook/Google login.",
+    ],
+  },
+  {
+    period: "2018 — 2019",
+    title: "Mobile Developer",
+    company: "Saigon Technology Solutions",
+    highlights: [
+      "Built KALMS (Singapore) in React Native: voucher purchase, reporting and printing over Wi‑Fi/Bluetooth, then shipped it to the App Store and Play Store.",
+      "Worked on a chat and eKYC product (video selfie, face search): 1-to-1 and group chat, Agora video calls, SignalR messages and offline mode.",
     ],
   },
 ];

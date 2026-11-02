@@ -1,15 +1,14 @@
-// PLACEHOLDER content: replace with your own story.
 export const ABOUT = {
-  heading: "I build mobile and web products from idea to store.",
+  heading: "I build mobile and web products people actually use.",
   paragraphs: [
-    "I'm a mobile and fullstack developer who enjoys the whole journey: shaping an idea, designing the API behind it, and polishing the last pixel of the interface people actually touch.",
-    "I care about fast, accessible, well-tested software, and about interfaces that feel alive. When I'm not shipping features, I'm usually experimenting with WebGL and motion.",
+    "I'm a senior mobile developer with more than six years building mobile and web products in React Native, ReactJS, Next.js and Flutter. At Huge I ship commerce and checkout flows for a large resort app, and before that a boxing news app, with a focus on CMS-driven content and feature-flagged releases.",
+    "I'm also studying machine learning and deep learning, mostly through Coursera, and I still enjoy the hardware-adjacent work I started with — MQTT, Raspberry Pi, and products that live in the real world. I studied Embedded Systems at UIT and completed a Master of Data Science at the University of Technology, both in Ho Chi Minh City.",
   ],
   /** IANA time zone, used for the live clock next to the location. */
   timeZone: "Asia/Ho_Chi_Minh",
   facts: [
-    { label: "Based in", value: "Vietnam · UTC+7" },
-    { label: "Focus", value: "React Native, Next.js, Node.js" },
-    { label: "Status", value: "Open to new opportunities" },
+    { label: "Based in", value: "Ho Chi Minh City · Vietnam" },
+    { label: "Focus", value: "React Native, Next.js, Flutter" },
+    { label: "Status", value: "Open to Senior Mobile roles" },
   ],
 } as const;
