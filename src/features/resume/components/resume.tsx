@@ -140,7 +140,7 @@ export function Resume() {
           <img
             src="/cv-photo.png"
             alt={`Portrait of ${PERSON.fullName}`}
-            className="size-[28mm] shrink-0 rounded-full object-cover"
+            className="size-[36mm] shrink-0 rounded-full object-cover"
           />
         </div>
         {/* A thin band in the portfolio's palette. */}
