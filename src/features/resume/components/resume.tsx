@@ -202,6 +202,14 @@ export function Resume() {
                 {role.title}
                 <span className="font-normal text-zinc-600"> &middot; {role.company}</span>
               </h3>
+              {role.projects && (
+                <p className="mt-[1mm] text-zinc-700">
+                  <span className="font-semibold text-zinc-900">
+                    {role.projects.length > 1 ? "Projects" : "Project"}:
+                  </span>{" "}
+                  {role.projects.join(" · ")}
+                </p>
+              )}
               <ul className="mt-[1.5mm] list-disc space-y-[0.8mm] pl-[4mm] text-zinc-700 marker:text-zinc-400">
                 {role.highlights.map((line) => (
                   <li key={line}>{line}</li>
