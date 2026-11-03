@@ -40,12 +40,11 @@ function InfoRow({ label, children }: { label: string; children: ReactNode }) {
 
 /**
  * The resume as an App Store listing, made for the screen (the classic A4 layout is what gets
- * printed): the portrait is the app icon, the roles are the version history with release notes,
- * the projects are the preview screens. Light and flat, with a single orange accent.
+ * printed): the portrait is the app icon, the roles are release notes, the projects are the
+ * preview screens. Light and flat, with a single orange accent.
  */
 export function ResumeCreative() {
   const contacts = getContacts();
-  const versionCount = EXPERIENCE.length;
   const skillGroups = [
     ...SKILL_GROUPS.map((group) => ({ title: group.title, items: group.items.map((i) => i.name) })),
     ...EXTRA_SKILLS.map((group) => ({ title: group.title, items: [...group.items] })),
@@ -110,9 +109,9 @@ export function ResumeCreative() {
         </p>
       </section>
 
-      {/* Roles as versions, newest first. */}
+      {/* Roles with their release notes, newest first. */}
       <section className="mt-12">
-        <SectionTitle note="Newest first">Version History</SectionTitle>
+        <SectionTitle note="Newest first">Experience</SectionTitle>
         <ol className="mt-2 divide-y divide-zinc-200">
           {EXPERIENCE.map((role, i) => (
             <li
@@ -120,8 +119,7 @@ export function ResumeCreative() {
               className="grid gap-4 py-7 sm:grid-cols-[9.5rem_1fr] sm:gap-8"
             >
               <div>
-                <p className="text-xl font-bold">Version {versionCount - i}.0</p>
-                <p className="mt-1 font-mono text-xs tracking-widest text-zinc-500 uppercase">
+                <p className="font-mono text-sm leading-snug tracking-wide text-zinc-700 uppercase">
                   {role.period}
                 </p>
                 {i === 0 && (
@@ -163,12 +161,12 @@ export function ResumeCreative() {
 
       {/* Projects as screenshots in a sideways-scrolling row. */}
       <section className="mt-12">
-        <SectionTitle note="Scroll sideways">Preview</SectionTitle>
+        <SectionTitle>Preview</SectionTitle>
         <div
           role="region"
           aria-label="Projects"
           tabIndex={0}
-          className="-mx-6 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 sm:-mx-12 sm:px-12"
+          className="-mx-6 mt-5 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto px-6 pb-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 sm:-mx-12 sm:scroll-px-12 sm:px-12"
         >
           {PROJECTS.map((project) => (
             <article
