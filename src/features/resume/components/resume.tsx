@@ -35,6 +35,14 @@ const HONORS = [
   },
 ] as const;
 
+/** Personal details printed on the resume only (not shown elsewhere on the site). */
+const PERSON = {
+  fullName: "Phạm Thanh Hiền",
+  phone: "+8483.9199.121",
+  birthday: "Feb 21, 1994",
+  birthplace: "Tây Ninh (Long An)",
+} as const;
+
 /** `https://www.github.com/foo/` -> `github.com/foo` */
 function displayUrl(href: string): string {
   return href.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
@@ -60,9 +68,12 @@ export function Resume() {
       <header>
         <div className="flex items-center justify-between gap-[6mm]">
           <div>
-            <h1 className="text-[26pt] leading-none font-black tracking-tight">{SITE.name}</h1>
+            <h1 className="text-[26pt] leading-none font-black tracking-tight">
+              {PERSON.fullName}
+            </h1>
             <p className="mt-[2mm] text-[12pt] font-semibold text-zinc-600">{SITE.role}</p>
             <ul className="mt-[3mm] flex flex-wrap gap-x-[5mm] gap-y-[1mm] font-mono text-[8.5pt] text-zinc-600">
+              <li>{PERSON.phone}</li>
               <li>{SITE.email}</li>
               {SITE.socials
                 .filter((social) => displayUrl(social.href).includes("/"))
@@ -71,11 +82,14 @@ export function Resume() {
                 ))}
               {location && <li>{location}</li>}
             </ul>
+            <p className="mt-[1mm] font-mono text-[8.5pt] text-zinc-600">
+              Born {PERSON.birthday} &middot; {PERSON.birthplace}
+            </p>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element -- print-only, no optimization needed */}
           <img
             src="/cv-photo.png"
-            alt={`Portrait of ${SITE.name}`}
+            alt={`Portrait of ${PERSON.fullName}`}
             className="size-[28mm] shrink-0 rounded-full object-cover"
           />
         </div>
