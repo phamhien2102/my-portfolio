@@ -69,9 +69,10 @@ export const EDUCATION = [
 
 /** Headline numbers for the creative layout. The pull requests come from the git history at Huge. */
 export const STATS = [
-  { value: "6+", label: "years building mobile and web products" },
-  { value: "400+", label: "pull requests merged at Huge" },
-  { value: "MSc", label: "Data Science, 2025" },
+  { label: "Experience", value: "6+", caption: "Years" },
+  { label: "Pull requests", value: "400+", caption: "Merged at Huge" },
+  { label: "Education", value: "MSc", caption: "Data Science" },
+  { label: "Based in", value: "HCMC", caption: "Vietnam" },
 ] as const;
 
 /** `https://www.github.com/foo/` -> `github.com/foo` */

@@ -36,7 +36,7 @@ export function ResumeViewer({ classic, creative, printable }: ResumeViewerProps
     <div
       className={cn(
         "min-h-svh transition-colors duration-300 motion-reduce:transition-none print:bg-white",
-        layout === "classic" ? "bg-zinc-900" : "bg-[#09090e]",
+        layout === "classic" ? "bg-zinc-900" : "bg-zinc-200",
       )}
     >
       <header className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 bg-black/60 px-6 py-4 backdrop-blur sm:px-10 print:hidden">

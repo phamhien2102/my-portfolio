@@ -1,11 +1,11 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import { FadeIn } from "@/components/ui/fade-in";
-import { THEME, accentAt } from "@/config/theme";
+import { SITE } from "@/config/site";
+import { accentAt } from "@/config/theme";
 import { ABOUT } from "@/features/about";
-import { EXPERIENCE, RoleProjects } from "@/features/experience";
+import { EXPERIENCE } from "@/features/experience";
+import { PROJECTS } from "@/features/projects";
 import { SKILL_GROUPS } from "@/features/skills";
-import { cn } from "@/lib/cn";
 
 import {
   EDUCATION,
@@ -13,275 +13,268 @@ import {
   HONORS,
   PERSON,
   STATS,
+  displayUrl,
   getContacts,
-  type Contact,
 } from "./resume-data";
 
-const GRADIENT = `linear-gradient(90deg, ${THEME.palette.join(", ")})`;
-const RING = `conic-gradient(from 0deg, ${[...THEME.palette, THEME.palette[0]].join(", ")})`;
+/** The one accent colour of this layout (the orange of the shared palette). */
+const ACCENT_VAR = { "--accent": accentAt(2) } as CSSProperties;
 
-function Label({ children, accent }: { children: string; accent: number }) {
+function SectionTitle({ children, note }: { children: string; note?: string }) {
   return (
-    <p
-      style={{ "--accent": accentAt(accent) } as CSSProperties}
-      className="flex items-center gap-3 font-mono text-xs tracking-widest text-zinc-500 uppercase"
-    >
-      <span aria-hidden="true" className="size-2 rounded-full bg-(--accent)" />
-      {children}
-    </p>
-  );
-}
-
-function Card({
-  accent,
-  className,
-  children,
-}: {
-  accent: number;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      style={{ "--accent": accentAt(accent) } as CSSProperties}
-      className={cn(
-        "relative h-full overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition-colors duration-300 hover:border-(--accent)/60 motion-reduce:transition-none sm:p-8",
-        className,
-      )}
-    >
-      {children}
+    <div className="flex items-baseline justify-between gap-4">
+      <h2 className="text-2xl font-bold tracking-tight text-zinc-900">{children}</h2>
+      {note && <p className="text-sm text-zinc-500">{note}</p>}
     </div>
   );
 }
 
-function ContactPill({ contact, index }: { contact: Contact; index: number }) {
-  const className = cn(
-    "inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-2 text-sm text-zinc-200",
-    contact.href &&
-      "transition-colors duration-300 hover:border-transparent hover:bg-(--accent) hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none",
-  );
-  const content = (
-    <>
-      <span aria-hidden="true" className="size-4 shrink-0">
-        {contact.icon}
-      </span>
-      {contact.text}
-    </>
-  );
-  const style = { "--accent": accentAt(index + 1) } as CSSProperties;
-
-  if (!contact.href) {
-    return (
-      <span style={style} className={className}>
-        {content}
-      </span>
-    );
-  }
-  const external = contact.href.startsWith("http");
+function InfoRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <a
-      href={contact.href}
-      style={style}
-      className={className}
-      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-    >
-      {content}
-    </a>
+    <div className="grid gap-1 py-4 sm:grid-cols-[10rem_1fr] sm:gap-6">
+      <dt className="text-zinc-500">{label}</dt>
+      <dd className="text-zinc-900">{children}</dd>
+    </div>
   );
 }
 
 /**
- * The resume as a dark, neon bento page, made for the screen (the classic A4 layout is what gets
- * printed). Server-rendered; the only motion is a slow colour ring around the portrait, which
- * stops for visitors who prefer reduced motion.
+ * The resume as an App Store listing, made for the screen (the classic A4 layout is what gets
+ * printed): the portrait is the app icon, the roles are the version history with release notes,
+ * the projects are the preview screens. Light and flat, with a single orange accent.
  */
 export function ResumeCreative() {
   const contacts = getContacts();
+  const versionCount = EXPERIENCE.length;
   const skillGroups = [
     ...SKILL_GROUPS.map((group) => ({ title: group.title, items: group.items.map((i) => i.name) })),
     ...EXTRA_SKILLS.map((group) => ({ title: group.title, items: [...group.items] })),
   ];
 
   return (
-    <div className="relative mx-auto w-full max-w-6xl">
-      {/* Soft neon glow behind everything; purely decorative. */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 left-1/4 size-[32rem] rounded-full bg-[#7a2cff]/20 blur-[120px]" />
-        <div className="absolute top-1/3 -right-24 size-[28rem] rounded-full bg-[#ff2d95]/15 blur-[120px]" />
-        <div className="absolute bottom-0 left-0 size-[26rem] rounded-full bg-[#00c4ff]/10 blur-[120px]" />
-      </div>
+    <div
+      style={ACCENT_VAR}
+      className="mx-auto w-full max-w-4xl rounded-[2rem] bg-white p-6 text-zinc-900 shadow-sm sm:p-12"
+    >
+      {/* The "app" header: icon, name, subtitle, call to action. */}
+      <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
+        {/* eslint-disable-next-line @next/next/no-img-element -- single small static image */}
+        <img
+          src="/cv-photo.png"
+          alt={`Portrait of ${PERSON.fullName}`}
+          className="size-32 shrink-0 rounded-[22.37%] object-cover ring-1 ring-black/10 sm:size-40"
+        />
+        <div className="min-w-0 flex-1">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {PERSON.fullName}
+            <span className="ml-2 font-normal text-zinc-500">({PERSON.nickname})</span>
+          </h1>
+          <p className="mt-1 text-lg text-zinc-600">{SITE.role}</p>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <a
+              href={`mailto:${SITE.email}`}
+              className="rounded-full bg-(--accent) px-7 py-2.5 text-sm font-bold tracking-wide text-black uppercase transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 motion-reduce:transition-none"
+            >
+              Hire me
+            </a>
+            <a
+              href={SITE.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-zinc-100 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 motion-reduce:transition-none"
+            >
+              {displayUrl(SITE.website)}
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          </div>
+        </div>
+      </header>
 
-      <div className="grid gap-4 lg:grid-cols-12">
-        {/* Hero */}
-        <FadeIn className="lg:col-span-12">
-          <Card accent={12} className="p-8 sm:p-12">
-            <div className="flex flex-col-reverse items-start justify-between gap-10 md:flex-row md:items-center">
-              <div className="min-w-0">
-                <p className="font-mono text-xs tracking-widest text-zinc-500 uppercase">Résumé</p>
-                <h1 className="mt-4 text-5xl leading-[0.95] font-black tracking-tighter sm:text-7xl">
-                  <span
-                    style={{ backgroundImage: GRADIENT }}
-                    className="bg-clip-text text-transparent [-webkit-text-fill-color:transparent]"
-                  >
-                    {PERSON.fullName}
-                  </span>
-                  <span className="ml-3 align-middle text-2xl font-normal tracking-normal text-zinc-500 sm:text-3xl">
-                    ({PERSON.nickname})
-                  </span>
-                </h1>
-                <p className="mt-5 max-w-xl text-lg text-zinc-300 sm:text-xl">
-                  Senior Mobile Developer · React Native &amp; ReactJS
+      {/* The rating strip. */}
+      <dl className="mt-10 grid grid-cols-2 gap-y-6 border-y border-zinc-200 py-5 sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:divide-zinc-200">
+        {STATS.map((stat) => (
+          <div key={stat.label} className="px-4 text-center">
+            <dt className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+              {stat.label}
+            </dt>
+            <dd className="mt-1 text-2xl font-bold">{stat.value}</dd>
+            <dd className="text-sm text-zinc-500">{stat.caption}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <section className="mt-12">
+        <SectionTitle>About</SectionTitle>
+        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-zinc-700">
+          {ABOUT.paragraphs[0]}
+        </p>
+      </section>
+
+      {/* Roles as versions, newest first. */}
+      <section className="mt-12">
+        <SectionTitle note="Newest first">Version History</SectionTitle>
+        <ol className="mt-2 divide-y divide-zinc-200">
+          {EXPERIENCE.map((role, i) => (
+            <li
+              key={`${role.company}-${role.period}`}
+              className="grid gap-4 py-7 sm:grid-cols-[9.5rem_1fr] sm:gap-8"
+            >
+              <div>
+                <p className="text-xl font-bold">Version {versionCount - i}.0</p>
+                <p className="mt-1 font-mono text-xs tracking-widest text-zinc-500 uppercase">
+                  {role.period}
                 </p>
-                <ul className="mt-8 flex flex-wrap gap-2">
-                  {contacts.map((contact, i) => (
-                    <li key={contact.text}>
-                      <ContactPill contact={contact} index={i} />
+                {i === 0 && (
+                  <span className="mt-3 inline-block rounded-full bg-(--accent) px-3 py-0.5 text-xs font-bold text-black">
+                    Current
+                  </span>
+                )}
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {role.title}
+                  <span className="font-normal text-zinc-500"> &middot; {role.company}</span>
+                </h3>
+                {role.projects && (
+                  <ul aria-label="Projects" className="mt-3 flex flex-wrap gap-2">
+                    {role.projects.map((project) => (
+                      <li
+                        key={project}
+                        className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700"
+                      >
+                        {project}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <p className="mt-4 text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+                  What&apos;s new
+                </p>
+                <ul className="mt-2 list-disc space-y-2 pl-5 text-zinc-700 marker:text-(--accent)">
+                  {role.highlights.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* Projects as screenshots in a sideways-scrolling row. */}
+      <section className="mt-12">
+        <SectionTitle note="Scroll sideways">Preview</SectionTitle>
+        <div
+          role="region"
+          aria-label="Projects"
+          tabIndex={0}
+          className="-mx-6 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 sm:-mx-12 sm:px-12"
+        >
+          {PROJECTS.map((project) => (
+            <article
+              key={project.title}
+              className="flex h-96 w-64 shrink-0 snap-start flex-col overflow-hidden rounded-3xl bg-zinc-900 text-white sm:w-72"
+            >
+              {project.image ? (
+                // eslint-disable-next-line @next/next/no-img-element -- small static preview
+                <img src={project.image} alt="" className="h-36 w-full object-cover" />
+              ) : (
+                <div
+                  aria-hidden="true"
+                  className="flex h-36 items-end bg-zinc-800 p-5 text-5xl font-black tracking-tighter text-zinc-600"
+                >
+                  {project.title.charAt(0)}
+                </div>
+              )}
+              <div className="flex flex-1 flex-col justify-between p-5">
+                <div>
+                  <p className="font-mono text-xs tracking-widest text-(--accent) uppercase">
+                    {project.year}
+                  </p>
+                  <h3 className="mt-2 text-lg leading-tight font-bold">{project.title}</h3>
+                  <p className="mt-2 line-clamp-4 text-sm text-zinc-400">{project.summary}</p>
+                </div>
+                <ul className="mt-3 flex flex-wrap gap-1.5">
+                  {project.tags.slice(0, 3).map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-zinc-300"
+                    >
+                      {tag}
                     </li>
                   ))}
                 </ul>
               </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
-              {/* Portrait inside a slowly turning colour ring. */}
-              <div className="relative size-44 shrink-0 sm:size-56">
-                <span
-                  aria-hidden="true"
-                  style={{ backgroundImage: RING }}
-                  className="absolute inset-0 rounded-full motion-safe:animate-[spin_14s_linear_infinite]"
-                />
-                {/* eslint-disable-next-line @next/next/no-img-element -- single small static image */}
-                <img
-                  src="/cv-photo.png"
-                  alt={`Portrait of ${PERSON.fullName}`}
-                  className="absolute inset-1.5 size-[calc(100%-0.75rem)] rounded-full border-4 border-[#0e0e16] object-cover"
-                />
-              </div>
-            </div>
-          </Card>
-        </FadeIn>
-
-        {/* Headline numbers */}
-        {STATS.map((stat, i) => (
-          <FadeIn key={stat.label} delay={80 * (i + 1)} className="lg:col-span-4">
-            <Card accent={i * 4 + 2}>
-              <p
-                style={{ backgroundImage: GRADIENT }}
-                className="bg-clip-text text-6xl font-black tracking-tighter text-transparent [-webkit-text-fill-color:transparent]"
-              >
-                {stat.value}
-              </p>
-              <p className="mt-2 text-zinc-400">{stat.label}</p>
-            </Card>
-          </FadeIn>
-        ))}
-
-        {/* About and education */}
-        <FadeIn className="lg:col-span-7">
-          <Card accent={1}>
-            <Label accent={1}>About</Label>
-            <p className="mt-5 text-lg leading-relaxed text-zinc-200">{ABOUT.paragraphs[0]}</p>
-          </Card>
-        </FadeIn>
-        <FadeIn delay={80} className="lg:col-span-5">
-          <Card accent={5}>
-            <Label accent={5}>Education</Label>
-            <ul className="mt-5 space-y-5">
+      {/* Key-value details. */}
+      <section className="mt-12">
+        <SectionTitle>Information</SectionTitle>
+        <dl className="mt-2 divide-y divide-zinc-200 border-y border-zinc-200 text-sm">
+          <InfoRow label="Education">
+            <ul className="space-y-2">
               {EDUCATION.map((item) => (
                 <li key={item.school}>
-                  <p className="font-bold text-zinc-100">{item.school}</p>
-                  <p className="text-zinc-400">{item.degree}</p>
-                  <p className="font-mono text-xs tracking-widest text-zinc-500 uppercase">
-                    {item.place} &middot; {item.date}
-                  </p>
+                  {item.degree} &middot; {item.school}
+                  <span className="text-zinc-500">
+                    {" "}
+                    ({item.place}, {item.date})
+                  </span>
                 </li>
               ))}
             </ul>
-          </Card>
-        </FadeIn>
-
-        {/* Experience */}
-        <FadeIn className="lg:col-span-8">
-          <Card accent={9}>
-            <Label accent={9}>Experience</Label>
-            <ol className="relative mt-8 ml-1.5 space-y-10 border-l border-white/10 pl-8">
-              {EXPERIENCE.map((role, i) => (
-                <li
-                  key={`${role.company}-${role.period}`}
-                  style={{ "--accent": accentAt(i + 2) } as CSSProperties}
-                  className="relative"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="absolute top-1.5 -left-[calc(2rem+4.5px)] size-2 rounded-full bg-(--accent) shadow-[0_0_12px_var(--accent)]"
-                  />
-                  <p className="font-mono text-xs tracking-widest text-(--accent) uppercase">
-                    {role.period}
-                  </p>
-                  <h3 className="mt-2 text-2xl font-black tracking-tight">
-                    {role.title}
-                    <span className="font-normal text-zinc-400"> &middot; {role.company}</span>
-                  </h3>
-                  <RoleProjects projects={role.projects} />
-                  <ul className="mt-4 space-y-2.5 text-zinc-300">
-                    {role.highlights.map((line) => (
-                      <li key={line} className="flex gap-3">
-                        <span
-                          aria-hidden="true"
-                          className="mt-2.5 h-px w-4 shrink-0 bg-(--accent)"
-                        />
-                        {line}
-                      </li>
-                    ))}
-                  </ul>
+          </InfoRow>
+          {skillGroups.map((group) => (
+            <InfoRow key={group.title} label={group.title}>
+              {group.items.join(", ")}
+            </InfoRow>
+          ))}
+          <InfoRow label="Honors & awards">
+            <ul className="space-y-2">
+              {HONORS.map((honor) => (
+                <li key={honor.name}>
+                  {honor.name}
+                  <span className="text-zinc-500">
+                    {" "}
+                    ({honor.date}, {honor.place})
+                  </span>
                 </li>
               ))}
-            </ol>
-          </Card>
-        </FadeIn>
+            </ul>
+          </InfoRow>
+          <InfoRow label="Contact">
+            <ul className="space-y-2">
+              {contacts.map((contact) => (
+                <li key={contact.text} className="flex items-center gap-2">
+                  <span aria-hidden="true" className="size-4 shrink-0 text-zinc-500">
+                    {contact.icon}
+                  </span>
+                  {contact.href ? (
+                    <a
+                      href={contact.href}
+                      className="underline decoration-zinc-300 underline-offset-4 hover:decoration-(--accent) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
+                      {...(contact.href.startsWith("http")
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                    >
+                      {contact.text}
+                    </a>
+                  ) : (
+                    contact.text
+                  )}
+                </li>
+              ))}
+            </ul>
+          </InfoRow>
+        </dl>
+      </section>
 
-        {/* Skills and honors */}
-        <div className="flex flex-col gap-4 lg:col-span-4">
-          <FadeIn>
-            <Card accent={3}>
-              <Label accent={3}>Skills</Label>
-              <div className="mt-5 space-y-5">
-                {skillGroups.map((group, g) => (
-                  <div key={group.title} style={{ "--accent": accentAt(g * 2) } as CSSProperties}>
-                    <p className="font-mono text-xs tracking-widest text-zinc-500 uppercase">
-                      {group.title}
-                    </p>
-                    <ul className="mt-2 flex flex-wrap gap-1.5">
-                      {group.items.map((name) => (
-                        <li
-                          key={name}
-                          className="rounded-full border border-(--accent)/40 bg-(--accent)/10 px-3 py-1 text-sm text-zinc-200"
-                        >
-                          {name}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </FadeIn>
-
-          <FadeIn delay={80}>
-            <Card accent={12}>
-              <Label accent={12}>Honors &amp; awards</Label>
-              <ul className="mt-5 space-y-4">
-                {HONORS.map((honor) => (
-                  <li key={honor.name}>
-                    <p className="font-mono text-xs tracking-widest text-zinc-500 uppercase">
-                      {honor.date} &middot; {honor.place}
-                    </p>
-                    <p className="mt-1 text-sm text-zinc-300">{honor.name}</p>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </FadeIn>
-        </div>
-      </div>
+      <p className="mt-10 text-center text-xs text-zinc-400">
+        &copy; {PERSON.fullName} &middot; {displayUrl(SITE.website)}
+      </p>
     </div>
   );
 }
