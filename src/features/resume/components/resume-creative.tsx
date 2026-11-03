@@ -169,7 +169,7 @@ export function ResumeCreative() {
           role="region"
           aria-label="Projects"
           tabIndex={0}
-          className="-mx-6 mt-5 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto px-6 pb-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 sm:-mx-12 sm:scroll-px-12 sm:px-12"
+          className="-mx-6 mt-5 flex snap-x snap-mandatory scroll-px-6 [scrollbar-width:none] gap-4 overflow-x-auto px-6 pb-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 sm:-mx-12 sm:scroll-px-12 sm:px-12 [&::-webkit-scrollbar]:hidden"
         >
           {PROJECTS.map((project) => (
             <article
