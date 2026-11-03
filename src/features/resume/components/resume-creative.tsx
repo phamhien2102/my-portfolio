@@ -40,7 +40,7 @@ function InfoRow({ label, children }: { label: string; children: ReactNode }) {
 
 /**
  * The resume as an App Store listing, made for the screen (the classic A4 layout is what gets
- * printed): the portrait is the app icon, the roles are release notes, the projects are the
+ * printed): the portrait is the app icon (round), the roles are release notes, the projects are the
  * preview screens. Light and flat, with a single orange accent.
  */
 export function ResumeCreative() {
@@ -57,12 +57,15 @@ export function ResumeCreative() {
     >
       {/* The "app" header: icon, name, subtitle, call to action. */}
       <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
-        {/* eslint-disable-next-line @next/next/no-img-element -- single small static image */}
-        <img
-          src="/cv-photo.png"
-          alt={`Portrait of ${PERSON.fullName}`}
-          className="size-32 shrink-0 rounded-[22.37%] object-cover ring-1 ring-black/10 sm:size-40"
-        />
+        {/* The photo is a round picture, so it stays round; the slight zoom hides its thin dark rim. */}
+        <span className="block size-32 shrink-0 overflow-hidden rounded-full ring-1 ring-black/10 sm:size-40">
+          {/* eslint-disable-next-line @next/next/no-img-element -- single small static image */}
+          <img
+            src="/cv-photo.png"
+            alt={`Portrait of ${PERSON.fullName}`}
+            className="size-full scale-110 object-cover"
+          />
+        </span>
         <div className="min-w-0 flex-1">
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {PERSON.fullName}
