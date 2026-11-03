@@ -1,10 +1,24 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { SITE } from "@/config/site";
 import { THEME, accentAt } from "@/config/theme";
 import { ABOUT } from "@/features/about";
 import { EXPERIENCE } from "@/features/experience";
 import { SKILL_GROUPS } from "@/features/skills";
+
+import {
+  AwardIcon,
+  BriefcaseIcon,
+  CakeIcon,
+  CodeIcon,
+  GithubIcon,
+  GraduationCapIcon,
+  LinkedinIcon,
+  MailIcon,
+  MapPinIcon,
+  PhoneIcon,
+  UserIcon,
+} from "./resume-icons";
 
 /** Resume-only skills: tools used day to day that are not part of the website's skill bars. */
 const EXTRA_SKILLS = [
@@ -48,9 +62,30 @@ function displayUrl(href: string): string {
   return href.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 }
 
-function Heading({ children }: { children: string }) {
+/** A small rounded square holding an icon, tinted with one of the portfolio's accent colours. */
+function Chip({ icon, accent, size }: { icon: ReactNode; accent: number; size: string }) {
   return (
-    <h2 className="mt-[7mm] mb-[3mm] border-b border-zinc-300 pb-[1.2mm] font-mono text-[8pt] font-bold tracking-[0.22em] text-zinc-500 uppercase">
+    <span
+      style={{ "--accent": accentAt(accent), width: size, height: size } as CSSProperties}
+      className="inline-flex shrink-0 items-center justify-center rounded-[1.2mm] bg-(--accent)/15 p-[1mm] text-[color-mix(in_srgb,var(--accent)_65%,black)]"
+    >
+      {icon}
+    </span>
+  );
+}
+
+function Heading({
+  children,
+  icon,
+  accent,
+}: {
+  children: string;
+  icon: ReactNode;
+  accent: number;
+}) {
+  return (
+    <h2 className="mt-[7mm] mb-[3mm] flex items-center gap-[2.5mm] border-b border-zinc-300 pb-[1.5mm] font-mono text-[8pt] font-bold tracking-[0.22em] text-zinc-600 uppercase">
+      <Chip icon={icon} accent={accent} size="5.5mm" />
       {children}
     </h2>
   );
@@ -62,6 +97,22 @@ function Heading({ children }: { children: string }) {
  */
 export function Resume() {
   const location = ABOUT.facts.find((fact) => fact.label === "Based in")?.value;
+  const socialIcons: Record<string, ReactNode> = {
+    GitHub: <GithubIcon />,
+    LinkedIn: <LinkedinIcon />,
+  };
+  const contacts: { icon: ReactNode; text: string }[] = [
+    { icon: <PhoneIcon />, text: PERSON.phone },
+    { icon: <MailIcon />, text: SITE.email },
+    ...SITE.socials
+      .filter((social) => displayUrl(social.href).includes("/"))
+      .map((social) => ({
+        icon: socialIcons[social.label] ?? <UserIcon />,
+        text: displayUrl(social.href),
+      })),
+    ...(location ? [{ icon: <MapPinIcon />, text: location }] : []),
+    { icon: <CakeIcon />, text: `Born ${PERSON.birthday} \u00b7 ${PERSON.birthplace}` },
+  ];
 
   return (
     <article className="hidden bg-white box-decoration-clone p-[14mm] text-[9.5pt] leading-snug text-zinc-900 [-webkit-print-color-adjust:exact] [print-color-adjust:exact] print:block">
@@ -72,19 +123,14 @@ export function Resume() {
               {PERSON.fullName}
             </h1>
             <p className="mt-[2mm] text-[12pt] font-semibold text-zinc-600">{SITE.role}</p>
-            <ul className="mt-[3mm] flex flex-wrap gap-x-[5mm] gap-y-[1mm] font-mono text-[8.5pt] text-zinc-600">
-              <li>{PERSON.phone}</li>
-              <li>{SITE.email}</li>
-              {SITE.socials
-                .filter((social) => displayUrl(social.href).includes("/"))
-                .map((social) => (
-                  <li key={social.label}>{displayUrl(social.href)}</li>
-                ))}
-              {location && <li>{location}</li>}
+            <ul className="mt-[3.5mm] grid grid-cols-[auto_auto] justify-start gap-x-[7mm] gap-y-[1.6mm] text-[8.5pt] text-zinc-700">
+              {contacts.map((item, i) => (
+                <li key={item.text} className="flex items-center gap-[2mm]">
+                  <Chip icon={item.icon} accent={i + 1} size="4.6mm" />
+                  <span>{item.text}</span>
+                </li>
+              ))}
             </ul>
-            <p className="mt-[1mm] font-mono text-[8.5pt] text-zinc-600">
-              Born {PERSON.birthday} &middot; {PERSON.birthplace}
-            </p>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element -- print-only, no optimization needed */}
           <img
@@ -102,12 +148,16 @@ export function Resume() {
       </header>
 
       <section>
-        <Heading>Profile</Heading>
+        <Heading icon={<UserIcon />} accent={1}>
+          Profile
+        </Heading>
         <p className="text-zinc-700">{ABOUT.paragraphs[0]}</p>
       </section>
 
       <section>
-        <Heading>Education</Heading>
+        <Heading icon={<GraduationCapIcon />} accent={2}>
+          Education
+        </Heading>
         <ul className="space-y-[2mm]">
           <li>
             <p className="font-bold">
@@ -127,7 +177,9 @@ export function Resume() {
       </section>
 
       <section>
-        <Heading>Experience</Heading>
+        <Heading icon={<BriefcaseIcon />} accent={3}>
+          Experience
+        </Heading>
         <ol className="relative ml-[1.5mm] border-l border-zinc-300 pl-[6mm]">
           {EXPERIENCE.map((role, i) => (
             <li
@@ -157,7 +209,9 @@ export function Resume() {
       </section>
 
       <section>
-        <Heading>Skills</Heading>
+        <Heading icon={<CodeIcon />} accent={4}>
+          Skills
+        </Heading>
         <dl className="grid grid-cols-[22mm_1fr] gap-x-[3mm] gap-y-[1.2mm]">
           {SKILL_GROUPS.map((group) => (
             <div key={group.title} className="contents">
@@ -179,7 +233,9 @@ export function Resume() {
       </section>
 
       <section>
-        <Heading>Honors &amp; Awards</Heading>
+        <Heading icon={<AwardIcon />} accent={5}>
+          Honors &amp; Awards
+        </Heading>
         <ul className="space-y-[1mm]">
           {HONORS.map((honor) => (
             <li key={honor.name} className="grid grid-cols-[26mm_1fr] gap-x-[3mm]">
