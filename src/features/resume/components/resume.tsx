@@ -5,6 +5,7 @@ import { THEME, accentAt } from "@/config/theme";
 import { ABOUT } from "@/features/about";
 import { EXPERIENCE } from "@/features/experience";
 import { SKILL_GROUPS } from "@/features/skills";
+import { cn } from "@/lib/cn";
 
 import {
   AwardIcon,
@@ -93,10 +94,11 @@ function Heading({
 }
 
 /**
- * A one-page A4 resume, laid out as a timeline. It is never shown on screen: print styles hide
- * the rest of the page and reveal only this (see `PrintResumeButton`).
+ * An A4 resume, laid out as a timeline. On the home page it is never shown on screen: print
+ * styles hide the rest of the page and reveal only this (see `PrintResumeButton`). With `preview`
+ * it is shown on screen, as a sheet of paper (the `/resume` page).
  */
-export function Resume() {
+export function Resume({ preview = false }: { preview?: boolean }) {
   const location = ABOUT.facts.find((fact) => fact.label === "Based in")?.value;
   const socialIcons: Record<string, ReactNode> = {
     GitHub: <GithubIcon />,
@@ -116,9 +118,16 @@ export function Resume() {
   ];
 
   return (
-    <article className="hidden bg-white box-decoration-clone p-[14mm] text-[9.5pt] leading-snug text-zinc-900 [-webkit-print-color-adjust:exact] [print-color-adjust:exact] print:block">
+    <article
+      className={cn(
+        "bg-white box-decoration-clone p-[7mm] text-[9.5pt] leading-snug text-zinc-900 [-webkit-print-color-adjust:exact] [print-color-adjust:exact] sm:p-[14mm]",
+        preview
+          ? "mx-auto block min-h-[297mm] w-[210mm] max-w-full shadow-2xl shadow-black/40 print:min-h-0 print:w-auto print:max-w-none print:shadow-none"
+          : "hidden print:block",
+      )}
+    >
       <header>
-        <div className="flex items-center justify-between gap-[6mm]">
+        <div className="flex flex-col-reverse items-start gap-[4mm] sm:flex-row sm:items-center sm:justify-between sm:gap-[6mm]">
           <div>
             <h1 className="text-[26pt] leading-none font-black tracking-tight">
               {PERSON.fullName}
@@ -127,7 +136,7 @@ export function Resume() {
               </span>
             </h1>
             <p className="mt-[2mm] text-[12pt] font-semibold text-zinc-600">{SITE.role}</p>
-            <ul className="mt-[3.5mm] grid grid-cols-[auto_auto] justify-start gap-x-[7mm] gap-y-[1.6mm] text-[8.5pt] text-zinc-700">
+            <ul className="mt-[3.5mm] grid grid-cols-1 justify-start gap-x-[7mm] gap-y-[1.6mm] text-[8.5pt] text-zinc-700 sm:grid-cols-[auto_auto]">
               {contacts.map((item, i) => (
                 <li key={item.text} className="flex items-center gap-[2mm]">
                   <Chip icon={item.icon} accent={i + 1} size="4.6mm" />
@@ -140,7 +149,7 @@ export function Resume() {
           <img
             src="/cv-photo.png"
             alt={`Portrait of ${PERSON.fullName}`}
-            className="size-[36mm] shrink-0 rounded-full object-cover"
+            className="size-[26mm] shrink-0 rounded-full object-cover sm:size-[36mm]"
           />
         </div>
         {/* A thin band in the portfolio's palette. */}

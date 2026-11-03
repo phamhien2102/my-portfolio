@@ -17,4 +17,6 @@ export const SITE = {
     { label: "Experience", href: "#experience" },
     { label: "Contact", href: "#contact" },
   ],
+  /** The full resume, opened in a new tab from the navigation. */
+  resume: { label: "Resume", href: "/resume" },
 } as const;

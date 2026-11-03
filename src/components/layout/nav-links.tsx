@@ -12,6 +12,12 @@ interface NavItem {
   href: string;
 }
 
+interface ResumeLink {
+  label: string;
+  /** A separate page, opened in a new tab. */
+  href: string;
+}
+
 /** A section counts as "current" once its top has passed this fraction of the viewport. */
 const TRIGGER = 0.4;
 
@@ -19,7 +25,7 @@ const TRIGGER = 0.4;
  * Primary navigation that highlights the section currently in view (scroll-spy).
  * Nothing is highlighted while the hero is on screen.
  */
-export function NavLinks({ items }: { items: readonly NavItem[] }) {
+export function NavLinks({ items, resume }: { items: readonly NavItem[]; resume?: ResumeLink }) {
   const [active, setActive] = useState<string | null>(null);
 
   useEffect(() => {
@@ -61,7 +67,7 @@ export function NavLinks({ items }: { items: readonly NavItem[] }) {
   return (
     <>
       {/* Phones: a menu icon opening a full-screen list. */}
-      <MobileMenu items={items} active={active} className="order-1 sm:hidden" />
+      <MobileMenu items={items} resume={resume} active={active} className="order-1 sm:hidden" />
 
       {/* Wider screens: the links inline. */}
       <nav
@@ -85,6 +91,18 @@ export function NavLinks({ items }: { items: readonly NavItem[] }) {
             </a>
           );
         })}
+        {resume && (
+          <a
+            href={resume.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="-my-1.5 inline-flex items-center gap-1.5 rounded-full border border-current/40 px-3 py-1.5 transition-colors hover:bg-white hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none"
+          >
+            {resume.label}
+            <span aria-hidden="true">&#8599;</span>
+            <span className="sr-only">(opens in a new tab)</span>
+          </a>
+        )}
       </nav>
     </>
   );

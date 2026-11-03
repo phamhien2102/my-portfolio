@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { SITE } from "@/config/site";
 
 /**
@@ -7,7 +9,7 @@ import { SITE } from "@/config/site";
  * printed (everything else is hidden by print styles). The page title becomes the suggested file
  * name while the dialog is open.
  */
-export function PrintResumeButton() {
+export function PrintResumeButton({ children = "Resume (PDF)" }: { children?: ReactNode }) {
   const print = () => {
     const previousTitle = document.title;
     document.title = `${SITE.name} - Resume`;
@@ -21,7 +23,7 @@ export function PrintResumeButton() {
       onClick={print}
       className="group inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-4 font-mono text-sm tracking-widest text-zinc-200 uppercase transition-colors hover:border-white/50 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
     >
-      Resume (PDF)
+      {children}
       <svg
         aria-hidden="true"
         viewBox="0 0 24 24"

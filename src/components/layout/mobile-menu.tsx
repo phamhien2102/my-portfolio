@@ -12,6 +12,8 @@ interface NavItem {
 
 interface MobileMenuProps {
   items: readonly NavItem[];
+  /** A separate page, listed last and opened in a new tab. */
+  resume?: NavItem;
   /** Id of the section currently in view, if any (highlighted in the list). */
   active: string | null;
   className?: string;
@@ -26,7 +28,7 @@ const INLINE_NAV_QUERY = "(min-width: 640px)";
  * Built on the native `<dialog>`: `showModal()` gives focus trapping, Escape-to-close and an
  * inert page behind it. Choosing a link closes the menu and lets the browser scroll to the section.
  */
-export function MobileMenu({ items, active, className }: MobileMenuProps) {
+export function MobileMenu({ items, resume, active, className }: MobileMenuProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -121,6 +123,27 @@ export function MobileMenu({ items, active, className }: MobileMenuProps) {
                   </li>
                 );
               })}
+              {resume && (
+                <li>
+                  <a
+                    href={resume.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={close}
+                    style={{ "--accent": accentAt(items.length) } as CSSProperties}
+                    className="group flex items-baseline gap-4 py-2 text-4xl font-black tracking-tight text-white transition-colors hover:text-(--accent) focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none min-[400px]:text-5xl"
+                  >
+                    <span className="font-mono text-xs font-normal tracking-widest text-zinc-500">
+                      {String(items.length + 1).padStart(2, "0")}
+                    </span>
+                    {resume.label}
+                    <span aria-hidden="true" className="text-2xl">
+                      &#8599;
+                    </span>
+                    <span className="sr-only">(opens in a new tab)</span>
+                  </a>
+                </li>
+              )}
             </ul>
           </nav>
         </div>

@@ -14,7 +14,7 @@ export function SiteHeader() {
       <a id={LOGO_DOCK_ID} href="#top" className="block h-8 w-24 shrink-0 sm:h-4 sm:w-36">
         <span className="sr-only">{SITE.name}</span>
       </a>
-      <NavLinks items={SITE.nav} />
+      <NavLinks items={SITE.nav} resume={SITE.resume} />
       <SettingsButton />
     </header>
   );
