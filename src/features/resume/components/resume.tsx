@@ -51,7 +51,8 @@ const HONORS = [
 
 /** Personal details printed on the resume only (not shown elsewhere on the site). */
 const PERSON = {
-  fullName: "Phạm Thanh Hiền (Raymond)",
+  fullName: "Phạm Thanh Hiền",
+  nickname: "Raymond",
   phone: "(+84) 83.9199.121",
   birthday: "Feb 21, 1994",
   birthplace: "Tây Ninh (Long An)",
@@ -121,6 +122,9 @@ export function Resume() {
           <div>
             <h1 className="text-[26pt] leading-none font-black tracking-tight">
               {PERSON.fullName}
+              <span className="ml-[2mm] text-[14pt] font-normal tracking-normal text-zinc-500">
+                ({PERSON.nickname})
+              </span>
             </h1>
             <p className="mt-[2mm] text-[12pt] font-semibold text-zinc-600">{SITE.role}</p>
             <ul className="mt-[3.5mm] grid grid-cols-[auto_auto] justify-start gap-x-[7mm] gap-y-[1.6mm] text-[8.5pt] text-zinc-700">
