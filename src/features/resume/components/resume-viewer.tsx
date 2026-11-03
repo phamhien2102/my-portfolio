@@ -25,9 +25,9 @@ interface ResumeViewerProps {
 }
 
 /**
- * The `/resume` page body: a toolbar with a layout switch and the download button, and the chosen
- * layout. "Download PDF" always prints the classic A4 sheet, because the creative layout is built
- * for the screen.
+ * The `/resume` page body: a toolbar with a layout switch, and the chosen layout. "Download PDF"
+ * is only offered in the classic layout, the A4 sheet that gets printed; the creative layout is
+ * built for the screen (printing from the browser still produces the classic sheet).
  */
 export function ResumeViewer({ classic, creative, printable }: ResumeViewerProps) {
   const [layout, setLayout] = useState<Layout>("classic");
@@ -69,7 +69,7 @@ export function ResumeViewer({ classic, creative, printable }: ResumeViewerProps
               </button>
             ))}
           </div>
-          <PrintResumeButton>Download PDF</PrintResumeButton>
+          {layout === "classic" && <PrintResumeButton>Download PDF</PrintResumeButton>}
         </div>
       </header>
 
