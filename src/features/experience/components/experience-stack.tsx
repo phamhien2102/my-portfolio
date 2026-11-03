@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 
 import { JOURNEY } from "../lib/journey";
+import { RoleProjects } from "./role-projects";
 
 /**
  * Cards that pile up as you scroll: each one sticks a little lower than the one before, so the
@@ -30,6 +31,7 @@ export function ExperienceStack() {
             </p>
             <h3 className="mt-4 text-3xl font-black tracking-tight sm:text-5xl">{role.title}</h3>
             <p className="mt-2 text-zinc-300">{role.company}</p>
+            <RoleProjects projects={role.projects} />
             <ul className="mt-6 max-w-2xl space-y-3 text-zinc-300">
               {role.highlights.map((line) => (
                 <li key={line} className="flex gap-3">

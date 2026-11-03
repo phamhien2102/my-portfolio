@@ -4,6 +4,7 @@ import { FadeIn } from "@/components/ui/fade-in";
 import { accentAt } from "@/config/theme";
 
 import { EXPERIENCE } from "../data";
+import { RoleProjects } from "./role-projects";
 
 /**
  * Plain vertical timeline, newest first. Used when the visitor prefers reduced motion,
@@ -26,6 +27,7 @@ export function ExperienceTimeline() {
             </p>
             <h3 className="mt-3 text-2xl font-black tracking-tight sm:text-4xl">{role.title}</h3>
             <p className="mt-1 text-zinc-400">{role.company}</p>
+            <RoleProjects projects={role.projects} />
             <ul className="mt-5 max-w-2xl list-disc space-y-2 pl-5 text-zinc-400 marker:text-zinc-600">
               {role.highlights.map((line) => (
                 <li key={line}>{line}</li>

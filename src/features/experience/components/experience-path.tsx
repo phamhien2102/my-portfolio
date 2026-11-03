@@ -8,6 +8,7 @@ import { createPathScene } from "@/lib/path-journey/create-path-scene";
 import { PATH_STYLES, type PathEffect } from "@/lib/path-journey/effects";
 import { cardState, nearestRole, waypointP } from "@/lib/path-journey/flight-path";
 import { JOURNEY } from "../lib/journey";
+import { RoleProjects } from "./role-projects";
 
 const COUNT = JOURNEY.length;
 
@@ -156,6 +157,7 @@ export function ExperiencePath({ effect, children }: ExperiencePathProps) {
                     {role.title}
                   </h3>
                   <p className="mt-2 text-zinc-300">{role.company}</p>
+                  <RoleProjects projects={role.projects} />
                   <ul className="mt-6 space-y-3 text-zinc-300">
                     {role.highlights.map((line) => (
                       <li key={line} className="flex gap-3">
@@ -223,7 +225,7 @@ export function ExperiencePath({ effect, children }: ExperiencePathProps) {
       </div>
 
       {/* The plain timeline: reduced motion, or no WebGL. */}
-      <div className="mx-auto block max-w-6xl px-6 group-data-[path=off]/exp:block! sm:px-10 motion-safe:hidden">
+      <div className="mx-auto block max-w-6xl px-6 group-data-[path=off]/exp:block! motion-safe:hidden sm:px-10">
         {children}
       </div>
     </div>
