@@ -114,7 +114,7 @@ export function Resume({ preview = false }: { preview?: boolean }) {
         text: displayUrl(social.href),
       })),
     ...(location ? [{ icon: <MapPinIcon />, text: location }] : []),
-    { icon: <CakeIcon />, text: `Born ${PERSON.birthday} \u00b7 ${PERSON.birthplace}` },
+    { icon: <CakeIcon />, text: `${PERSON.birthday} \u00b7 ${PERSON.birthplace}` },
   ];
 
   return (
