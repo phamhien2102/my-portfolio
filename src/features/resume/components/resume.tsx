@@ -52,7 +52,7 @@ const HONORS = [
 /** Personal details printed on the resume only (not shown elsewhere on the site). */
 const PERSON = {
   fullName: "Phạm Thanh Hiền",
-  phone: "+8483.9199.121",
+  phone: "(+84) 83.9199.121",
   birthday: "Feb 21, 1994",
   birthplace: "Tây Ninh (Long An)",
 } as const;
