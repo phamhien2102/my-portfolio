@@ -7,63 +7,8 @@ import { EXPERIENCE } from "@/features/experience";
 import { SKILL_GROUPS } from "@/features/skills";
 import { cn } from "@/lib/cn";
 
-import {
-  AwardIcon,
-  BriefcaseIcon,
-  CakeIcon,
-  CodeIcon,
-  GithubIcon,
-  GlobeIcon,
-  GraduationCapIcon,
-  LinkedinIcon,
-  MailIcon,
-  MapPinIcon,
-  PhoneIcon,
-  UserIcon,
-} from "./resume-icons";
-
-/** Resume-only skills: tools used day to day that are not part of the website's skill bars. */
-const EXTRA_SKILLS = [
-  {
-    title: "Quality",
-    items: ["Jest", "Fastlane", "Firebase App Distribution"],
-  },
-  { title: "Platform", items: ["Contentful (CMS)", "Feature flags", "Remote config", "OneTrust"] },
-] as const;
-
-const HONORS = [
-  { date: "Dec 2022", name: "Certificate, Neural Networks and Deep Learning", place: "Coursera" },
-  { date: "Nov 2022", name: "Certificate, Convolutional Neural Networks", place: "Coursera" },
-  {
-    date: "Sep 2015",
-    name: "Certificate, 10th Annual International Microelectronics Olympiad of Armenia (AMO2015)",
-    place: "Ho Chi Minh City",
-  },
-  {
-    date: "May 2015",
-    name: "Euréka encouragement award, Student Scientific Research Competition",
-    place: "Ho Chi Minh City",
-  },
-  {
-    date: "2012 — 2016",
-    name: "Certificate, Outstanding Scholarships Every Semester for UIT Students",
-    place: "Ho Chi Minh City",
-  },
-] as const;
-
-/** Personal details printed on the resume only (not shown elsewhere on the site). */
-const PERSON = {
-  fullName: "Phạm Thanh Hiền",
-  nickname: "Raymond",
-  phone: "(+84) 83.9199.121",
-  birthday: "Feb 21, 1994",
-  birthplace: "Tây Ninh (Long An)",
-} as const;
-
-/** `https://www.github.com/foo/` -> `github.com/foo` */
-function displayUrl(href: string): string {
-  return href.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
-}
+import { EDUCATION, EXTRA_SKILLS, HONORS, PERSON, getContacts } from "./resume-data";
+import { AwardIcon, BriefcaseIcon, CodeIcon, GraduationCapIcon, UserIcon } from "./resume-icons";
 
 /** A small rounded square holding an icon, tinted with one of the portfolio's accent colours. */
 function Chip({ icon, accent, size }: { icon: ReactNode; accent: number; size: string }) {
@@ -100,24 +45,7 @@ function Heading({
  * it is shown on screen, as a sheet of paper (the `/resume` page).
  */
 export function Resume({ preview = false }: { preview?: boolean }) {
-  const location = ABOUT.facts.find((fact) => fact.label === "Based in")?.value;
-  const socialIcons: Record<string, ReactNode> = {
-    GitHub: <GithubIcon />,
-    LinkedIn: <LinkedinIcon />,
-  };
-  const contacts: { icon: ReactNode; text: string }[] = [
-    { icon: <PhoneIcon />, text: PERSON.phone },
-    { icon: <MailIcon />, text: SITE.email },
-    ...SITE.socials
-      .filter((social) => displayUrl(social.href).includes("/"))
-      .map((social) => ({
-        icon: socialIcons[social.label] ?? <UserIcon />,
-        text: displayUrl(social.href),
-      })),
-    { icon: <GlobeIcon />, text: displayUrl(SITE.website) },
-    ...(location ? [{ icon: <MapPinIcon />, text: location }] : []),
-    { icon: <CakeIcon />, text: `${PERSON.birthday} \u00b7 ${PERSON.birthplace}` },
-  ];
+  const contacts = getContacts();
 
   return (
     <article
@@ -174,20 +102,17 @@ export function Resume({ preview = false }: { preview?: boolean }) {
           Education
         </Heading>
         <ul className="space-y-[2mm]">
-          <li>
-            <p className="font-bold">
-              University of Technology (UT)
-              <span className="font-normal text-zinc-600"> &middot; Ho Chi Minh City</span>
-            </p>
-            <p className="text-zinc-700">Master of Data Science &middot; Apr 2025</p>
-          </li>
-          <li>
-            <p className="font-bold">
-              University of Information Technology (UIT)
-              <span className="font-normal text-zinc-600"> &middot; Ho Chi Minh City</span>
-            </p>
-            <p className="text-zinc-700">Engineer of Embedded Systems &middot; May 2017</p>
-          </li>
+          {EDUCATION.map((item) => (
+            <li key={item.school}>
+              <p className="font-bold">
+                {item.school}
+                <span className="font-normal text-zinc-600"> &middot; {item.place}</span>
+              </p>
+              <p className="text-zinc-700">
+                {item.degree} &middot; {item.date}
+              </p>
+            </li>
+          ))}
         </ul>
       </section>
 
