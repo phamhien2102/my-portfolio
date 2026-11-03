@@ -13,6 +13,7 @@ import {
   CakeIcon,
   CodeIcon,
   GithubIcon,
+  GlobeIcon,
   GraduationCapIcon,
   LinkedinIcon,
   MailIcon,
@@ -113,6 +114,7 @@ export function Resume({ preview = false }: { preview?: boolean }) {
         icon: socialIcons[social.label] ?? <UserIcon />,
         text: displayUrl(social.href),
       })),
+    { icon: <GlobeIcon />, text: displayUrl(SITE.website) },
     ...(location ? [{ icon: <MapPinIcon />, text: location }] : []),
     { icon: <CakeIcon />, text: `${PERSON.birthday} \u00b7 ${PERSON.birthplace}` },
   ];

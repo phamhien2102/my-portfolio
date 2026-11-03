@@ -5,6 +5,7 @@ export const SITE = {
   description:
     "Portfolio of Raymond Pham, a senior mobile developer building mobile and web products.",
   email: "phamhien2102@gmail.com",
+  website: "https://hienpt.dev",
   availability: "Available for new projects",
   socials: [
     { label: "GitHub", href: "https://github.com/phamhien2102" },
