@@ -33,7 +33,18 @@ export const PROJECTS: readonly Project[] = [
       "Commerce and passes in the My Epic mobile app: pass and lift-ticket browsing, product pages, cart and checkout, driven by CMS content and feature flags.",
     tags: ["React Native", "TypeScript", "iOS", "Android"],
     year: "2025 — Present",
-    href: "#",
+    href: "https://www.vailresorts.com/",
+    links: [
+      { label: "Website", href: "https://www.vailresorts.com/" },
+      {
+        label: "App Store",
+        href: "https://apps.apple.com/vn/app/my-epic-skiing-snowboarding/id395375487",
+      },
+      {
+        label: "Google Play",
+        href: "https://play.google.com/store/apps/details?id=com.vailresorts.epicmix&hl=en",
+      },
+    ],
   },
   {
     title: "The Ring (boxing news app)",
