@@ -23,7 +23,26 @@ export const EXTRA_SKILLS = [
   { title: "Platform", items: ["Contentful (CMS)", "Feature flags", "Remote config", "OneTrust"] },
 ] as const;
 
+interface Honor {
+  date: string;
+  name: string;
+  place: string;
+  /** Only for certificates that expire. */
+  validUntil?: string;
+}
+
 export const HONORS = [
+  {
+    date: "Sep 2026",
+    name: "Certificate, Contentful Certified Professional",
+    place: "Contentful",
+    validUntil: "Sep 2028",
+  },
+  {
+    date: "Aug 2026",
+    name: "Certificate, Optimizely Certified SaaS CMS Developer",
+    place: "Optimizely",
+  },
   { date: "Dec 2022", name: "Certificate, Neural Networks and Deep Learning", place: "Coursera" },
   { date: "Nov 2022", name: "Certificate, Convolutional Neural Networks", place: "Coursera" },
   {
@@ -41,7 +60,7 @@ export const HONORS = [
     name: "Certificate, Outstanding Scholarships Every Semester for UIT Students",
     place: "Ho Chi Minh City",
   },
-] as const;
+] as const satisfies readonly Honor[];
 
 /** Personal details printed on the resume only (not shown elsewhere on the site). */
 export const PERSON = {

@@ -192,7 +192,11 @@ export function Resume({ preview = false }: { preview?: boolean }) {
               </span>
               <span>
                 <span className="font-bold">{honor.name}</span>
-                <span className="text-zinc-600"> &middot; {honor.place}</span>
+                <span className="text-zinc-600">
+                  {" "}
+                  &middot; {honor.place}
+                  {"validUntil" in honor && <> &middot; valid until {honor.validUntil}</>}
+                </span>
               </span>
             </li>
           ))}

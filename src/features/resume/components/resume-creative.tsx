@@ -240,7 +240,8 @@ export function ResumeCreative() {
                   {honor.name}
                   <span className="text-zinc-500">
                     {" "}
-                    ({honor.date}, {honor.place})
+                    ({honor.date}, {honor.place}
+                    {"validUntil" in honor && `, valid until ${honor.validUntil}`})
                   </span>
                 </li>
               ))}
