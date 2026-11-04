@@ -125,21 +125,21 @@ export function Resume({ preview = false }: { preview?: boolean }) {
             <li
               key={`${role.company}-${role.period}`}
               style={{ "--accent": accentAt(i + 2) } as CSSProperties}
-              className="relative break-inside-avoid pb-[4.5mm] last:pb-0"
+              className="relative pb-[4.5mm] last:pb-0"
             >
               <span
                 aria-hidden="true"
                 className="absolute top-[1mm] -left-[calc(6mm+1.2mm+0.5px)] size-[2.4mm] rounded-full border-[0.6mm] border-white bg-(--accent) ring-[0.4mm] ring-(--accent)"
               />
-              <p className="font-mono text-[8pt] tracking-widest text-zinc-500 uppercase">
+              <p className="break-after-avoid font-mono text-[8pt] tracking-widest text-zinc-500 uppercase">
                 {role.period}
               </p>
-              <h3 className="mt-[0.5mm] text-[11pt] leading-tight font-bold">
+              <h3 className="mt-[0.5mm] break-after-avoid text-[11pt] leading-tight font-bold">
                 {role.title}
                 <span className="font-normal text-zinc-600"> &middot; {role.company}</span>
               </h3>
               {role.projects && (
-                <p className="mt-[1mm] text-zinc-700">
+                <p className="mt-[1mm] break-after-avoid text-zinc-700">
                   <span className="font-semibold text-zinc-900">
                     {role.projects.length > 1 ? "Projects" : "Project"}:
                   </span>{" "}
@@ -148,7 +148,9 @@ export function Resume({ preview = false }: { preview?: boolean }) {
               )}
               <ul className="mt-[1.5mm] list-disc space-y-[0.8mm] pl-[4mm] text-zinc-700 marker:text-zinc-400">
                 {role.highlights.map((line) => (
-                  <li key={line}>{line}</li>
+                  <li key={line} className="break-inside-avoid">
+                    {line}
+                  </li>
                 ))}
               </ul>
             </li>
