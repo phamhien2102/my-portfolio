@@ -250,9 +250,11 @@ export function ResumeCreative() {
                         href={honor.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="underline decoration-zinc-300 underline-offset-4 hover:decoration-(--accent) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
+                        className="inline-flex items-center gap-1 rounded-full bg-zinc-900 px-2.5 py-0.5 align-middle text-xs font-semibold text-white transition-colors hover:bg-(--accent) hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 motion-reduce:transition-none"
                       >
-                        View<span className="sr-only"> {honor.name} (opens in a new tab)</span>
+                        View
+                        <span aria-hidden="true">&#8599;</span>
+                        <span className="sr-only"> {honor.name} (opens in a new tab)</span>
                       </a>
                     </>
                   )}
