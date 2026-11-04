@@ -34,14 +34,6 @@ export const EXPERIENCE: readonly Role[] = [
     ],
   },
   {
-    period: "Dec 2024 — May 2025",
-    title: "Master's thesis",
-    company: "University of Technology (UT)",
-    highlights: [
-      "Took a break from work to focus full time on the thesis for my Master of Data Science, completed in April 2025.",
-    ],
-  },
-  {
     period: "Mar 2023 — Dec 2024",
     title: "Mobile and Web Developer",
     company: "Autonomous Company",
@@ -55,26 +47,16 @@ export const EXPERIENCE: readonly Role[] = [
     period: "Mar 2020 — Feb 2023",
     title: "Mobile & Hardware Developer",
     company: "Autonomous Company",
-    projects: [
-      "Autonomous Connect (formerly SmartDesk 4)",
-      "Blockchain Game Store",
-      "E-commerce Website",
-    ],
+    projects: ["Autonomous Connect (formerly SmartDesk 4)", "Blockchain Game Store"],
     highlights: [
-      "Built Autonomous Connect (formerly SmartDesk 4) in React Native with MQTT and Redux Saga: a phone app that sets up smart desks over Bluetooth, then controls desks, lights, thermals and frames, with scheduling, sit/stand reports, lock mode and Facebook/Google login.",
-      "Wrote the Python service on Raspberry Pi 4 that shows NFTs, sent from the phone, on Smart Frames.",
+      "Built Autonomous Connect (formerly SmartDesk 4) in React Native with MQTT and Redux Saga: a phone app that sets up smart desks over Bluetooth, then controls desks, lights, thermals and frames, plus the Python service on Raspberry Pi 4 that shows NFTs on Smart Frames.",
       "Shipped blockchain games in Flutter (Pikachu, Block Puzzle, Jumps) for Android, iOS and web.",
-      "Improved the furniture e-commerce site in React (Redux Thunk, Facebook Conversions API, Google Tag Manager).",
     ],
   },
   {
     period: "2018 — 2019",
     title: "Mobile Developer",
     company: "Saigon Technology Solutions",
-    projects: ["KALMS (Singapore)", "Video selfie and eKYC chat app"],
-    highlights: [
-      "Built KALMS (Singapore) in React Native: voucher purchase, reporting and printing over Wi‑Fi/Bluetooth, then shipped it to the App Store and Play Store.",
-      "Worked on a chat and eKYC product (video selfie, face search): 1-to-1 and group chat, Agora video calls, SignalR messages and offline mode.",
-    ],
+    highlights: ["React Native apps, including KALMS (Singapore) and a chat and eKYC product."],
   },
 ];

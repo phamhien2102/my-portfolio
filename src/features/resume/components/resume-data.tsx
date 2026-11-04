@@ -50,21 +50,6 @@ export const HONORS = [
   },
   { date: "Dec 2022", name: "Certificate, Neural Networks and Deep Learning", place: "Coursera" },
   { date: "Nov 2022", name: "Certificate, Convolutional Neural Networks", place: "Coursera" },
-  {
-    date: "Sep 2015",
-    name: "Certificate, 10th Annual International Microelectronics Olympiad of Armenia (AMO2015)",
-    place: "Ho Chi Minh City",
-  },
-  {
-    date: "May 2015",
-    name: "Euréka encouragement award, Student Scientific Research Competition",
-    place: "Ho Chi Minh City",
-  },
-  {
-    date: "2012 — 2016",
-    name: "Certificate, Outstanding Scholarships Every Semester for UIT Students",
-    place: "Ho Chi Minh City",
-  },
 ] as const satisfies readonly Honor[];
 
 /** Personal details printed on the resume only (not shown elsewhere on the site). */
@@ -76,12 +61,21 @@ export const PERSON = {
   birthplace: "Tây Ninh (Long An)",
 } as const;
 
+interface Education {
+  school: string;
+  place: string;
+  degree: string;
+  date: string;
+  note?: string;
+}
+
 export const EDUCATION = [
   {
     school: "University of Technology (UT)",
     place: "Ho Chi Minh City",
     degree: "Master of Data Science",
     date: "Apr 2025",
+    note: "Full-time thesis work, Dec 2024 — May 2025",
   },
   {
     school: "University of Information Technology (UIT)",
@@ -89,7 +83,7 @@ export const EDUCATION = [
     degree: "Engineer of Embedded Systems",
     date: "May 2017",
   },
-] as const;
+] as const satisfies readonly Education[];
 
 /** Headline numbers for the creative layout. The pull requests come from the git history at Huge. */
 export const STATS = [

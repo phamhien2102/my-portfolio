@@ -111,6 +111,7 @@ export function Resume({ preview = false }: { preview?: boolean }) {
               <p className="text-zinc-700">
                 {item.degree} &middot; {item.date}
               </p>
+              {"note" in item && <p className="text-zinc-500">{item.note}</p>}
             </li>
           ))}
         </ul>

@@ -242,6 +242,7 @@ export function ResumeCreative() {
                     {" "}
                     ({item.place}, {item.date})
                   </span>
+                  {"note" in item && <span className="text-zinc-500"> &middot; {item.note}</span>}
                 </li>
               ))}
             </ul>
