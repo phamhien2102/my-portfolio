@@ -16,6 +16,7 @@ import {
   displayUrl,
   getContacts,
 } from "./resume-data";
+import { HandPointIcon } from "./resume-icons";
 
 /** The one accent colour of this layout (the orange of the shared palette). */
 const ACCENT_VAR = { "--accent": accentAt(2) } as CSSProperties;
@@ -246,16 +247,26 @@ export function ResumeCreative() {
                   {"href" in honor && (
                     <>
                       {" "}
-                      <a
-                        href={honor.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-full bg-zinc-900 px-2.5 py-0.5 align-middle text-xs font-semibold text-white transition-colors hover:bg-(--accent) hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 motion-reduce:transition-none"
-                      >
-                        View
-                        <span aria-hidden="true">&#8599;</span>
-                        <span className="sr-only"> {honor.name} (opens in a new tab)</span>
-                      </a>
+                      <span className="inline-flex items-center gap-1.5 align-middle">
+                        <a
+                          href={honor.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold underline decoration-(--accent) decoration-2 underline-offset-4 hover:text-(--accent) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
+                        >
+                          View
+                          <span className="sr-only"> {honor.name} (opens in a new tab)</span>
+                        </a>
+                        {/* The hand sits to the right, turned to point left, and nudges toward the link. */}
+                        <span
+                          aria-hidden="true"
+                          className="motion-safe:animate-point-nudge inline-block size-6 text-(--accent)"
+                        >
+                          <span className="block size-full -rotate-90">
+                            <HandPointIcon />
+                          </span>
+                        </span>
+                      </span>
                     </>
                   )}
                 </li>

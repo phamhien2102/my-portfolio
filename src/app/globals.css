@@ -29,6 +29,18 @@
       color: #71717a;
     }
   }
+
+  /* A hand on the right of a link, pointing left: it nudges toward the link (resume certificates). */
+  --animate-point-nudge: point-nudge 1.1s ease-in-out infinite;
+  @keyframes point-nudge {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-5px);
+    }
+  }
 }
 
 html {
