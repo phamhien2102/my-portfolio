@@ -81,7 +81,7 @@ export const PROJECTS: readonly Project[] = [
   {
     title: "Autonomous Connect",
     summary:
-      "A React Native app, SmartDesk 4 included, that sets up and controls smart desks, lights and thermals over Bluetooth and MQTT, and sends NFTs to a Raspberry Pi Smart Frame.",
+      "A React Native app (formerly SmartDesk 4) that sets up and controls smart desks, lights and thermals over Bluetooth and MQTT, and sends NFTs to a Raspberry Pi Smart Frame.",
     tags: ["React Native", "MQTT", "Redux Saga", "Python"],
     year: "2020 — 2022",
     href: "#",
