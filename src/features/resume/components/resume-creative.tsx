@@ -257,13 +257,15 @@ export function ResumeCreative() {
                           View
                           <span className="sr-only"> {honor.name} (opens in a new tab)</span>
                         </a>
-                        {/* The hand sits to the right, turned to point left, and nudges toward the link. */}
+                        {/* The hand sits to the right and points left (the right-pointing hand, mirrored so the thumb stays on top). */}
                         <span
                           aria-hidden="true"
                           className="motion-safe:animate-point-nudge inline-block size-6 text-(--accent)"
                         >
-                          <span className="block size-full -rotate-90">
-                            <HandPointIcon />
+                          <span className="block size-full -scale-x-100">
+                            <span className="block size-full rotate-90">
+                              <HandPointIcon />
+                            </span>
                           </span>
                         </span>
                       </span>
