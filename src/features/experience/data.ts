@@ -17,7 +17,7 @@ export const EXPERIENCE: readonly Role[] = [
       "Own the pass browsing, product detail, cart and checkout screens of the My Epic app (React Native, iOS and Android), from list page to order confirmation, with cart API integration and off-sale handling. 95 merged pull requests across 71 tickets so far.",
       "Moved pass content, icons and entry points to CMS and feature flags, so they can change without an app release.",
       "Restructured the app-wide Redux store and wrote the optimization strategy the team follows; audited pass API contracts and found 11 typing gaps in four root-cause patterns, with a plan to fix them.",
-      "Ran technical spikes on app-startup observability and the APM SDK, and wrote the docs that came out of them.",
+      "Ran technical spikes on app-startup observability and a performance-monitoring SDK, and wrote the docs that came out of them.",
     ],
   },
   {
