@@ -14,14 +14,14 @@ export const EXPERIENCE: readonly Role[] = [
     company: "Huge",
     projects: ["My Epic (Vail Resorts)"],
     highlights: [
-      "Own the pass browsing, product detail, cart and checkout screens of the My Epic app (React Native, iOS and Android), from list page to order confirmation, with cart API integration and off-sale handling. 95 merged pull requests across 71 tickets so far.",
+      "Own the pass browsing, product detail, cart and checkout screens of the My Epic app (React Native, iOS and Android), from list page to order confirmation, with cart API integration and off-sale handling. 97 merged pull requests across 74 tickets so far.",
       "Moved pass content, icons and entry points to CMS and feature flags, so they can change without an app release.",
-      "Restructured the app-wide Redux store and wrote the optimization strategy the team follows; audited pass API contracts and found 11 typing gaps in four root-cause patterns, with a plan to fix them.",
+      "Restructured the app-wide Redux store and wrote the optimization strategy the team follows; audited pass API contracts and found 11 contract issues in four root-cause patterns, with a plan to fix them.",
       "Ran technical spikes on app-startup observability and a performance-monitoring SDK, and wrote the docs that came out of them.",
     ],
   },
   {
-    period: "Jun 2025 — Nov 2025",
+    period: "Jun 2025 — Dec 2025",
     title: "UI Engineer",
     company: "Huge",
     projects: ["The Ring (boxing news app)"],
