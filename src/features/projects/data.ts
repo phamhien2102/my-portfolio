@@ -4,6 +4,8 @@ export interface Project {
   tags: readonly string[];
   year: string;
   href: string;
+  /** Extra places to see the project (store pages, ...), listed on the creative resume. */
+  links?: readonly { label: string; href: string }[];
   /**
    * Optional preview image, e.g. "/projects/alpha.png" (file in `public/projects/`, ~16:10).
    * Without it the card shows a generated gradient backdrop.
@@ -39,7 +41,15 @@ export const PROJECTS: readonly Project[] = [
       "A boxing app with news and articles, fight schedules, rankings and fighter profiles, plus push notifications, consent management and iPad support.",
     tags: ["React Native", "TypeScript", "Contentful", "iOS", "Android"],
     year: "2025",
-    href: "#",
+    href: "https://www.ringmagazine.com/",
+    links: [
+      { label: "Website", href: "https://www.ringmagazine.com/" },
+      { label: "App Store", href: "https://apps.apple.com/us/app/ring-magazine/id1261206136" },
+      {
+        label: "Google Play",
+        href: "https://play.google.com/store/apps/details?id=com.zeen101.ringtv.app.android",
+      },
+    ],
   },
   {
     title: "AI Chat (ChatGPT-style)",

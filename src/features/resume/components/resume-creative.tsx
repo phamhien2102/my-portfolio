@@ -175,7 +175,7 @@ export function ResumeCreative() {
           {PROJECTS.map((project) => (
             <article
               key={project.title}
-              className="flex h-96 w-64 shrink-0 snap-start flex-col overflow-hidden rounded-3xl bg-zinc-900 text-white sm:w-72"
+              className="flex h-[28rem] w-64 shrink-0 snap-start flex-col overflow-hidden rounded-3xl bg-zinc-900 text-white sm:w-72"
             >
               {project.image ? (
                 // eslint-disable-next-line @next/next/no-img-element -- small static preview
@@ -206,6 +206,23 @@ export function ResumeCreative() {
                     </li>
                   ))}
                 </ul>
+                {project.links && (
+                  <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold">
+                    {project.links.map((link) => (
+                      <li key={link.href}>
+                        <a
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-white underline decoration-(--accent) decoration-2 underline-offset-4 hover:text-(--accent) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                        >
+                          {link.label} <span aria-hidden="true">&#8599;</span>
+                          <span className="sr-only"> ({project.title}, opens in a new tab)</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </article>
           ))}
