@@ -243,6 +243,19 @@ export function ResumeCreative() {
                     ({honor.date}, {honor.place}
                     {"validUntil" in honor && `, valid until ${honor.validUntil}`})
                   </span>
+                  {"href" in honor && (
+                    <>
+                      {" "}
+                      <a
+                        href={honor.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline decoration-zinc-300 underline-offset-4 hover:decoration-(--accent) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
+                      >
+                        View<span className="sr-only"> {honor.name} (opens in a new tab)</span>
+                      </a>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>

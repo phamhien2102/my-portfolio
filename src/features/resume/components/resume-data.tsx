@@ -29,6 +29,8 @@ interface Honor {
   place: string;
   /** Only for certificates that expire. */
   validUntil?: string;
+  /** The certificate file or page, linked from the creative layout. */
+  href?: string;
 }
 
 export const HONORS = [
@@ -37,11 +39,14 @@ export const HONORS = [
     name: "Certificate, Contentful Certified Professional",
     place: "Contentful",
     validUntil: "Sep 2028",
+    href: "/certificates/raymond-pham-5c28ad90-2041-4d9a-85d5-efcd27ee3afc-certificate.pdf",
   },
   {
     date: "Aug 2026",
     name: "Certificate, Optimizely Certified SaaS CMS Developer",
     place: "Optimizely",
+    validUntil: "Aug 2028",
+    href: "/certificates/Raymond%20Pham%20-%20Optimizely%20Certified%20SaaS%20CMS%20Developer.pdf",
   },
   { date: "Dec 2022", name: "Certificate, Neural Networks and Deep Learning", place: "Coursera" },
   { date: "Nov 2022", name: "Certificate, Convolutional Neural Networks", place: "Coursera" },
