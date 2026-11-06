@@ -47,6 +47,17 @@ html {
   color-scheme: dark;
 }
 
+/* A light page (`<main data-page-theme="light">`, e.g. /native) opts out of the dark shell, so the
+   scrollbar, the form controls and the area behind a rubber-band scroll follow the page. */
+html:has([data-page-theme="light"]) {
+  color-scheme: light;
+}
+
+html:has([data-page-theme="light"]) body {
+  background: #fff;
+  color: #18181b;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
