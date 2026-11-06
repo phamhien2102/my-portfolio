@@ -4,6 +4,7 @@ export interface Role {
   company: string;
   /** Names of the products or projects worked on in this role (shown on the resume). */
   projects?: readonly string[];
+  /** Plain text; `**like this**` marks the few words to emphasise (see `Emphasis`). */
   highlights: readonly string[];
 }
 
@@ -14,10 +15,10 @@ export const EXPERIENCE: readonly Role[] = [
     company: "Huge",
     projects: ["My Epic (Vail Resorts)"],
     highlights: [
-      "Own the pass browsing, product detail, cart and checkout screens of the My Epic app (React Native, iOS and Android), from list page to order confirmation, with cart API integration and off-sale handling. 97 merged pull requests across 74 tickets so far.",
+      "Own the pass browsing, product detail, cart and checkout screens of the My Epic app (React Native, iOS and Android) in a team of **five or more**, from list page to order confirmation, with cart API integration and off-sale handling. **97** merged pull requests across 74 tickets so far.",
       "Moved pass content, icons and entry points to CMS and feature flags, so they can change without an app release.",
       "Built the lift-ticket entry points: a CMS-driven overlay menu, homepage smart tiles for buying tickets and passes, and a fully tappable resort search, with loading and error states.",
-      "Restructured the app-wide Redux store and wrote the optimization strategy the team follows; audited pass API contracts and found 11 contract issues in four root-cause patterns, with a plan to fix them.",
+      "Restructured the app-wide Redux store and wrote the optimization strategy the team follows; audited pass API contracts and found **11** contract issues in four root-cause patterns, with a plan to fix them.",
       "Ran technical spikes on app-startup observability and a performance-monitoring SDK, and wrote the docs that came out of them.",
     ],
   },
@@ -27,7 +28,7 @@ export const EXPERIENCE: readonly Role[] = [
     company: "Huge",
     projects: ["The Ring (boxing news app)"],
     highlights: [
-      "Joined The Ring app (React Native) in its first months and became its most active contributor in a team of six or more: 306 merged pull requests across 133 tickets. Built the shared component library and the sign-in flows (Google, Apple, email, account linking).",
+      "Joined The Ring app (React Native) in its first months and became its **most active contributor** in a team of six or more: **306** merged pull requests across 133 tickets. Built the shared component library and the sign-in flows (Google, Apple, email, account linking).",
       "Delivered the news experience end to end: hero carousel, article pages with video, galleries and fight cards, and related articles, with content from Contentful.",
       "Built schedules, event listings and results, rankings, and push notifications that open the right event.",
       "Added consent management with OneTrust, remote config, image caching and iPad support, and wrote the notification, auth and analytics docs.",

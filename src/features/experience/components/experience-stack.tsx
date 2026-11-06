@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 
 import { JOURNEY } from "../lib/journey";
 import { RoleProjects } from "./role-projects";
+import { Emphasis } from "@/components/ui/emphasis";
 
 /**
  * Cards that pile up as you scroll: each one sticks a little lower than the one before, so the
@@ -36,7 +37,7 @@ export function ExperienceStack() {
               {role.highlights.map((line) => (
                 <li key={line} className="flex gap-3">
                   <span aria-hidden="true" className="mt-2.5 h-px w-4 shrink-0 bg-(--accent)" />
-                  {line}
+                  <Emphasis text={line} />
                 </li>
               ))}
             </ul>

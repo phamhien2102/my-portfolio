@@ -9,6 +9,7 @@ import { PATH_STYLES, type PathEffect } from "@/lib/path-journey/effects";
 import { cardState, nearestRole, waypointP } from "@/lib/path-journey/flight-path";
 import { JOURNEY } from "../lib/journey";
 import { RoleProjects } from "./role-projects";
+import { Emphasis } from "@/components/ui/emphasis";
 
 const COUNT = JOURNEY.length;
 
@@ -166,7 +167,7 @@ export function ExperiencePath({ effect, children }: ExperiencePathProps) {
                           style={{ backgroundColor: accent }}
                           className="mt-2.5 h-px w-4 shrink-0"
                         />
-                        {line}
+                        <Emphasis text={line} />
                       </li>
                     ))}
                   </ul>

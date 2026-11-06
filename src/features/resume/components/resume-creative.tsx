@@ -17,6 +17,7 @@ import {
   getContacts,
 } from "./resume-data";
 import { HandPointIcon } from "./resume-icons";
+import { Emphasis } from "@/components/ui/emphasis";
 
 /** The one accent colour of this layout (the orange of the shared palette). */
 const ACCENT_VAR = { "--accent": accentAt(2) } as CSSProperties;
@@ -154,7 +155,9 @@ export function ResumeCreative() {
                 </p>
                 <ul className="mt-2 list-disc space-y-2 pl-5 text-zinc-700 marker:text-(--accent)">
                   {role.highlights.map((line) => (
-                    <li key={line}>{line}</li>
+                    <li key={line}>
+                      <Emphasis text={line} className="font-bold text-zinc-900" />
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -242,7 +245,6 @@ export function ResumeCreative() {
                     {" "}
                     ({item.place}, {item.date})
                   </span>
-                  {"note" in item && <span className="text-zinc-500"> &middot; {item.note}</span>}
                 </li>
               ))}
             </ul>

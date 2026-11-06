@@ -20,7 +20,10 @@ export const EXTRA_SKILLS = [
     title: "Quality",
     items: ["Jest", "Fastlane", "Firebase App Distribution"],
   },
-  { title: "Platform", items: ["Contentful (CMS)", "Feature flags", "Remote config", "OneTrust"] },
+  {
+    title: "Platform",
+    items: ["Contentful (CMS)", "Contentstack (CMS)", "LaunchDarkly", "Remote config", "OneTrust"],
+  },
 ] as const;
 
 interface Honor {
@@ -66,7 +69,6 @@ interface Education {
   place: string;
   degree: string;
   date: string;
-  note?: string;
 }
 
 export const EDUCATION = [
@@ -75,7 +77,6 @@ export const EDUCATION = [
     place: "Ho Chi Minh City",
     degree: "Master of Data Science",
     date: "Apr 2025",
-    note: "Full-time thesis work, Dec 2024 — May 2025",
   },
   {
     school: "University of Information Technology (UIT)",

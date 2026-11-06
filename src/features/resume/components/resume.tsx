@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 
 import { EDUCATION, EXTRA_SKILLS, HONORS, PERSON, getContacts } from "./resume-data";
 import { AwardIcon, BriefcaseIcon, CodeIcon, GraduationCapIcon, UserIcon } from "./resume-icons";
+import { Emphasis } from "@/components/ui/emphasis";
 
 /** A small rounded square holding an icon, tinted with one of the portfolio's accent colours. */
 function Chip({ icon, accent, size }: { icon: ReactNode; accent: number; size: string }) {
@@ -111,7 +112,6 @@ export function Resume({ preview = false }: { preview?: boolean }) {
               <p className="text-zinc-700">
                 {item.degree} &middot; {item.date}
               </p>
-              {"note" in item && <p className="text-zinc-500">{item.note}</p>}
             </li>
           ))}
         </ul>
@@ -150,7 +150,7 @@ export function Resume({ preview = false }: { preview?: boolean }) {
               <ul className="mt-[1.5mm] list-disc space-y-[0.8mm] pl-[4mm] text-zinc-700 marker:text-zinc-400">
                 {role.highlights.map((line) => (
                   <li key={line} className="break-inside-avoid">
-                    {line}
+                    <Emphasis text={line} className="font-bold text-zinc-900" />
                   </li>
                 ))}
               </ul>

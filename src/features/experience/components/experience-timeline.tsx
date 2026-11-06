@@ -5,6 +5,7 @@ import { accentAt } from "@/config/theme";
 
 import { EXPERIENCE } from "../data";
 import { RoleProjects } from "./role-projects";
+import { Emphasis } from "@/components/ui/emphasis";
 
 /**
  * Plain vertical timeline, newest first. Used when the visitor prefers reduced motion,
@@ -30,7 +31,9 @@ export function ExperienceTimeline() {
             <RoleProjects projects={role.projects} />
             <ul className="mt-5 max-w-2xl list-disc space-y-2 pl-5 text-zinc-400 marker:text-zinc-600">
               {role.highlights.map((line) => (
-                <li key={line}>{line}</li>
+                <li key={line}>
+                  <Emphasis text={line} />
+                </li>
               ))}
             </ul>
           </FadeIn>
