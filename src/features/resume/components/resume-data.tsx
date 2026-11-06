@@ -24,6 +24,10 @@ export const EXTRA_SKILLS = [
     title: "Platform",
     items: ["Contentful (CMS)", "Contentstack (CMS)", "LaunchDarkly", "Remote config", "OneTrust"],
   },
+  {
+    title: "AI and workflow",
+    items: ["Claude Code", "Cursor", "Gemini", "Figma MCP", "Atlassian MCP (Jira)"],
+  },
 ] as const;
 
 interface Honor {
