@@ -36,9 +36,12 @@ Pages are a few lines: metadata plus one component imported from a feature's pub
 | `/dating`                           | `date`                                                                    | date invite as an airport check-in                      |
 | `/bloom-pool`                       | `bloom-pool`                                                              | own `layout.tsx` with a light `viewport` theme          |
 | `/native`                           | `native`                                                                  | SwiftUI + Kotlin roadmap; light page, `robots: noindex` |
+| `/hide-pages`                       | `hide-pages`                                                              | index of every unlisted page; `robots: noindex`         |
 
 **Unlisted pages** are kept out of `SITE.nav` _and_ set `robots: { index: false, follow: false }`
 in their `metadata`. Follow both halves when adding another one.
+Also add the page to `features/hide-pages/data.ts`, which is a hand-kept list that `/hide-pages` renders.
+Leave secret-bypassing shortcuts (`/dating?jump=`) off it: that page is a public URL.
 
 ### Feature boundaries are enforced by ESLint
 
