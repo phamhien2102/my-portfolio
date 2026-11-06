@@ -4,7 +4,7 @@ export interface Role {
   company: string;
   /** Names of the products or projects worked on in this role (shown on the resume). */
   projects?: readonly string[];
-  /** Plain text; `**like this**` marks the few words to emphasise (see `Emphasis`). */
+  /** Plain text; `**like this**` marks the few words to emphasize (see `Emphasis`). */
   highlights: readonly string[];
 }
 
@@ -15,7 +15,7 @@ export const EXPERIENCE: readonly Role[] = [
     company: "Huge",
     projects: ["My Epic (Vail Resorts)"],
     highlights: [
-      "Own the pass browsing, product detail, cart and checkout screens of the My Epic app (React Native, iOS and Android) in a team of **five or more**, from list page to order confirmation, with cart API integration and off-sale handling. **97** merged pull requests across 74 tickets so far.",
+      "Own the pass browsing, product detail, cart and checkout screens of the My Epic app (React Native, iOS and Android), from list page to order confirmation, with cart API integration and off-sale handling, in a team of **five or more**. **97** merged pull requests across 74 tickets so far.",
       "Moved pass content, icons and entry points to CMS and feature flags, so they can change without an app release.",
       "Built the lift-ticket entry points: a CMS-driven overlay menu, homepage smart tiles for buying tickets and passes, and a fully tappable resort search, with loading and error states.",
       "Restructured the app-wide Redux store and wrote the optimization strategy the team follows; audited pass API contracts and found **11** contract issues in four root-cause patterns, with a plan to fix them.",
@@ -46,11 +46,11 @@ export const EXPERIENCE: readonly Role[] = [
   },
   {
     period: "Mar 2020 — Feb 2023",
-    title: "Mobile & Hardware Developer",
+    title: "Mobile and Hardware Developer",
     company: "Autonomous Company",
     projects: ["Autonomous Connect (formerly SmartDesk 4)", "Blockchain Game Store"],
     highlights: [
-      "Built Autonomous Connect (formerly SmartDesk 4) in React Native with MQTT and Redux Saga: a phone app that sets up smart desks over Bluetooth, then controls desks, lights, thermals and frames, plus the Python service on Raspberry Pi 4 that shows NFTs on Smart Frames.",
+      "Built Autonomous Connect (formerly SmartDesk 4) in React Native with MQTT and Redux Saga: a phone app that sets up smart desks over Bluetooth and then controls desks, lights, thermals and frames, plus the Python service on Raspberry Pi 4 that shows NFTs on smart frames.",
       "Shipped blockchain games in Flutter (Pikachu, Block Puzzle, Jumps) for Android, iOS and web.",
     ],
   },
@@ -58,6 +58,8 @@ export const EXPERIENCE: readonly Role[] = [
     period: "2018 — 2019",
     title: "Mobile Developer",
     company: "Saigon Technology Solutions",
-    highlights: ["React Native apps, including KALMS (Singapore) and a chat and eKYC product."],
+    highlights: [
+      "Built React Native apps, including KALMS (Singapore) and a chat and eKYC product.",
+    ],
   },
 ];
