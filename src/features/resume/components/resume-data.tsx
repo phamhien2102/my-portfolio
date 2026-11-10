@@ -92,7 +92,7 @@ export const EDUCATION = [
 
 /** Headline numbers for the creative layout. The pull requests come from the git history at Huge. */
 export const STATS = [
-  { label: "Experience", value: "6+", caption: "Years" },
+  { label: "Experience", value: "8+", caption: "Years" },
   { label: "Pull requests", value: "400+", caption: "Merged at Huge" },
   { label: "Education", value: "MSc", caption: "Data Science" },
   { label: "Based in", value: "HCMC", caption: "Vietnam" },
