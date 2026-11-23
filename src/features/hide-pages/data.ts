@@ -50,6 +50,15 @@ export const HIDDEN_PAGES: readonly HiddenPage[] = [
     noindex: false,
   },
   {
+    path: "/design-system",
+    title: "System Design course",
+    blurb:
+      "An interactive system design course: animated diagrams you step through, from one server to a URL shortener.",
+    group: "Learning",
+    access: "Direct URL only",
+    noindex: true,
+  },
+  {
     path: "/algorithms",
     title: "Algorithm patterns",
     blurb:
