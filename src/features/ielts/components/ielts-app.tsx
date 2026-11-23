@@ -15,6 +15,9 @@ import { cn } from "@/lib/cn";
 
 import type { OutlineChapter, OutlinePart } from "../lib/outline";
 import { useProgress } from "../lib/progress";
+import { useFlashcards } from "../lib/study-store";
+import { FlashcardsPanel } from "./flashcards-panel";
+import { StudyTools } from "./study-tools";
 
 interface Props {
   title: string;
@@ -77,6 +80,8 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
   // A part is open when the reader opened it, or by default when it holds the chapter being read.
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cardsOpen, setCardsOpen] = useState(false);
+  const cardCount = useFlashcards().items.length;
   const progress = useProgress();
 
   // Show only the active chapter. Before paint, so a deep link never flashes the first one.
@@ -99,7 +104,9 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
       const target = event.target as HTMLElement | null;
-      if (target?.closest("audio, input, textarea, select, [contenteditable]")) return;
+      if (target?.closest("audio, input, textarea, select, [contenteditable], [role=dialog]"))
+        return;
+      if (document.querySelector("[role=dialog]")) return;
       const to =
         event.key === "ArrowRight" ? next : event.key === "ArrowLeft" ? previous : undefined;
       if (to) window.location.hash = to.id;
@@ -130,6 +137,9 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
             onClick={() => setMenuOpen((open) => !open)}
           >
             Course
+          </button>
+          <button type="button" className="cards-btn" onClick={() => setCardsOpen(true)}>
+            Flashcards{cardCount > 0 && <span>{cardCount}</span>}
           </button>
           <Link href="/" className="home-link">
             ← Raymond Pham
@@ -216,6 +226,8 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
           <div ref={stageRef} className="stage">
             {children}
           </div>
+          {/* Keyed so a new chapter starts with no tooltip or dialog. */}
+          <StudyTools key={active.id} stageRef={stageRef} chapterId={active.id} />
 
           <nav className="lesson-foot" aria-label="Chapters">
             {previous ? (
@@ -248,6 +260,8 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
           <p className="hint">← → turn the page</p>
         </main>
       </div>
+
+      {cardsOpen && <FlashcardsPanel onClose={() => setCardsOpen(false)} />}
 
       <p className="colophon">Links to practice websites open third-party pages.</p>
     </div>
