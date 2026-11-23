@@ -721,3 +721,423 @@ html:has(.ielts-app) {
     font-size: 0.7rem;
   }
 }
+
+/* ---- highlights, selection tooltip, flashcard dialog -------------------------------- */
+
+.ielts-app {
+  --hl-red: #f4b3a8;
+  --hl-yellow: #f6dd8a;
+  --hl-green: #bfe09f;
+}
+
+.ielts-app .user-hl {
+  font-weight: 800;
+  background: linear-gradient(transparent 8%, var(--hl) 8%, var(--hl) 92%, transparent 92%);
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.ielts-app .hl-red {
+  --hl: var(--hl-red);
+}
+
+.ielts-app .hl-yellow {
+  --hl: var(--hl-yellow);
+}
+
+.ielts-app .hl-green {
+  --hl: var(--hl-green);
+}
+
+.ielts-app .sel-tip {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--sheet);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+  transform: translate(-50%, calc(-100% - 8px));
+}
+
+.ielts-app .sel-tip[data-below="true"] {
+  transform: translate(-50%, 8px);
+}
+
+.ielts-app .sel-tip button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.ielts-app .sel-tip button:hover {
+  background: var(--green);
+}
+
+.ielts-app .sel-tip svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.ielts-app .fc-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(29 27 24 / 0.35);
+}
+
+.ielts-app .fc-dialog {
+  display: grid;
+  gap: 0.85rem;
+  width: min(26rem, 100%);
+  padding: 1.25rem;
+  background: var(--sheet);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 3px 5px 0 var(--ink);
+}
+
+.ielts-app .fc-dialog h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.ielts-app .fc-dialog label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.ielts-app .fc-dialog input,
+.ielts-app .fc-dialog textarea {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.ielts-app .fc-dialog input:focus,
+.ielts-app .fc-dialog textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.ielts-app .fc-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.ielts-app .fc-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- flashcards panel --------------------------------------------------------------- */
+
+.ielts-app .cards-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--green);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+  cursor: pointer;
+}
+
+.ielts-app .cards-btn span {
+  padding: 0 0.4rem;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 999px;
+  font-size: 0.7rem;
+}
+
+.ielts-app .fc-panel {
+  width: min(34rem, 100%);
+  max-height: min(36rem, 90svh);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+}
+
+.ielts-app .fc-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ielts-app .fc-panel-head h2 {
+  flex: 1;
+}
+
+.ielts-app .fc-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.ielts-app .fc-tabs button,
+.ielts-app .fc-close {
+  padding: 0.2rem 0.7rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: transparent;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ielts-app .fc-tabs button.is-on {
+  background: var(--green);
+  border-color: var(--ink);
+}
+
+.ielts-app .fc-close {
+  border: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.ielts-app .fc-empty {
+  margin: 1rem 0;
+  color: var(--muted);
+}
+
+.ielts-app .fc-card {
+  --flip: 0deg;
+  display: block;
+  width: 100%;
+  height: 14rem;
+  padding: 0;
+  font: inherit;
+  color: var(--ink);
+  text-align: center;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  perspective: 1100px;
+}
+
+.ielts-app .fc-card.is-flipped {
+  --flip: 180deg;
+}
+
+.ielts-app .fc-card-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateY(var(--flip));
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1.15);
+}
+
+/* A little lean toward the cursor so the card reads as an object, not a flat box. */
+.ielts-app .fc-card:hover .fc-card-inner {
+  transform: rotateY(calc(var(--flip) + 7deg)) rotateX(5deg);
+}
+
+.ielts-app .fc-card:active .fc-card-inner {
+  transform: rotateY(var(--flip)) scale(0.98);
+}
+
+.ielts-app .fc-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  gap: 0.6rem;
+  place-content: center;
+  justify-items: center;
+  padding: 1.5rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 16px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Stacked hard shadows give the card some thickness. */
+  box-shadow:
+    1px 1px 0 var(--ink),
+    2px 2px 0 var(--ink),
+    3px 3px 0 var(--ink),
+    4px 4px 0 var(--ink),
+    0 14px 26px -12px rgb(29 27 24 / 0.45);
+}
+
+.ielts-app .fc-face::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px dashed rgb(29 27 24 / 0.25);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.ielts-app .fc-front {
+  background: linear-gradient(145deg, #f1f7e4, var(--green) 140%);
+}
+
+.ielts-app .fc-back {
+  background: linear-gradient(145deg, #f3edfa, #d9cbee 140%);
+  transform: rotateY(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ielts-app .fc-card-inner {
+    transition: none;
+  }
+
+  .ielts-app .fc-card:hover .fc-card-inner {
+    transform: rotateY(var(--flip));
+  }
+}
+
+.ielts-app .fc-card-label,
+.ielts-app .fc-card-hint {
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ielts-app .fc-card-text {
+  font-size: 1.3rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.ielts-app .fc-nav {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ielts-app .fc-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.ielts-app .fc-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.ielts-app .fc-list li > div {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.ielts-app .fc-list span {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.ielts-app .fc-list a {
+  font-size: 0.75rem;
+}
+
+.ielts-app .fc-list button {
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--rust);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .ielts-app .cards-btn {
+    padding-inline: 0.55rem;
+  }
+}
+
+.ielts-app .fc-io {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.ielts-app .fc-io .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ielts-app .fc-notice {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.ielts-app .sel-tip {
+  align-items: center;
+}
+
+.ielts-app .sel-tip .sel-swatch {
+  width: 1.45rem;
+  height: 1.45rem;
+  margin: 0.25rem 0.15rem;
+  background: var(--sw);
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+}
+
+.ielts-app .sel-tip .sel-swatch:hover {
+  background: var(--sw);
+  transform: scale(1.15);
+}
+
+.ielts-app .sel-swatch[data-color="red"] {
+  --sw: var(--hl-red);
+}
+
+.ielts-app .sel-swatch[data-color="yellow"] {
+  --sw: var(--hl-yellow);
+}
+
+.ielts-app .sel-swatch[data-color="green"] {
+  --sw: var(--hl-green);
+}
+
+.ielts-app .sel-sep {
+  width: 1px;
+  height: 1.4rem;
+  margin: 0 0.15rem;
+  background: var(--line-strong);
+}
