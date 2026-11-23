@@ -36,6 +36,7 @@ Pages are a few lines: metadata plus one component imported from a feature's pub
 | `/dating`                           | `date`                                                                    | date invite as an airport check-in                      |
 | `/bloom-pool`                       | `bloom-pool`                                                              | own `layout.tsx` with a light `viewport` theme          |
 | `/native`                           | `native`                                                                  | SwiftUI + Kotlin roadmap; light page, `robots: noindex` |
+| `/ielts`                            | `ielts`                                                                   | IELTS course reader; light page, `robots: noindex`      |
 | `/hide-pages`                       | `hide-pages`                                                              | index of every unlisted page; `robots: noindex`         |
 
 **Unlisted pages** are kept out of `SITE.nav` _and_ set `robots: { index: false, follow: false }`
@@ -60,6 +61,13 @@ to `components/ui/`, `lib/` or `lib/path-journey/` only once a second feature ne
 Copy, projects, skills, roles, roadmap steps are plain exported consts, not JSX. Start at
 `src/config/site.ts` (name, email, socials, nav) and `src/config/theme.ts` (background + the neon
 palette, `accentAt(i)`). Each feature's `data.ts` owns its own copy.
+
+### Generated content: `/ielts`
+
+`features/ielts/content.json` and `public/ielts/files/` (about 52 MB of audio and images) are
+generated from a Canvas course export by `~/Documents/MyProject/ielts-classic/build.py --next .`.
+Change the script, not the JSON. The chapter HTML is injected with `dangerouslySetInnerHTML`, which is
+safe only because that script whitelists tags and strips styles, scripts and iframes.
 
 ### WebGL scenes
 

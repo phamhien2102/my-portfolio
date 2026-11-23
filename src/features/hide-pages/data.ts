@@ -68,6 +68,15 @@ export const HIDDEN_PAGES: readonly HiddenPage[] = [
     alsoOpen: [{ label: "Weather design", href: "/native/weather-design" }],
   },
   {
+    path: "/ielts",
+    title: "IELTS Practice Course",
+    blurb:
+      "A four-week IELTS course as a reader: a course tree, one chapter at a time, audio, and a mock exam.",
+    group: "Learning",
+    access: "Direct URL only",
+    noindex: true,
+  },
+  {
     path: "/ai-workflow",
     title: "One workflow, built in layers",
     blurb: "A Claude Code roadmap: context, skills, hooks, subagents, MCP and CI.",

@@ -1,0 +1,723 @@
+/* /ielts: a warm-paper course reader. Cream background, monospace type, 12px cards with a firm dark
+   edge and a small hard shadow, colour-coded chips. Every selector is scoped to .ielts-app so
+   nothing leaks into the dark site; the html:has() rule only matches while this page is mounted. */
+
+.ielts-app {
+  color-scheme: light;
+  --paper: #f4ebe0;
+  --paper-2: #f7efe4;
+  --sheet: #f9f2e8;
+  --card: #f8f0e6;
+  --tile: #efe5d6;
+  --line: #ddd3c5;
+  --line-strong: #c6bbac;
+  --edge: #46413b;
+  --ink: #1d1b18;
+  --muted: #6f6961;
+  --green: #cfe3b2;
+  --green-2: #b2d491;
+  --green-tile: #e8efd9;
+  --green-line: #c9d6b3;
+  --violet: #e7ddf5;
+  --violet-tile: #ebe3f1;
+  --violet-line: #d5c8e2;
+  --orange-tile: #fcebd6;
+  --yellow: #f7e2a8;
+  --mark: #f6dd8a;
+  --rust: #b8432f;
+  --link: #1f63a0;
+  --radius: 12px;
+  --pop: 1.5px 2.5px 0 var(--ink);
+
+  min-height: 100svh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-jbm), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+}
+
+html:has(.ielts-app) {
+  scroll-padding-top: 5rem;
+}
+
+.ielts-app,
+.ielts-app *,
+.ielts-app *::before,
+.ielts-app *::after {
+  box-sizing: border-box;
+}
+
+.ielts-app a {
+  color: var(--link);
+  text-decoration-line: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+.ielts-app a:hover {
+  color: var(--ink);
+}
+
+.ielts-app :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.ielts-app .muted {
+  color: var(--muted);
+}
+
+/* ---- top bar ---------------------------------------------------------------------- */
+
+.ielts-app .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.ielts-app .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.ielts-app .brand,
+.ielts-app .home-link {
+  white-space: nowrap;
+}
+
+.ielts-app .brand-icon {
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+.ielts-app .brand-name > span {
+  background: linear-gradient(transparent 62%, var(--green-2) 62%);
+}
+
+.ielts-app .topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ielts-app .home-link {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ielts-app .home-link:hover {
+  color: var(--ink);
+}
+
+.ielts-app .menu-btn {
+  display: none;
+  padding: 0.3rem 0.8rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--green);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+  cursor: pointer;
+}
+
+/* ---- shell: course tree + chapter -------------------------------------------------- */
+
+.ielts-app .shell {
+  display: grid;
+  grid-template-columns: 17.5rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  max-width: 88rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2rem;
+}
+
+.ielts-app .side {
+  position: sticky;
+  top: 4.1rem;
+  max-height: calc(100svh - 5rem);
+  overflow-y: auto;
+  padding: 0.75rem 0.6rem 0.6rem;
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.ielts-app .side-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.45rem 0.7rem;
+  font-weight: 800;
+}
+
+.ielts-app .side-head .muted {
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.ielts-app .parts,
+.ielts-app .tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ielts-app .part-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.4rem 0.45rem;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ielts-app .part-toggle:hover {
+  background: var(--tile);
+}
+
+.ielts-app .part-name {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.ielts-app .count {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.ielts-app .icon {
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.ielts-app .icon.file {
+  color: var(--muted);
+}
+
+.ielts-app .chevron {
+  flex: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.ielts-app .chevron.is-open {
+  transform: rotate(90deg);
+}
+
+.ielts-app .tree {
+  margin: 0.1rem 0 0.4rem 1.15rem;
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--line-strong);
+}
+
+.ielts-app .leaf {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.1rem 0;
+  padding: 0.3rem 0.5rem;
+  color: var(--ink);
+  text-decoration: none;
+  border: 1.5px solid transparent;
+  border-radius: 9px;
+}
+
+.ielts-app .leaf:hover {
+  background: var(--tile);
+  color: var(--ink);
+}
+
+.ielts-app .leaf.is-active {
+  font-weight: 800;
+  background: var(--green);
+  border-color: var(--ink);
+  box-shadow: var(--pop);
+}
+
+.ielts-app .leaf.is-active .icon.file {
+  color: var(--ink);
+}
+
+.ielts-app .tick {
+  margin-left: auto;
+  font-weight: 800;
+  color: #2f7d3f;
+}
+
+.ielts-app .progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.6rem 0.15rem 0.1rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.72rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+/* ---- chapter card --------------------------------------------------------------- */
+
+.ielts-app .lesson {
+  min-width: 0;
+  padding: 1.1rem 1.5rem 1.4rem;
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 10px 22px -14px rgba(70, 65, 59, 0.35);
+}
+
+.ielts-app .lesson-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px dashed var(--line-strong);
+}
+
+.ielts-app .crumbs {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.ielts-app .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ielts-app .chip {
+  padding: 0.12rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--pop);
+}
+
+.ielts-app .chip.y {
+  background: var(--yellow);
+}
+
+.ielts-app .chip.g {
+  background: var(--green);
+}
+
+.ielts-app .chip.v {
+  background: var(--violet);
+}
+
+.ielts-app .stage {
+  max-width: 56rem;
+}
+
+.ielts-app .lesson-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  max-width: 56rem;
+  margin-top: 2.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px dashed var(--line-strong);
+}
+
+.ielts-app .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+  cursor: pointer;
+}
+
+.ielts-app .btn:hover {
+  color: var(--ink);
+  background: var(--tile);
+}
+
+.ielts-app .btn.primary {
+  background: var(--green);
+}
+
+.ielts-app .btn.primary:hover {
+  background: var(--green-2);
+}
+
+.ielts-app .btn.is-on {
+  background: var(--green-tile);
+  border-color: var(--edge);
+}
+
+.ielts-app .btn.is-disabled {
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--line-strong);
+  box-shadow: none;
+  cursor: default;
+}
+
+.ielts-app .hint {
+  margin: 0.8rem 0 0;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.ielts-app .colophon {
+  margin: 0;
+  padding: 0 1.25rem 2.5rem;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+/* ---- chapter content (the sanitised HTML) ------------------------------------------ */
+
+.ielts-app .chapter > :first-child {
+  margin-top: 0;
+}
+
+.ielts-app .banner {
+  margin: 0 0 1.4rem;
+}
+
+.ielts-app .banner .eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ielts-app .banner h3 {
+  margin: 0;
+  font-size: clamp(1.45rem, 3.4vw, 1.9rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.ielts-app .banner .sub {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+}
+
+.ielts-app h4 {
+  margin: 2.4rem 0 0.8rem;
+  padding-left: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-left: 4px solid var(--green-2);
+}
+
+.ielts-app h5 {
+  margin: 1.9rem 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.ielts-app h6 {
+  margin: 1.3rem 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ielts-app .chapter p {
+  margin: 0.75rem 0;
+}
+
+.ielts-app .chapter strong {
+  font-weight: 800;
+}
+
+.ielts-app .chapter ul,
+.ielts-app .chapter ol {
+  margin: 0.75rem 0;
+  padding-left: 1.4rem;
+}
+
+.ielts-app .chapter ul {
+  list-style: none;
+}
+
+.ielts-app .chapter ol {
+  list-style: decimal;
+}
+
+.ielts-app .chapter ol > li::marker {
+  font-weight: 800;
+}
+
+.ielts-app .chapter li {
+  margin: 0.3rem 0;
+  padding-left: 0.1rem;
+}
+
+.ielts-app .chapter ul > li {
+  position: relative;
+}
+
+.ielts-app .chapter ul > li::before {
+  content: "\203A";
+  position: absolute;
+  left: -1.05rem;
+  font-weight: 800;
+  color: #4f9a55;
+}
+
+/* tables: one rounded card with a firm edge */
+
+.ielts-app .tablewrap {
+  margin: 1.1rem 0 1.4rem;
+  overflow-x: auto;
+  background: var(--card);
+  border: 1.5px solid var(--edge);
+  border-radius: var(--radius);
+  box-shadow: var(--pop);
+}
+
+.ielts-app .chapter table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+
+.ielts-app .chapter th {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  vertical-align: bottom;
+  background: var(--tile);
+  border-bottom: 1.5px solid var(--edge);
+}
+
+.ielts-app .chapter td {
+  padding: 0.55rem 0.75rem;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+
+.ielts-app .chapter tr:last-child td {
+  border-bottom: 0;
+}
+
+.ielts-app .chapter td ul {
+  margin: 0.2rem 0;
+}
+
+/* inline marks */
+
+.ielts-app mark {
+  padding: 0.05em 0.3em;
+  color: var(--ink);
+  background: var(--mark);
+  border-radius: 4px;
+}
+
+.ielts-app .miss {
+  color: var(--rust);
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+
+.ielts-app .tag {
+  display: inline-block;
+  margin: 0 0.25rem 0 0.4rem;
+  padding: 0 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.6;
+  white-space: nowrap;
+  background: var(--tile);
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+}
+
+.ielts-app .tag:first-child {
+  margin-left: 0;
+  background: var(--yellow);
+}
+
+/* boxes */
+
+.ielts-app .note,
+.ielts-app .simple,
+.ielts-app .rules {
+  margin: 1.2rem 0;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--violet-line);
+  border-radius: var(--radius);
+  background: var(--violet-tile);
+}
+
+.ielts-app .simple {
+  background: var(--green-tile);
+  border-color: var(--green-line);
+  font-size: 0.95em;
+}
+
+.ielts-app .rules {
+  background: var(--orange-tile);
+  border: 1.5px dashed var(--edge);
+}
+
+.ielts-app .note > :first-child,
+.ielts-app .simple > :first-child,
+.ielts-app .rules > :first-child,
+.ielts-app .passage > :first-child,
+.ielts-app .site > :first-child {
+  margin-top: 0;
+}
+
+.ielts-app .note > :last-child,
+.ielts-app .simple > :last-child,
+.ielts-app .rules > :last-child,
+.ielts-app .passage > :last-child,
+.ielts-app .site > :last-child {
+  margin-bottom: 0;
+}
+
+.ielts-app .passage {
+  margin: 1.1rem 0;
+  padding: 0.9rem 1.2rem;
+  background: #fffbf3;
+  border: 1.5px solid var(--edge);
+  border-radius: var(--radius);
+}
+
+.ielts-app .site {
+  margin: 1.2rem 0;
+  padding: 1rem 1.2rem;
+  background: var(--card);
+  border: 1.5px solid var(--edge);
+  border-radius: var(--radius);
+  box-shadow: var(--pop);
+}
+
+/* media */
+
+.ielts-app audio {
+  display: block;
+  width: 100%;
+  max-width: 30rem;
+  margin: 0.4rem 0 0.9rem;
+}
+
+.ielts-app .audio-label {
+  display: block;
+  margin-top: 0.4rem;
+}
+
+.ielts-app .chapter img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.2rem 0;
+  padding: 0.4rem;
+  background: #fffbf3;
+  border: 1.5px solid var(--edge);
+  border-radius: var(--radius);
+}
+
+/* ---- small screens: the tree folds into a menu --------------------------------------- */
+
+@media (max-width: 62rem) {
+  .ielts-app .menu-btn {
+    display: inline-block;
+  }
+
+  .ielts-app .shell {
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 0.75rem;
+  }
+
+  .ielts-app .side {
+    position: static;
+    display: none;
+    max-height: none;
+  }
+
+  .ielts-app .side.is-open {
+    display: block;
+  }
+
+  .ielts-app .lesson {
+    padding-inline: 1rem;
+  }
+
+  .ielts-app .topbar {
+    padding-inline: 0.75rem;
+  }
+
+  .ielts-app .brand {
+    font-size: 0.95rem;
+  }
+
+  .ielts-app .home-link {
+    font-size: 0.7rem;
+  }
+}
