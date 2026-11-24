@@ -1,0 +1,398 @@
+/* /algo-lab: the stage's own drawing: keycap cells, round nodes, edges, pointers and frames.
+   The shell around it lives in components/course/course.css. Every colour below is an explicit
+   value (no nested custom properties), because a broken variable paints shapes black. */
+
+.ds-app .al-diagram {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ds-app .al-camera {
+  transform-origin: 0 0;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ds-app .al-item {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ds-app .al-item > * {
+  transition:
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    y 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    fill 0.35s,
+    stroke 0.35s,
+    opacity 0.35s;
+}
+
+/* Faded as a whole, so the dark depth edge does not show through a see-through face. */
+.ds-app .al-item.tone-muted {
+  opacity: 0.45;
+}
+
+.ds-app .al-sub {
+  font-size: 10px;
+  font-weight: 600;
+  fill: #8b847a;
+}
+
+/* ---- edges and pointers ------------------------------------------------------------- */
+
+.ds-app .al-edge {
+  stroke: #211e1b;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.ds-app .al-edge.tone-active {
+  stroke: #d49a1c;
+  stroke-width: 2.6;
+}
+
+.ds-app .al-edge.tone-found {
+  stroke: #3f9a55;
+  stroke-width: 2.6;
+}
+
+.ds-app .al-edge.tone-warn {
+  stroke: #c0392b;
+  stroke-width: 2.4;
+}
+
+.ds-app .al-edge.tone-muted {
+  stroke: #b0a698;
+  stroke-width: 1.5;
+}
+
+.ds-app .al-edge.is-dashed {
+  stroke-dasharray: 5 5;
+}
+
+.ds-app .al-arrowhead {
+  fill: #211e1b;
+}
+
+.ds-app .al-arrowhead.tone-active {
+  fill: #d49a1c;
+}
+
+.ds-app .al-arrowhead.tone-found {
+  fill: #3f9a55;
+}
+
+.ds-app .al-arrowhead.tone-warn {
+  fill: #c0392b;
+}
+
+.ds-app .al-arrowhead.tone-muted {
+  fill: #b0a698;
+}
+
+.ds-app .al-edge-tag {
+  fill: #fbf6ef;
+  stroke: #211e1b;
+  stroke-width: 1.2;
+}
+
+.ds-app .al-edge-text {
+  font-size: 9.5px;
+  font-weight: 700;
+  fill: #211e1b;
+}
+
+/* ---- labels and frames -------------------------------------------------------------- */
+
+.ds-app .al-label.tone-ink {
+  fill: #211e1b;
+}
+
+.ds-app[data-theme="dark"] .al-label.tone-ink {
+  fill: #efe6d6;
+}
+
+.ds-app .al-label.tone-muted {
+  fill: #8b847a;
+}
+
+.ds-app .al-label.tone-warn {
+  fill: #c0392b;
+}
+
+.ds-app .al-label.tone-good {
+  fill: #2f7d3f;
+}
+
+.ds-app .al-frame {
+  fill: rgba(255, 255, 255, 0.25);
+  stroke: #6f6961;
+  stroke-width: 1.5;
+}
+
+.ds-app .al-frame.is-dashed {
+  stroke-dasharray: 6 5;
+}
+
+.ds-app .al-frame.tone-active {
+  fill: rgba(247, 226, 168, 0.35);
+  stroke: #d49a1c;
+}
+
+.ds-app .al-frame.tone-found {
+  fill: rgba(159, 210, 143, 0.25);
+  stroke: #3f9a55;
+}
+
+.ds-app .al-frame.tone-warn {
+  fill: rgba(246, 184, 173, 0.3);
+  stroke: #c0392b;
+}
+
+.ds-app .al-frame.tone-mark {
+  fill: rgba(224, 210, 244, 0.35);
+  stroke: #7c63d0;
+}
+
+.ds-app .al-frame-text {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: #6f6961;
+}
+
+/* ---- legend ------------------------------------------------------------------------- */
+
+.ds-app .al-lg {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 1.4px solid #211e1b;
+  border-radius: 3px;
+}
+
+.ds-app .al-lg.active {
+  background: #f7e2a8;
+}
+
+.ds-app .al-lg.found {
+  background: #9fd28f;
+}
+
+.ds-app .al-lg.done {
+  background: #dff0de;
+}
+
+.ds-app .al-lg.warn {
+  background: #f6b8ad;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-app .al-camera,
+  .ds-app .al-item,
+  .ds-app .al-item > * {
+    transition: none;
+  }
+}
+
+/* ---- blocks: a light face, a light top, and a side drawn with coral stripes ---- */
+
+.ds-app .al-face,
+.ds-app .al-top,
+.ds-app .al-side {
+  stroke: #26262a;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.ds-app .al-face {
+  fill: #fbf8f1;
+}
+
+.ds-app .al-top {
+  fill: #fffdf9;
+}
+
+.ds-app .al-face.tone-active {
+  fill: #fde9b4;
+}
+
+.ds-app .al-top.tone-active {
+  fill: #fff4d4;
+}
+
+.ds-app .al-face.tone-found {
+  fill: #cdeec3;
+}
+
+.ds-app .al-top.tone-found {
+  fill: #e5f7de;
+}
+
+.ds-app .al-face.tone-done {
+  fill: #fdf1ea;
+}
+
+.ds-app .al-face.tone-warn {
+  fill: #fad2c9;
+}
+
+.ds-app .al-top.tone-warn {
+  fill: #fde6e0;
+}
+
+.ds-app .al-face.tone-mark {
+  fill: #e9defa;
+}
+
+.ds-app .al-top.tone-mark {
+  fill: #f4edfd;
+}
+
+.ds-app .al-face.tone-muted,
+.ds-app .al-top.tone-muted {
+  fill: #eee9df;
+}
+
+.ds-app .al-face.tone-ghost {
+  fill: none;
+  stroke-dasharray: 4 4;
+  stroke-opacity: 0.5;
+}
+
+.ds-app .al-item.tone-ghost .al-side,
+.ds-app .al-item.tone-ghost .al-top {
+  display: none;
+}
+
+/* Stripes on the side, in the tone's own colour. */
+.ds-app .al-hatch-bg.tone-plain {
+  fill: #fbe3da;
+}
+
+.ds-app .al-hatch-bar.tone-plain {
+  fill: #e2705a;
+}
+
+.ds-app .al-hatch-bg.tone-active {
+  fill: #fcefc8;
+}
+
+.ds-app .al-hatch-bar.tone-active {
+  fill: #e5a92a;
+}
+
+.ds-app .al-hatch-bg.tone-found {
+  fill: #def2d6;
+}
+
+.ds-app .al-hatch-bar.tone-found {
+  fill: #4aa860;
+}
+
+.ds-app .al-hatch-bg.tone-done {
+  fill: #fdeee8;
+}
+
+.ds-app .al-hatch-bar.tone-done {
+  fill: #efb0a0;
+}
+
+.ds-app .al-hatch-bg.tone-warn {
+  fill: #fbd9d2;
+}
+
+.ds-app .al-hatch-bar.tone-warn {
+  fill: #d9473a;
+}
+
+.ds-app .al-hatch-bg.tone-mark {
+  fill: #ebe2fa;
+}
+
+.ds-app .al-hatch-bar.tone-mark {
+  fill: #8a6fd0;
+}
+
+.ds-app .al-hatch-bg.tone-muted {
+  fill: #efebe2;
+}
+
+.ds-app .al-hatch-bar.tone-muted {
+  fill: #bbb5a8;
+}
+
+.ds-app .al-text {
+  font-weight: 700;
+  fill: #26262a;
+}
+
+/* ---- pointers: a dark label hanging off a dot, as on the real page; the tone recolours it ---- */
+
+.ds-app .al-pointer-line {
+  stroke: #26262a;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.ds-app .al-pointer-dot {
+  fill: #26262a;
+}
+
+.ds-app .al-pill-face {
+  fill: #26262a;
+}
+
+.ds-app .al-pill-text {
+  font-size: 11.5px;
+  font-weight: 700;
+  fill: #fff;
+}
+
+.ds-app .al-pill-face.tone-active {
+  fill: #d0634c;
+}
+
+.ds-app .al-pill-face.tone-found {
+  fill: #3f9a55;
+}
+
+.ds-app .al-pill-face.tone-warn {
+  fill: #c0392b;
+}
+
+.ds-app .al-pill-face.tone-mark {
+  fill: #7c63d0;
+}
+
+.ds-app .al-pointer-line.tone-active,
+.ds-app .al-pointer-dot.tone-active {
+  stroke: #d0634c;
+  fill: #d0634c;
+}
+
+.ds-app .al-pointer-line.tone-found,
+.ds-app .al-pointer-dot.tone-found {
+  stroke: #3f9a55;
+  fill: #3f9a55;
+}
+
+.ds-app .al-pointer-line.tone-warn,
+.ds-app .al-pointer-dot.tone-warn {
+  stroke: #c0392b;
+  fill: #c0392b;
+}
+
+.ds-app .al-pointer-line.tone-mark,
+.ds-app .al-pointer-dot.tone-mark {
+  stroke: #7c63d0;
+  fill: #7c63d0;
+}
+
+.ds-app .al-pointer-line {
+  fill: none;
+}

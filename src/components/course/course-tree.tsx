@@ -4,10 +4,12 @@ import { useState } from "react";
 
 import { cn } from "@/lib/cn";
 
-import { MODULES } from "../data";
-import { Check, Chevron, Folder } from "./icons";
+import { Check, Chevron, FileIcon, Folder, FolderLine } from "./icons";
+import type { CourseLesson, CourseModule, CourseVariant } from "./types";
 
 interface Props {
+  variant: CourseVariant;
+  modules: readonly CourseModule<CourseLesson>[];
   activeId: string;
   isDone: (id: string) => boolean;
   countOf: (ids: readonly string[]) => number;
@@ -16,12 +18,21 @@ interface Props {
 }
 
 /** The left column: modules as coloured folders with their lessons, and a progress drawer. */
-export function CourseTree({ activeId, isDone, countOf, total, onNavigate }: Props) {
+export function CourseTree({
+  variant,
+  modules,
+  activeId,
+  isDone,
+  countOf,
+  total,
+  onNavigate,
+}: Props) {
+  const algo = variant === "algo";
   // A module is open when the reader toggled it, or by default when it holds the open lesson.
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [progressOpen, setProgressOpen] = useState(false);
 
-  const allIds = MODULES.flatMap((m) => m.lessons.map((l) => l.id));
+  const allIds = modules.flatMap((m) => m.lessons.map((l) => l.id));
   const done = countOf(allIds);
   const percent = total ? Math.round((done / total) * 100) : 0;
 
@@ -34,8 +45,10 @@ export function CourseTree({ activeId, isDone, countOf, total, onNavigate }: Pro
       </div>
 
       <nav className="ds-course">
-        {MODULES.map((module) => {
-          const open = expanded[module.id] ?? false;
+        {modules.map((module) => {
+          // The module that holds the open lesson starts open in Algo Lab, as in the original.
+          const open =
+            expanded[module.id] ?? (algo && module.lessons.some((l) => l.id === activeId));
           const count = countOf(module.lessons.map((l) => l.id));
           return (
             <div key={module.id} className={cn("ds-mod", open && "is-open")}>
@@ -46,7 +59,7 @@ export function CourseTree({ activeId, isDone, countOf, total, onNavigate }: Pro
                 onClick={() => setExpanded((e) => ({ ...e, [module.id]: !open }))}
               >
                 <Chevron className="ds-mod-chev" />
-                <Folder color={module.color} />
+                {algo ? <FolderLine filled={open} /> : <Folder color={module.color} />}
                 <span className="ds-mod-title">{module.name}</span>
                 <span className="ds-mod-count">
                   {count}/{module.lessons.length}
@@ -68,12 +81,21 @@ export function CourseTree({ activeId, isDone, countOf, total, onNavigate }: Pro
                             aria-current={current ? "page" : undefined}
                             onClick={onNavigate}
                           >
-                            <span
-                              className={cn("ds-mark", isDone(lesson.id) && "is-done")}
-                              aria-hidden="true"
-                            >
-                              {isDone(lesson.id) ? <Check /> : <i />}
-                            </span>
+                            {algo ? (
+                              <span
+                                className={cn("ds-file", isDone(lesson.id) && "is-done")}
+                                aria-hidden="true"
+                              >
+                                {isDone(lesson.id) ? <Check /> : <FileIcon />}
+                              </span>
+                            ) : (
+                              <span
+                                className={cn("ds-mark", isDone(lesson.id) && "is-done")}
+                                aria-hidden="true"
+                              >
+                                {isDone(lesson.id) ? <Check /> : <i />}
+                              </span>
+                            )}
                             <span className="ds-lesson-title">{lesson.title}</span>
                           </a>
                         </li>
@@ -87,7 +109,25 @@ export function CourseTree({ activeId, isDone, countOf, total, onNavigate }: Pro
         })}
       </nav>
 
-      <div className={cn("ds-progress", progressOpen && "is-open")}>
+      {algo && (
+        <div className="ds-progress-line">
+          <span>Progress</span>
+          <div
+            className="ds-bar"
+            role="progressbar"
+            aria-valuenow={percent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <span style={{ width: `${percent}%` }} />
+          </div>
+          <b>
+            {done} / {total}
+          </b>
+        </div>
+      )}
+
+      <div className={cn("ds-progress", progressOpen && "is-open", algo && "is-hidden")}>
         <button
           type="button"
           className="ds-progress-head"
@@ -112,7 +152,7 @@ export function CourseTree({ activeId, isDone, countOf, total, onNavigate }: Pro
               <span style={{ width: `${percent}%` }} />
             </div>
             <ul className="ds-progress-list">
-              {MODULES.map((module) => {
+              {modules.map((module) => {
                 const count = countOf(module.lessons.map((l) => l.id));
                 const all = count === module.lessons.length;
                 return (

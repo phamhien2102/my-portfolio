@@ -1,7 +1,7 @@
 import type { DiagramLink, DiagramNode, Flow, NodeKind, Panel, Scene, Tag } from "../lib/types";
 import { cn } from "@/lib/cn";
 
-import { GLYPH } from "./icons";
+import { GLYPH } from "@/components/course/icons";
 
 export const VIEW_W = 640;
 export const VIEW_H = 372;
@@ -417,7 +417,7 @@ function Cube({ node }: { node: DiagramNode }) {
       : [{ t: node.label, y: 26, size: 13.5, weight: 800 }];
   // The cube's top face is centred at y - 24 so that the whole block is centred on the node.
   return (
-    <g className="ds-body" transform={`translate(${node.x} ${node.y - 22})`}>
+    <g className="ds-figure" transform={`translate(${node.x} ${node.y - 22})`}>
       <ellipse
         cx="0"
         cy="62"
@@ -502,7 +502,7 @@ function Device({ node }: { node: DiagramNode }) {
   const move = (pts: Pt[]) => pts.map(([px, py]) => [px + bx, py + by] as Pt);
 
   return (
-    <g className="ds-body" transform={`translate(${x} ${y + 16})`}>
+    <g className="ds-figure" transform={`translate(${x} ${y + 16})`}>
       <ellipse
         cx="0"
         cy="58"

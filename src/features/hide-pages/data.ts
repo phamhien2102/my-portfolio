@@ -59,6 +59,15 @@ export const HIDDEN_PAGES: readonly HiddenPage[] = [
     noindex: true,
   },
   {
+    path: "/algo-lab",
+    title: "Algo Lab",
+    blurb:
+      "An interactive data structures and algorithms course: animated, step-by-step diagrams from arrays to graphs.",
+    group: "Learning",
+    access: "Direct URL only",
+    noindex: true,
+  },
+  {
     path: "/algorithms",
     title: "Algorithm patterns",
     blurb:
