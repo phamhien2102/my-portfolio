@@ -1,0 +1,688 @@
+/* The "algo" look of the course shell (Algo Lab): Inter text, a coral accent in place of green, a
+   plain light page, and the extra cards in the right column. It only restyles; the structure is the
+   same shell as /design-system. Selected by data-variant="algo" on the root. */
+
+.ds-app[data-variant="algo"] {
+  /* The real page's tokens: warm paper, a coral accent, near-black ink. */
+  --paper: #f7f4ee;
+  --paper-2: #f9f7f2;
+  --sheet: #f9f7f2;
+  --card: #f7f4ee;
+  --stage: #faf7f1;
+  --field: #f9f7f2;
+  --line: #dfdbd2;
+  --line-strong: #cfc9bf;
+  --ink: #2a2b2f;
+  --ink-2: #434247;
+  --muted: #77746f;
+  --muted-2: #a5a19a;
+  --green: #e2705a;
+  --green-2: #d6624b;
+  --green-tile: #fcece5;
+  --green-tile-line: #f7cec0;
+  --violet: #fae0d6;
+  --violet-tile: #fcece5;
+  --violet-tile-line: #f7cec0;
+  --sand: #e9e3da;
+  --coral: #e2705a;
+  --coral-ink: #7c2717;
+  --coral-soft: #fae0d6;
+  --drop: #2a2b2f;
+  --drop-2: #5d5e63;
+
+  font-family:
+    var(--font-inter),
+    Inter,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  letter-spacing: 0;
+  font-feature-settings: normal;
+  grid-template-rows: 64px minmax(0, 1fr);
+}
+
+.ds-app[data-variant="algo"][data-theme="dark"] {
+  --paper: #17171a;
+  --paper-2: #1c1c20;
+  --sheet: #1e1e22;
+  --card: #1f1f23;
+  --stage: #1b1b1f;
+  --field: #26262b;
+  --line: #2d2d33;
+  --line-strong: #43434b;
+  --green: #e8694e;
+  --green-2: #f07a5f;
+  --green-tile: #271612;
+  --green-tile-line: #4c2219;
+  --violet: #4c2219;
+  --violet-tile: #271612;
+  --violet-tile-line: #4c2219;
+  --coral: #e8694e;
+  --coral-ink: #f6ab98;
+  --coral-soft: #4c2219;
+  --ink: #f2f0eb;
+  --ink-2: #c8c5bf;
+  --muted: #908d87;
+  --line: #26282d;
+  --line-strong: #383b42;
+}
+
+/* Text on the coral buttons is white. */
+.ds-app[data-variant="algo"] .ds-nav-item.is-active,
+.ds-app[data-variant="algo"] .ds-btn-next,
+.ds-app[data-variant="algo"] .ds-timeline-steps .is-current .ds-timeline-dot {
+  color: #fff;
+  border-color: var(--green-2);
+}
+
+.ds-app[data-variant="algo"] .ds-nav-item.is-active {
+  background: var(--green);
+  box-shadow: 0 2px 0 rgba(168, 68, 47, 0.45);
+}
+
+.ds-app[data-variant="algo"] .ds-btn-next {
+  box-shadow: 0 2px 0 rgba(168, 68, 47, 0.45);
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-steps .is-current .ds-timeline-dot {
+  box-shadow: 0 1.5px 0 rgba(168, 68, 47, 0.5);
+}
+
+.ds-app[data-variant="algo"] .ds-btn-ghost,
+.ds-app[data-variant="algo"] .ds-tool,
+.ds-app[data-variant="algo"] .ds-theme-btn,
+.ds-app[data-variant="algo"] .ds-menu-btn {
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+
+.ds-app[data-variant="algo"] .ds-search {
+  width: 250px;
+  border-color: var(--line-strong);
+}
+
+/* ---- top bar ---- */
+
+.ds-app[data-variant="algo"] .ds-brand-name {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ds-app[data-variant="algo"] .ds-brand-name span {
+  padding: 1px 9px 2px;
+  color: var(--coral-ink);
+  background: var(--coral-soft);
+  border-radius: 8px;
+}
+
+.ds-app[data-variant="algo"] .ds-nav {
+  gap: 6px;
+}
+
+.ds-app[data-variant="algo"] .ds-nav-item {
+  padding: 0 16px;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.ds-app[data-variant="algo"] .ds-nav-item.is-active {
+  padding: 0 20px;
+}
+
+.ds-app[data-variant="algo"] .ds-nav-item em {
+  display: none;
+}
+
+/* ---- sidebar ---- */
+
+.ds-app[data-variant="algo"] .ds-tree-root {
+  font-size: 17px;
+}
+
+.ds-app[data-variant="algo"] .ds-mod-title {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.ds-app[data-variant="algo"] .ds-lesson-row {
+  font-size: 14px;
+}
+
+.ds-app[data-variant="algo"] .ds-lesson-row a {
+  gap: 10px;
+  border-radius: 10px;
+}
+
+.ds-app[data-variant="algo"] .ds-lesson-row.is-current a {
+  background: var(--coral-soft);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.ds-app[data-variant="algo"] .ds-file {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  color: var(--coral);
+}
+
+.ds-app[data-variant="algo"] .ds-file.is-done {
+  color: #2f8a43;
+}
+
+.ds-app[data-variant="algo"] .ds-lesson-row:not(.is-current) .ds-file:not(.is-done) {
+  color: var(--muted-2);
+}
+
+.ds-app[data-variant="algo"] .ds-progress.is-hidden {
+  display: none;
+}
+
+.ds-app[data-variant="algo"] .ds-progress-line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-inline-start: -10px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  background: var(--paper-2);
+  border-radius: 12px;
+}
+
+.ds-app[data-variant="algo"] .ds-progress-line .ds-bar {
+  flex: 1;
+  height: 8px;
+  margin: 0;
+  background: var(--line);
+  border: 0;
+  border-radius: 999px;
+}
+
+.ds-app[data-variant="algo"] .ds-progress-line .ds-bar span {
+  background: var(--coral);
+  border: 0;
+}
+
+.ds-app[data-variant="algo"] .ds-progress-line b {
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* ---- lesson heading ---- */
+
+.ds-app[data-variant="algo"] .ds-lesson-head--algo {
+  padding: 22px 22px 0;
+}
+
+.ds-app[data-variant="algo"] .ds-lesson-head--algo .ds-lesson-head-row {
+  margin-top: 0;
+}
+
+.ds-app[data-variant="algo"] .ds-title {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  white-space: normal;
+}
+
+.ds-app[data-variant="algo"] .ds-module-badge {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 14px;
+  text-align: end;
+}
+
+.ds-app[data-variant="algo"] .ds-module-text {
+  display: grid;
+  gap: 2px;
+}
+
+.ds-app[data-variant="algo"] .ds-module-name {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.ds-app[data-variant="algo"] .ds-module-name b {
+  margin-inline-end: 8px;
+  padding: 1px 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  background: #26262a;
+  border-radius: 7px;
+}
+
+.ds-app[data-variant="algo"] .ds-module-text small {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ds-app[data-variant="algo"] .ds-iso-stairs {
+  flex: none;
+}
+
+/* ---- guide ---- */
+
+.ds-app[data-variant="algo"] .ds-guide-title {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+.ds-app[data-variant="algo"] .ds-guide-body p {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.ds-app[data-variant="algo"] .ds-chapter.coral {
+  color: var(--coral-ink);
+  background: var(--coral-soft);
+  border-color: var(--coral);
+  box-shadow: none;
+}
+
+.ds-app[data-variant="algo"] .ds-callout {
+  border-radius: 12px;
+}
+
+.ds-app[data-variant="algo"] .ds-callout-icon {
+  background: var(--coral-soft);
+  border-color: var(--line-strong);
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-keys {
+  margin-inline-end: 12px;
+  color: var(--muted);
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-keys kbd {
+  margin-inline-end: 4px;
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-row.has-nav {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  margin-top: 6px;
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-row.has-nav .ds-timeline-track {
+  margin-top: 0;
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-nav {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--ink);
+  background: var(--field);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-nav.prev .ds-i {
+  transform: rotate(180deg);
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-nav:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---- the extra cards in the right column ---- */
+
+.ds-app[data-variant="algo"] .ds-codecard,
+.ds-app[data-variant="algo"] .ds-numbers {
+  flex: none;
+  padding: 16px 18px 18px;
+}
+
+.ds-app[data-variant="algo"] .ds-codecard h2,
+.ds-app[data-variant="algo"] .ds-numbers h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.ds-app[data-variant="algo"] .ds-codecard h2 .ds-i {
+  color: var(--coral);
+}
+
+.ds-app[data-variant="algo"] .ds-code {
+  max-height: 240px;
+  margin: 0 -4px;
+  padding: 12px 0;
+  overflow: auto;
+  color: #ece7de;
+  background: #2a2a2e;
+  border-radius: 12px;
+  font-family: var(--font-jbm), "JetBrains Mono", ui-monospace, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.ds-app[data-variant="algo"] .ds-code code {
+  display: block;
+  font-family: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.ds-app[data-variant="algo"] .ds-code-line {
+  display: block;
+  padding: 0 16px 0 0;
+  white-space: pre;
+  border-inline-start: 3px solid transparent;
+}
+
+.ds-app[data-variant="algo"] .ds-code-line i {
+  display: inline-block;
+  width: 36px;
+  padding-inline-end: 14px;
+  font-style: normal;
+  color: #7d7a74;
+  text-align: end;
+}
+
+.ds-app[data-variant="algo"] .ds-code-line.is-on {
+  background: rgba(224, 119, 95, 0.22);
+  border-inline-start-color: #e0775f;
+}
+
+.ds-app[data-variant="algo"] .ds-code .kw {
+  color: #f0907a;
+  font-weight: 700;
+}
+
+.ds-app[data-variant="algo"] .ds-numbers ul {
+  display: grid;
+  gap: 2px;
+}
+
+.ds-app[data-variant="algo"] .ds-numbers li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  font-size: 15px;
+}
+
+.ds-app[data-variant="algo"] .ds-numbers li b {
+  min-width: 34px;
+  padding: 2px 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  background: var(--paper-2);
+  border-radius: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ds-app[data-variant="algo"] .ds-numbers li b[data-level="good"] {
+  color: #2f7d3f;
+}
+
+.ds-app[data-variant="algo"] .ds-numbers li b[data-level="warn"] {
+  color: #a5650c;
+}
+
+.ds-app[data-variant="algo"] .ds-numbers li b[data-level="bad"] {
+  color: #c0392b;
+}
+
+.ds-app[data-variant="algo"] .ds-goals {
+  flex: none;
+}
+
+/* ---- the page's own proportions: a 64px bar and three columns with 14px between them ---- */
+
+.ds-app[data-variant="algo"] .ds-topbar {
+  padding-inline: 20px 16px;
+  background: var(--paper);
+  box-shadow: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.ds-app[data-variant="algo"] .ds-body {
+  grid-template-columns: clamp(262px, 14.2vw, 276px) minmax(0, 1fr) clamp(400px, 23.5vw, 440px);
+  gap: 14px;
+  padding: 12px 12px 10px 10px;
+}
+
+.ds-app[data-variant="algo"] .ds-sidebar {
+  padding: 0;
+}
+
+.ds-app[data-variant="algo"] .ds-sheet {
+  margin: 0;
+  border-radius: 14px;
+}
+
+.ds-app[data-variant="algo"] .ds-rail {
+  padding: 0;
+  gap: 14px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.ds-app[data-variant="algo"] .ds-rail .ds-card {
+  background: var(--paper);
+  border-radius: 14px;
+}
+
+.ds-app[data-variant="algo"] .ds-guide {
+  flex: none;
+  padding: 15px 18px 16px 19px;
+}
+
+.ds-app[data-variant="algo"] .ds-guide-content {
+  flex: none;
+  overflow: visible;
+}
+
+.ds-app[data-variant="algo"] .ds-guide-title {
+  margin: 7px 0;
+  font-size: 21px;
+  font-weight: 780;
+  line-height: 1.2;
+  letter-spacing: -0.032em;
+}
+
+.ds-app[data-variant="algo"] .ds-guide-body p {
+  margin-bottom: 9px;
+  font-size: 14.2px;
+  font-weight: 440;
+  line-height: 21px;
+  letter-spacing: -0.006em;
+}
+
+.ds-app[data-variant="algo"] .ds-btn-ghost,
+.ds-app[data-variant="algo"] .ds-btn-next {
+  height: 40px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 620;
+}
+
+.ds-app[data-variant="algo"] .ds-guide-hint {
+  display: none;
+}
+
+.ds-app[data-variant="algo"] .ds-theme-btn,
+.ds-app[data-variant="algo"] .ds-menu-btn,
+.ds-app[data-variant="algo"] .ds-search {
+  height: 40px;
+}
+
+.ds-app[data-variant="algo"] .ds-theme-btn,
+.ds-app[data-variant="algo"] .ds-menu-btn {
+  width: 40px;
+}
+
+.ds-app[data-variant="algo"] .ds-nav-item {
+  height: 39px;
+  font-size: 14.8px;
+  font-weight: 650;
+}
+
+.ds-app[data-variant="algo"] .ds-progress-line {
+  height: 46px;
+  padding: 0 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 10px 24px -16px rgba(42, 43, 47, 0.3);
+  font-size: 13px;
+}
+
+.ds-app[data-variant="algo"] .ds-title {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* The code card: dim every line except the ones this step is on. */
+.ds-app[data-variant="algo"] .ds-code {
+  max-height: none;
+  margin: 0 -1px -1px;
+  padding: 10px 0 12px;
+  background: #2d2e32;
+  border-radius: 0 0 14px 14px;
+  font-size: 12.3px;
+  font-weight: 470;
+  line-height: 19.8px;
+}
+
+.ds-app[data-variant="algo"] .ds-code-line {
+  padding-inline-end: 14px;
+  border-inline-start: 2px solid transparent;
+  transition:
+    opacity 0.3s,
+    background-color 0.3s,
+    border-color 0.3s;
+}
+
+.ds-app[data-variant="algo"] .ds-code-line i {
+  width: 31px;
+  margin-inline-end: 23px;
+  padding-inline-end: 0;
+  font-size: 11.5px;
+  color: #7c7e87;
+}
+
+.ds-app[data-variant="algo"] .ds-code.has-focus .ds-code-line {
+  opacity: 0.42;
+}
+
+.ds-app[data-variant="algo"] .ds-code.has-focus .ds-code-line.is-on {
+  opacity: 1;
+  background: rgba(226, 112, 90, 0.11);
+  border-inline-start-color: #e2705a;
+}
+
+.ds-app[data-variant="algo"] .ds-code .kw {
+  color: #f08a6d;
+}
+
+.ds-app[data-variant="algo"] .ds-codecard {
+  padding: 0;
+  overflow: hidden;
+}
+
+.ds-app[data-variant="algo"] .ds-codecard h2 {
+  height: 51px;
+  margin: 0;
+  padding: 5px 12px 0 20px;
+  font-size: 17.5px;
+  letter-spacing: -0.032em;
+}
+
+@media (max-width: 1179px) {
+  .ds-app[data-variant="algo"] .ds-body {
+    grid-template-columns: minmax(0, 1fr) clamp(340px, 37vw, 430px);
+  }
+
+  .ds-app[data-variant="algo"] .ds-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 819px) {
+  .ds-app[data-variant="algo"] .ds-body {
+    display: block;
+    padding: 8px 10px 20px;
+  }
+}
+
+/* ---- the stage is bare, and the timeline scrolls sideways with a step title under each dot ---- */
+
+.ds-app[data-variant="algo"] .ds-timeline-steps {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-steps::-webkit-scrollbar {
+  display: none;
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-steps li {
+  position: relative;
+  flex: 0 0 clamp(120px, 12vw, 168px);
+  scroll-snap-align: center;
+}
+
+/* A line from each dot to the next one. */
+.ds-app[data-variant="algo"] .ds-timeline-steps li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  width: 100%;
+  height: 1.5px;
+  background: var(--line-strong);
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-steps li.is-done::after {
+  background: var(--ink);
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-dot {
+  position: relative;
+  z-index: 1;
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-label {
+  display: block;
+  max-width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds-app[data-variant="algo"] .ds-timeline-steps button {
+  min-width: 0;
+}

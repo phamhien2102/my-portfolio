@@ -1,5 +1,6 @@
 import { JetBrains_Mono } from "next/font/google";
 
+import "@/components/course/course.css";
 import "../design-system.css";
 import { DesignSystemApp } from "./design-system-app";
 

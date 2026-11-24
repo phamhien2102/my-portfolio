@@ -38,6 +38,7 @@ Pages are a few lines: metadata plus one component imported from a feature's pub
 | `/native`                           | `native`                                                                  | SwiftUI + Kotlin roadmap; light page, `robots: noindex`         |
 | `/ielts`                            | `ielts`                                                                   | IELTS course reader; light page, `robots: noindex`              |
 | `/design-system`                    | `design-system`                                                           | interactive system design course; light page, `robots: noindex` |
+| `/algo-lab`                         | `algo-lab`                                                                | interactive DSA course; light page, `robots: noindex`           |
 | `/hide-pages`                       | `hide-pages`                                                              | index of every unlisted page; `robots: noindex`                 |
 
 **Unlisted pages** are kept out of `SITE.nav` _and_ set `robots: { index: false, follow: false }`

@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
-import { MODULES } from "../data";
 import { SearchIcon } from "./icons";
+import type { CourseLesson, CourseModule } from "./types";
 
 interface Hit {
   key: string;
@@ -17,28 +17,39 @@ interface Hit {
 }
 
 /** Every lesson and every step, flattened once so typing only has to filter. */
-const INDEX: Hit[] = MODULES.flatMap((module) =>
-  module.lessons.flatMap((lesson) => [
-    {
-      key: lesson.id,
-      title: lesson.title,
-      meta: `${module.name} · ${lesson.minutes} min`,
-      href: `#${lesson.id}`,
-      kind: "lesson" as const,
-      text: `${lesson.title} ${lesson.summary}`.toLowerCase(),
-    },
-    ...lesson.steps.map((step, i) => ({
-      key: `${lesson.id}/${i + 1}`,
-      title: step.title,
-      meta: `${lesson.title} · step ${i + 1}`,
-      href: `#${lesson.id}/${i + 1}`,
-      kind: "step" as const,
-      text: `${step.title} ${step.body.join(" ")}`.toLowerCase(),
-    })),
-  ]),
-);
+function buildIndex(modules: readonly CourseModule<CourseLesson>[]): Hit[] {
+  return modules.flatMap((module) =>
+    module.lessons.flatMap((lesson) => [
+      {
+        key: lesson.id,
+        title: lesson.title,
+        meta: `${module.name} · ${lesson.minutes} min`,
+        href: `#${lesson.id}`,
+        kind: "lesson" as const,
+        text: `${lesson.title} ${lesson.summary}`.toLowerCase(),
+      },
+      ...lesson.steps.map((step, i) => ({
+        key: `${lesson.id}/${i + 1}`,
+        title: step.title,
+        meta: `${lesson.title} · step ${i + 1}`,
+        href: `#${lesson.id}/${i + 1}`,
+        kind: "step" as const,
+        text: `${step.title} ${step.body.join(" ")}`.toLowerCase(),
+      })),
+    ]),
+  );
+}
 
-export function SearchDialog({ onClose }: { onClose: () => void }) {
+export function SearchDialog({
+  modules,
+  placeholder,
+  onClose,
+}: {
+  modules: readonly CourseModule<CourseLesson>[];
+  placeholder: string;
+  onClose: () => void;
+}) {
+  const index = useMemo(() => buildIndex(modules), [modules]);
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
   const listRef = useRef<HTMLUListElement>(null);
@@ -46,10 +57,10 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
   const hits = useMemo(() => {
     const words = query.toLowerCase().split(/\s+/).filter(Boolean);
     const pool = words.length
-      ? INDEX.filter((h) => words.every((w) => h.text.includes(w)))
-      : INDEX.filter((h) => h.kind === "lesson");
+      ? index.filter((h) => words.every((w) => h.text.includes(w)))
+      : index.filter((h) => h.kind === "lesson");
     return pool.slice(0, 30);
-  }, [query]);
+  }, [index, query]);
 
   const at = Math.min(cursor, Math.max(hits.length - 1, 0));
 
@@ -73,7 +84,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
           <input
             autoFocus
             value={query}
-            placeholder="Search lessons and steps…"
+            placeholder={placeholder}
             aria-label="Search"
             onChange={(e) => {
               setQuery(e.target.value);

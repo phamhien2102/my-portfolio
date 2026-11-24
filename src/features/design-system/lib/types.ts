@@ -1,3 +1,5 @@
+import type { CourseLesson, CourseModule, CourseStep } from "@/components/course/types";
+
 export type NodeKind =
   "user" | "dns" | "server" | "service" | "lb" | "cache" | "db" | "queue" | "limiter";
 
@@ -67,69 +69,11 @@ export interface Scene {
   panels?: Panel[];
 }
 
-export type HudIcon =
-  | "globe"
-  | "link"
-  | "server"
-  | "download"
-  | "timer"
-  | "gauge"
-  | "database"
-  | "layers"
-  | "alert"
-  | "users"
-  | "queue"
-  | "shield";
+export type Step = CourseStep<Scene>;
 
-/** A slot in the row of chips above the diagram; every step fills it in, or leaves a dash. */
-export interface HudSlot {
-  label: string;
-  icon: HudIcon;
-}
-
-/** A live number shown as a chip above the diagram. */
-export interface Metric {
-  label: string;
-  value: string;
-  level?: "good" | "warn" | "bad";
-}
-
-export type CalloutKind = "insight" | "tip" | "warn";
-
-export interface Step {
-  short: string;
-  title: string;
-  /** Paragraphs. `code` between backticks is rendered as inline code. */
-  body: string[];
-  callout?: { kind: CalloutKind; text: string };
-  /** Overrides the tag worked out from the step's position, e.g. a worked case. */
-  chapter?: { label: string; tone: "red" | "amber" | "blue" | "green" | "ink" };
-  metrics?: Metric[];
-  /** Replaces the "What changed" list that is otherwise worked out from the scene and numbers. */
-  changes?: { kind: "add" | "del" | "mod"; text: string }[];
-  scene: Scene;
-}
-
-export type Level = "beginner" | "intermediate" | "advanced";
-
-export interface Lesson {
-  id: string;
-  title: string;
-  summary: string;
-  minutes: number;
-  level: Level;
-  goals: string[];
-  takeaways: string[];
-  /** The chips above the diagram. A step's `metrics` fill them by label. */
-  hud: HudSlot[];
+export interface Lesson extends CourseLesson<Scene> {
   nodes: DiagramNode[];
   links: DiagramLink[];
-  steps: Step[];
 }
 
-export interface Module {
-  id: string;
-  name: string;
-  color: string;
-  lessons: Lesson[];
-}
+export type Module = CourseModule<Lesson>;
