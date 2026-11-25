@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useState, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 
 import { paintHighlights, selectionOffsets } from "../lib/highlight-dom";
 import {
@@ -50,6 +50,7 @@ export function StudyTools({ stageRef, chapterId }: Props) {
   const flashcards = useFlashcards();
   const notes = useNotes();
   const [pending, setPending] = useState<Pending | null>(null);
+  const tipRef = useRef<HTMLDivElement>(null);
   const [dialog, setDialog] = useState<{ word: string } | null>(null);
   const [noteDialog, setNoteDialog] = useState<NoteTarget | null>(null);
 
@@ -86,11 +87,23 @@ export function StudyTools({ stageRef, chapterId }: Props) {
     return {
       text,
       ...offsets,
-      x: Math.min(Math.max(rect.left + rect.width / 2, 80), window.innerWidth - 80),
+      // Only the centre of the selection; the toolbar is kept on screen once it is measured.
+      x: rect.left + rect.width / 2,
       y: below ? rect.bottom : rect.top,
       below,
     };
   }, [chapterId, stageRef]);
+
+  // The toolbar is centred on the selection, but a word at the edge of the screen would push half
+  // of it off. Its width is only known once it is on the page, so pull it back in before paint.
+  useLayoutEffect(() => {
+    const tip = tipRef.current;
+    if (!pending || !tip) return;
+    const margin = 8;
+    const half = tip.offsetWidth / 2;
+    const limit = document.documentElement.clientWidth - half - margin;
+    tip.style.left = `${Math.max(half + margin, Math.min(pending.x, limit))}px`;
+  }, [pending]);
 
   // A click on an underlined passage reopens its note (but not at the end of a text selection).
   useEffect(() => {
@@ -209,6 +222,7 @@ export function StudyTools({ stageRef, chapterId }: Props) {
     <>
       {pending && (
         <div
+          ref={tipRef}
           className="sel-tip"
           data-below={pending.below}
           style={{ left: pending.x, top: pending.y }}
