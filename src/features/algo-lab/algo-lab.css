@@ -633,3 +633,117 @@
 .ds-app .al-pointer-line {
   fill: none;
 }
+
+/* ---- solid regions of memory (a frame with `solid`) --------------------------------------- */
+/* A slab whose top is the floor and whose two visible sides go down into it, in the colour of its
+   tone. Cells stand on the top, so nothing covers them. */
+
+.ds-app .al-slab-top,
+.ds-app .al-slab-left,
+.ds-app .al-slab-right {
+  stroke: #14202b;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.ds-app .al-slab-top.tone-plain {
+  fill: #e3ecf4;
+}
+.ds-app .al-slab-left.tone-plain {
+  fill: #bccddd;
+}
+.ds-app .al-slab-right.tone-plain {
+  fill: #a2b6c9;
+}
+
+.ds-app .al-slab-top.tone-active {
+  fill: #fff1c9;
+}
+.ds-app .al-slab-left.tone-active {
+  fill: #e8cd82;
+}
+.ds-app .al-slab-right.tone-active {
+  fill: #cfae5a;
+}
+
+.ds-app .al-slab-top.tone-mark {
+  fill: #ece4fb;
+}
+.ds-app .al-slab-left.tone-mark {
+  fill: #c8b7ee;
+}
+.ds-app .al-slab-right.tone-mark {
+  fill: #a994dd;
+}
+
+.ds-app .al-slab-top.tone-found {
+  fill: #ddf5f1;
+}
+.ds-app .al-slab-left.tone-found {
+  fill: #8ed3c9;
+}
+.ds-app .al-slab-right.tone-found {
+  fill: #5fb8ab;
+}
+
+.ds-app .al-slab-top.tone-warn {
+  fill: #fde3dd;
+}
+.ds-app .al-slab-left.tone-warn {
+  fill: #eca99c;
+}
+.ds-app .al-slab-right.tone-warn {
+  fill: #d4857a;
+}
+
+.ds-app[data-theme="dark"] .al-slab-top,
+.ds-app[data-theme="dark"] .al-slab-left,
+.ds-app[data-theme="dark"] .al-slab-right {
+  stroke: #02060a;
+}
+.ds-app[data-theme="dark"] .al-slab-top.tone-plain {
+  fill: #2a3b4a;
+}
+.ds-app[data-theme="dark"] .al-slab-left.tone-plain {
+  fill: #1d2b38;
+}
+.ds-app[data-theme="dark"] .al-slab-right.tone-plain {
+  fill: #15212b;
+}
+.ds-app[data-theme="dark"] .al-slab-top.tone-active {
+  fill: #5a4a22;
+}
+.ds-app[data-theme="dark"] .al-slab-left.tone-active {
+  fill: #433719;
+}
+.ds-app[data-theme="dark"] .al-slab-right.tone-active {
+  fill: #32280f;
+}
+.ds-app[data-theme="dark"] .al-slab-top.tone-mark {
+  fill: #3f3566;
+}
+.ds-app[data-theme="dark"] .al-slab-left.tone-mark {
+  fill: #2f2752;
+}
+.ds-app[data-theme="dark"] .al-slab-right.tone-mark {
+  fill: #231c3f;
+}
+
+/* A solid region drops in with the blocks on it (reduced motion keeps it still). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes al-slab-in {
+    from {
+      opacity: 0;
+      transform: translateY(-120px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .ds-app .al-slab-top,
+  .ds-app .al-slab-left,
+  .ds-app .al-slab-right {
+    animation: al-slab-in 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+  }
+}

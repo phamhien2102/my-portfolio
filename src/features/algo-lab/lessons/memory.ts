@@ -1,14 +1,15 @@
 import { cell, frame, label, ptr, row, scene } from "../lib/scenes";
 import type { AlgoLesson, Tone } from "../lib/types";
 
-/** Sixteen numbered slots (two rows of eight) with optional values and tones. */
+/** Sixteen numbered slots (two rows of eight) with optional values and tones. An empty slot is a solid
+ * block too (muted), so memory reads as real, stackable 3D cells rather than an outline. */
 function slots(values: Record<number, string>, tones: Record<number, Tone> = {}) {
   return Array.from({ length: 16 }, (_, i) =>
     cell(`m${i}`, 100 + (i % 8) * 62, i < 8 ? 110 : 190, values[i] ?? "", {
       w: 54,
       h: 46,
       sub: String(100 + i),
-      tone: tones[i] ?? (values[i] === undefined ? "ghost" : "plain"),
+      tone: tones[i] ?? (values[i] === undefined ? "muted" : "plain"),
     }),
   );
 }
@@ -113,7 +114,7 @@ export const memory: AlgoLesson = {
       ],
       scene: scene(
         slots({ 4: "7", 5: "3", 6: "9", 7: "1" }, { 4: "mark", 5: "mark", 6: "mark", 7: "mark" }),
-        frame("arr", 215, 82, 240, 62, "array a, start = 104"),
+        frame("arr", 315, 81, 252, 58, "array a, start = 104", { solid: true }),
       ),
     },
     {
@@ -168,8 +169,8 @@ export const memory: AlgoLesson = {
         { label: "Cost", value: "O(1)", level: "good" },
       ],
       scene: scene(
-        frame("fs", 80, 70, 190, 150, "stack", { tone: "active" }),
-        frame("fh", 370, 70, 190, 150, "heap", { tone: "mark" }),
+        frame("fs", 80, 70, 190, 150, "stack", { tone: "active", solid: true }),
+        frame("fh", 370, 70, 190, 150, "heap", { tone: "mark", solid: true }),
         cell("sv", 175, 150, "ref 7f2", { w: 120, h: 40, tone: "active" }),
         cell("hv", 465, 150, "[7, 3, 9]", { w: 120, h: 40, tone: "mark" }),
         ptr("sv-hv", "hv", "7f2", { side: "left", tone: "mark" }),
