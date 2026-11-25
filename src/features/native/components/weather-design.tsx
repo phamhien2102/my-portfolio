@@ -21,7 +21,7 @@ function skyStyle(sky: Sky): CSSProperties {
 }
 
 function Kicker({ children }: { children: string }) {
-  return <p className="font-mono text-xs tracking-[0.3em] text-zinc-500">{children}</p>;
+  return <p className="font-mono text-xs tracking-[0.3em] text-slate-500">{children}</p>;
 }
 
 function Glyph({ name, className = "size-5" }: { name: GlyphName; className?: string }) {
@@ -66,10 +66,10 @@ function Phone({ sky, children }: { sky: Sky; children: ReactNode }) {
   return (
     <div
       aria-hidden="true"
-      className="relative mx-auto aspect-[9/19] w-[250px] overflow-hidden rounded-[2.4rem] border-[7px] border-zinc-900 shadow-xl"
+      className="relative mx-auto aspect-[9/19] w-[250px] overflow-hidden rounded-[2.4rem] border-[7px] border-slate-900 shadow-xl"
       style={skyStyle(sky)}
     >
-      <div className="absolute top-2 left-1/2 h-4 w-16 -translate-x-1/2 rounded-full bg-zinc-900" />
+      <div className="absolute top-2 left-1/2 h-4 w-16 -translate-x-1/2 rounded-full bg-slate-900" />
       <div className="flex h-full flex-col px-4 pt-9 pb-4">{children}</div>
     </div>
   );
@@ -96,9 +96,9 @@ function Screen({
     <figure>
       {children}
       <figcaption className="mx-auto mt-4 max-w-[250px]">
-        <span className="font-mono text-[11px] tracking-[0.2em] text-zinc-400">{version}</span>
-        <span className="mt-1 block font-bold text-zinc-900">{title}</span>
-        <span className="mt-1 block text-sm text-zinc-600">{note}</span>
+        <span className="font-mono text-[11px] tracking-[0.2em] text-slate-400">{version}</span>
+        <span className="mt-1 block font-bold text-slate-900">{title}</span>
+        <span className="mt-1 block text-sm text-slate-600">{note}</span>
       </figcaption>
     </figure>
   );
@@ -165,11 +165,11 @@ function CitiesScreen() {
     <Phone sky={{ ...SKY_BY_ID.cloudy, from: "#f8fafc", to: "#e2e8f0", ink: "#0f172a" }}>
       <div className="flex items-center justify-between">
         <p className="text-2xl font-bold">Weather</p>
-        <span className="flex size-7 items-center justify-center rounded-full bg-zinc-900 text-lg leading-none text-white">
+        <span className="flex size-7 items-center justify-center rounded-full bg-slate-900 text-lg leading-none text-white">
           +
         </span>
       </div>
-      <div className="mt-3 rounded-xl bg-white px-3 py-1.5 text-[11px] text-zinc-400 shadow-sm">
+      <div className="mt-3 rounded-xl bg-white px-3 py-1.5 text-[11px] text-slate-400 shadow-sm">
         Search for a city
       </div>
       <ul className="mt-3 space-y-2">
@@ -250,23 +250,23 @@ export function WeatherDesign() {
   return (
     <main
       data-page-theme="light"
-      className="min-h-svh bg-white px-5 py-16 text-zinc-900 [color-scheme:light] sm:px-8"
+      className="min-h-svh bg-[#edf3f8] px-5 py-16 text-slate-900 [color-scheme:light] sm:px-8"
     >
       <div className="mx-auto max-w-5xl">
         <Link
           href="/native"
-          className="font-mono text-xs tracking-[0.25em] text-zinc-400 hover:text-zinc-900"
+          className="font-mono text-xs tracking-[0.25em] text-slate-400 hover:text-slate-900"
         >
           ← GOING NATIVE
         </Link>
 
-        <p className="mt-10 font-mono text-xs tracking-[0.3em] text-zinc-500">
+        <p className="mt-10 font-mono text-xs tracking-[0.3em] text-slate-500">
           THE APP · SWIFTUI · JETPACK COMPOSE
         </p>
         <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-6xl">
           Weather, drawn once.
         </h1>
-        <p className="mt-4 max-w-2xl text-zinc-600">
+        <p className="mt-4 max-w-2xl text-slate-600">
           One design for both platforms. The weather picks the colour, one big number carries the
           screen, and everything else stays out of its way. Build the same screens in SwiftUI and
           Compose and let each platform decide how a segmented control or a swipe feels.
@@ -307,20 +307,20 @@ export function WeatherDesign() {
           <h2 id="skies" className="mt-3 text-2xl font-black tracking-tight sm:text-4xl">
             Six skies, one rule.
           </h2>
-          <p className="mt-3 max-w-2xl text-zinc-600">
+          <p className="mt-3 max-w-2xl text-slate-600">
             The app has no brand colour. The gradient comes from the weather code and the text
             colour is fixed per sky so contrast never depends on the forecast.
           </p>
           <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {SKIES.map((sky) => (
-              <li key={sky.id} className="overflow-hidden rounded-2xl border border-zinc-200">
+              <li key={sky.id} className="overflow-hidden rounded-2xl border border-slate-200">
                 <div className="h-24 p-3 font-semibold" style={skyStyle(sky)}>
                   {sky.label}
                 </div>
-                <div className="p-3 font-mono text-[10px] leading-relaxed text-zinc-500">
+                <div className="p-3 font-mono text-[10px] leading-relaxed text-slate-500">
                   <p>{sky.from}</p>
                   <p>{sky.to}</p>
-                  <p className="mt-1 text-zinc-400">codes {sky.codes}</p>
+                  <p className="mt-1 text-slate-400">codes {sky.codes}</p>
                 </div>
               </li>
             ))}
@@ -332,9 +332,9 @@ export function WeatherDesign() {
           <h2 id="type" className="mt-3 text-2xl font-black tracking-tight sm:text-4xl">
             Four text styles on a 4-point grid.
           </h2>
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-200">
+          <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="bg-zinc-50 font-mono text-[11px] tracking-wider text-zinc-500">
+              <thead className="bg-slate-50 font-mono text-[11px] tracking-wider text-slate-500">
                 <tr>
                   <th className="p-3">STYLE</th>
                   <th className="p-3">SPEC</th>
@@ -344,14 +344,14 @@ export function WeatherDesign() {
               </thead>
               <tbody>
                 {TYPE_SCALE.map((style) => (
-                  <tr key={style.name} className="border-t border-zinc-200 align-top">
+                  <tr key={style.name} className="border-t border-slate-200 align-top">
                     <td className="p-3">
                       <p className={`${style.className} leading-tight`}>{style.sample}</p>
-                      <p className="mt-1 font-mono text-[11px] text-zinc-400">{style.name}</p>
+                      <p className="mt-1 font-mono text-[11px] text-slate-400">{style.name}</p>
                     </td>
-                    <td className="p-3 text-zinc-600">{style.spec}</td>
-                    <td className="p-3 font-mono text-xs text-zinc-600">{style.swift}</td>
-                    <td className="p-3 font-mono text-xs text-zinc-600">{style.kotlin}</td>
+                    <td className="p-3 text-slate-600">{style.spec}</td>
+                    <td className="p-3 font-mono text-xs text-slate-600">{style.swift}</td>
+                    <td className="p-3 font-mono text-xs text-slate-600">{style.kotlin}</td>
                   </tr>
                 ))}
               </tbody>
@@ -362,14 +362,14 @@ export function WeatherDesign() {
               <li key={space.token} className="flex items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="inline-block rounded-sm bg-zinc-900"
+                  className="inline-block rounded-sm bg-slate-900"
                   style={{ width: space.px, height: space.px }}
                 />
                 <span className="text-sm">
                   <span className="font-mono font-bold">
                     {space.token} · {space.px}
                   </span>
-                  <span className="ml-2 text-zinc-500">{space.use}</span>
+                  <span className="ml-2 text-slate-500">{space.use}</span>
                 </span>
               </li>
             ))}
@@ -381,26 +381,26 @@ export function WeatherDesign() {
           <h2 id="components" className="mt-3 text-2xl font-black tracking-tight sm:text-4xl">
             Seven pieces, named the same on both sides.
           </h2>
-          <p className="mt-3 max-w-2xl text-zinc-600">
+          <p className="mt-3 max-w-2xl text-slate-600">
             Give the SwiftUI view and the Composable the same name. When a bug shows up on one
             platform, you can open the other and compare like with like.
           </p>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2">
             {COMPONENTS.map((c) => (
-              <li key={c.name} className="rounded-2xl border border-zinc-200 p-4 shadow-sm">
+              <li key={c.name} className="rounded-2xl border border-slate-200 p-4 shadow-sm">
                 <p className="flex items-baseline justify-between">
                   <span className="font-mono font-bold">{c.name}</span>
-                  <span className="font-mono text-[11px] tracking-wider text-zinc-400">
+                  <span className="font-mono text-[11px] tracking-wider text-slate-400">
                     {c.from}
                   </span>
                 </p>
-                <p className="mt-1 text-sm text-zinc-600">{c.detail}</p>
+                <p className="mt-1 text-sm text-slate-600">{c.detail}</p>
                 <p className="mt-3 font-mono text-[11px] leading-relaxed">
-                  <span className="text-[#c2410c]">iOS </span>
-                  <span className="text-zinc-600">{c.swift}</span>
+                  <span className="text-[#1d6fd6]">iOS </span>
+                  <span className="text-slate-600">{c.swift}</span>
                   <br />
-                  <span className="text-[#6d28d9]">Android </span>
-                  <span className="text-zinc-600">{c.kotlin}</span>
+                  <span className="text-[#0f766e]">Android </span>
+                  <span className="text-slate-600">{c.kotlin}</span>
                 </p>
               </li>
             ))}
@@ -414,18 +414,18 @@ export function WeatherDesign() {
           </h2>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {STATES.map((state) => (
-              <li key={state.name} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-                <p className="font-mono text-[11px] tracking-wider text-zinc-400">
+              <li key={state.name} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="font-mono text-[11px] tracking-wider text-slate-400">
                   {state.version}
                 </p>
                 <p className="mt-1 font-bold">{state.name}</p>
-                <p className="mt-1 text-sm text-zinc-600">{state.body}</p>
+                <p className="mt-1 text-sm text-slate-600">{state.body}</p>
               </li>
             ))}
           </ul>
         </section>
 
-        <p className="mt-20 font-mono text-xs tracking-wider text-zinc-400">
+        <p className="mt-20 font-mono text-xs tracking-wider text-slate-400">
           A private page. Not linked from anywhere, not in search results.
         </p>
       </div>
