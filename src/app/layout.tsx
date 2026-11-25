@@ -37,11 +37,18 @@ const heroBlock = Bungee_Shade({
 });
 
 export const metadata: Metadata = {
+  // The base that turns the share-image paths into the absolute URLs a link preview needs.
+  metadataBase: new URL(SITE.website),
   title: {
     default: SITE.title,
     template: `%s | ${SITE.name}`,
   },
   description: SITE.description,
+  openGraph: {
+    type: "website",
+    siteName: SITE.name,
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
