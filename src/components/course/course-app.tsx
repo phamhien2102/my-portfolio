@@ -43,7 +43,7 @@ interface Props<L extends CourseLesson> {
   brand: React.ReactNode;
   nav: readonly NavItem[];
   searchPlaceholder: string;
-  /** "classic" (System Design: green, mono) or "algo" (Algo Lab: coral, Inter, extra rail cards). */
+  /** "classic" (Design System: green, mono) or "algo" (Algo Lab: coral, Inter, extra rail cards). */
   variant?: CourseVariant;
 }
 

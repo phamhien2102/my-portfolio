@@ -91,11 +91,7 @@ export function DesignSystemApp({ fontClassName }: { fontClassName: string }) {
       engine={ENGINE}
       fontClassName={fontClassName}
       storageKey="design-system"
-      brand={
-        <>
-          Raymond&rsquo;s <span>System Design</span>
-        </>
-      }
+      brand={<span>Design System</span>}
       nav={NAV}
       searchPlaceholder="Search lessons & concepts…"
     />
