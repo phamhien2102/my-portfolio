@@ -1397,6 +1397,38 @@ html:has(.ielts-app) {
   }
 }
 
+/* ---- the collapse arrows in the course menu's header ---------------------------------------- */
+
+/* Wide screens only: on a phone the menu is a drawer with its own backdrop and close button. */
+.ielts-app .side-collapse {
+  display: none;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.ielts-app .side-collapse svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.ielts-app .side-collapse:hover {
+  color: var(--ink);
+  background: var(--tile);
+}
+
+@media (min-width: 62.01rem) {
+  .ielts-app .side-collapse {
+    display: grid;
+  }
+}
+
 /* ---- folding the course menu away on a wide screen ------------------------------------------ */
 
 /* One tab on the left edge of the screen. It is narrower than the page's side padding, so it sits

@@ -7,19 +7,21 @@ import { cn } from "@/lib/cn";
 import { clampY, useFloatY } from "../lib/layout-store";
 
 interface Props {
-  collapsed: boolean;
-  onToggle: () => void;
+  /** Bring the course menu back. */
+  onExpand: () => void;
 }
 
 /** A key press moves the tab by this share of the window height. */
 const STEP = 0.04;
 
 /**
- * The tab on the left edge of a wide screen that folds the course menu away and brings it back.
- * Hover (or focus) lengthens it and reveals a grip above the arrows: drag the grip, or press the
- * up and down arrow keys on it, to move the tab along the edge. The position is remembered.
+ * The tab on the left edge of a wide screen that brings the course menu back after it was folded
+ * away. It only exists while the menu is folded; with the menu open, the arrows in the menu's own
+ * header fold it again. Hover (or focus) lengthens the tab and reveals a grip above the arrows:
+ * drag the grip, or press the up and down arrow keys on it, to move the tab along the edge. The
+ * position is remembered.
  */
-export function SideFloat({ collapsed, onToggle }: Props) {
+export function SideFloat({ onExpand }: Props) {
   const saved = useFloatY();
   // While dragging, follow the pointer without writing storage on every move.
   const [dragY, setDragY] = useState<number | null>(null);
@@ -74,20 +76,20 @@ export function SideFloat({ collapsed, onToggle }: Props) {
         ref={toggleRef}
         type="button"
         className="side-float-toggle"
-        aria-label={collapsed ? "Expand course menu" : "Collapse course menu"}
-        aria-expanded={!collapsed}
+        aria-label="Expand course menu"
+        aria-expanded={false}
         aria-controls="course-tree"
-        title={collapsed ? "Expand menu" : "Collapse menu"}
-        onClick={onToggle}
+        title="Expand menu"
+        onClick={onExpand}
       >
-        <ChevronsIcon flipped={collapsed} />
+        <ChevronsIcon flipped />
       </button>
     </div>
   );
 }
 
 /** Two chevrons: toward the left edge, where the menu folds away to, or turned around to bring it back. */
-function ChevronsIcon({ flipped }: { flipped: boolean }) {
+export function ChevronsIcon({ flipped }: { flipped: boolean }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" data-flipped={flipped}>
       <path

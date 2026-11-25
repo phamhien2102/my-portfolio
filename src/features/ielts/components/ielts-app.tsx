@@ -18,7 +18,7 @@ import { useProgress } from "../lib/progress";
 import { useFlashcards, useNotes, type Note } from "../lib/study-store";
 import { FlashcardsPanel } from "./flashcards-panel";
 import { NotesPanel } from "./notes-panel";
-import { SideFloat } from "./side-float";
+import { ChevronsIcon, SideFloat } from "./side-float";
 import { StudyTools } from "./study-tools";
 
 interface Props {
@@ -191,9 +191,10 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
         </div>
       </header>
 
-      {/* Wide screens: a tab on the left edge folds the course menu away and brings it back. Phones
-          use the hamburger and the drawer instead. */}
-      <SideFloat collapsed={collapsed} onToggle={toggleSide} />
+      {/* Wide screens: while the course menu is folded away, a tab on the left edge brings it back.
+          With the menu open the tab is gone and the arrows in the menu's header fold it instead.
+          Phones use the hamburger and the drawer. */}
+      {collapsed && <SideFloat onExpand={toggleSide} />}
 
       <div className={cn("shell", collapsed && "is-collapsed")}>
         {menuOpen && (
@@ -209,6 +210,15 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
             <FolderIcon color="var(--ink)" />
             <span>Course</span>
             <span className="muted">{total} chapters</span>
+            <button
+              type="button"
+              className="side-collapse"
+              aria-label="Collapse course menu"
+              title="Collapse menu"
+              onClick={toggleSide}
+            >
+              <ChevronsIcon flipped={false} />
+            </button>
           </div>
 
           <ul className="parts">
