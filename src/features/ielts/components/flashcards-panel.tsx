@@ -121,12 +121,10 @@ export function FlashcardsPanel({ onClose }: { onClose: () => void }) {
                 <span className="fc-face fc-front" aria-hidden={flipped}>
                   <span className="fc-card-label">Word</span>
                   <span className="fc-card-text">{card.word}</span>
-                  <span className="fc-card-hint">tap to flip</span>
                 </span>
                 <span className="fc-face fc-back" aria-hidden={!flipped}>
                   <span className="fc-card-label">Meaning</span>
                   <span className="fc-card-text">{card.meaning}</span>
-                  <span className="fc-card-hint">tap to flip back</span>
                 </span>
               </span>
             </button>
@@ -162,11 +160,24 @@ export function FlashcardsPanel({ onClose }: { onClose: () => void }) {
         )}
 
         <div className="fc-io">
-          <button type="button" className="btn" disabled={!items.length} onClick={onExport}>
-            Export .xlsx
+          <button
+            type="button"
+            className="fc-io-btn"
+            disabled={!items.length}
+            title="Export the cards as an .xlsx file"
+            onClick={onExport}
+          >
+            <TransferIcon direction="down" />
+            Export
           </button>
-          <button type="button" className="btn" onClick={() => fileRef.current?.click()}>
-            Import .xlsx
+          <button
+            type="button"
+            className="fc-io-btn"
+            title="Import cards from an .xlsx file"
+            onClick={() => fileRef.current?.click()}
+          >
+            <TransferIcon direction="up" />
+            Import
           </button>
           <input
             ref={fileRef}
@@ -186,5 +197,25 @@ export function FlashcardsPanel({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** A tray with an arrow into or out of it. */
+function TransferIcon({ direction }: { direction: "up" | "down" }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d={
+          direction === "down"
+            ? "M12 4v11m0 0-4-4m4 4 4-4M5 19h14"
+            : "M12 15V4m0 0L8 8m4-4 4 4M5 19h14"
+        }
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

@@ -13,6 +13,20 @@ export interface Highlight {
   color?: HighlightColor;
 }
 
+/**
+ * A note on a passage, stored like a highlight (character offsets into one chapter's textContent).
+ * The quoted text is kept with it, so the note still reads right in the list if the chapter changes.
+ */
+export interface Note {
+  id: string;
+  chapterId: string;
+  start: number;
+  end: number;
+  quote: string;
+  text: string;
+  createdAt: number;
+}
+
 export interface Flashcard {
   id: string;
   word: string;
@@ -93,6 +107,19 @@ export const useFlashcards = createListStore<Flashcard>(
     typeof v.word === "string" &&
     typeof v.meaning === "string" &&
     typeof v.chapterId === "string" &&
+    typeof v.createdAt === "number",
+);
+
+export const useNotes = createListStore<Note>(
+  "ielts-notes",
+  (v): v is Note =>
+    isObject(v) &&
+    typeof v.id === "string" &&
+    typeof v.chapterId === "string" &&
+    typeof v.start === "number" &&
+    typeof v.end === "number" &&
+    typeof v.quote === "string" &&
+    typeof v.text === "string" &&
     typeof v.createdAt === "number",
 );
 

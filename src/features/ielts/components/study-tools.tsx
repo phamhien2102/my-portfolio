@@ -8,7 +8,9 @@ import {
   newId,
   useFlashcards,
   useHighlights,
+  useNotes,
   type HighlightColor,
+  type Note,
 } from "../lib/study-store";
 
 interface Props {
@@ -27,26 +29,39 @@ interface Pending {
 }
 
 const MAX_WORD = 200;
+const MAX_NOTE = 2000;
+
+/** Which note the dialog is about: a new one on the selected passage, or one that already exists. */
+type NoteTarget =
+  { kind: "new"; quote: string; start: number; end: number } | { kind: "edit"; id: string };
 
 /**
- * Select text in a chapter and a small tooltip offers two tools: highlight it, or save it as a
- * flashcard (a dialog then asks for the meaning). Highlights are stored as character offsets per
- * chapter and repainted onto the server-rendered HTML; nothing here touches React's own markup.
+ * Select text in a chapter and a small tooltip offers three tools: highlight it, save it as a
+ * flashcard (a dialog then asks for the meaning), or attach a note to it. Highlights and notes are
+ * stored as character offsets per chapter and repainted onto the server-rendered HTML; nothing here
+ * touches React's own markup. A passage that has a note is underlined, and a click on it reopens
+ * the note.
  */
 export function StudyTools({ stageRef, chapterId }: Props) {
   const highlights = useHighlights();
   const flashcards = useFlashcards();
+  const notes = useNotes();
   const [pending, setPending] = useState<Pending | null>(null);
   const [dialog, setDialog] = useState<{ word: string } | null>(null);
+  const [noteDialog, setNoteDialog] = useState<NoteTarget | null>(null);
 
   const chapterHighlights = highlights.items.filter((h) => h.chapterId === chapterId);
   // A stable key so repainting only happens when this chapter's highlights really change.
-  const paintKey = chapterHighlights.map((h) => `${h.id}:${h.start}:${h.end}`).join("|");
+  const chapterNotes = notes.items.filter((n) => n.chapterId === chapterId);
+  const paintKey =
+    chapterHighlights.map((h) => `${h.id}:${h.start}:${h.end}:${h.color ?? ""}`).join("|") +
+    "#" +
+    chapterNotes.map((n) => `${n.id}:${n.start}:${n.end}`).join("|");
 
   useLayoutEffect(() => {
     const section = stageRef.current?.querySelector<HTMLElement>(`#${CSS.escape(chapterId)}`);
-    if (section) paintHighlights(section, chapterHighlights);
-    // chapterHighlights is derived from paintKey.
+    if (section) paintHighlights(section, chapterHighlights, chapterNotes);
+    // chapterHighlights and chapterNotes are derived from paintKey.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chapterId, paintKey, stageRef]);
 
@@ -74,9 +89,25 @@ export function StudyTools({ stageRef, chapterId }: Props) {
     };
   }, [chapterId, stageRef]);
 
+  // A click on an underlined passage reopens its note (but not at the end of a text selection).
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const onClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.closest("a, button, audio")) return;
+      const id = target.closest<HTMLElement>(".user-note")?.dataset.noteId;
+      if (!id || !window.getSelection()?.isCollapsed) return;
+      setPending(null);
+      setNoteDialog({ kind: "edit", id });
+    };
+    stage.addEventListener("click", onClick);
+    return () => stage.removeEventListener("click", onClick);
+  }, [stageRef]);
+
   // Follow the selection. Debounced a little so it settles after the drag handles stop moving.
   useEffect(() => {
-    if (dialog) return;
+    if (dialog || noteDialog) return;
     let timer: number | undefined;
     const sync = () => {
       window.clearTimeout(timer);
@@ -91,7 +122,7 @@ export function StudyTools({ stageRef, chapterId }: Props) {
       window.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
     };
-  }, [dialog, readSelection]);
+  }, [dialog, noteDialog, readSelection]);
 
   const dismiss = () => {
     window.getSelection()?.removeAllRanges();
@@ -126,6 +157,38 @@ export function StudyTools({ stageRef, chapterId }: Props) {
     setDialog({ word: pending.text });
     setPending(null);
   };
+
+  const openNote = () => {
+    if (!pending) return;
+    const { text: quote, start, end } = pending;
+    setNoteDialog({ kind: "new", quote, start, end });
+    setPending(null);
+  };
+
+  const saveNote = (text: string) => {
+    if (!noteDialog) return;
+    if (noteDialog.kind === "new") {
+      const { quote, start, end } = noteDialog;
+      notes.update((items) => [
+        ...items,
+        { id: newId(), chapterId, start, end, quote, text, createdAt: Date.now() },
+      ]);
+    } else {
+      notes.update((items) => items.map((n) => (n.id === noteDialog.id ? { ...n, text } : n)));
+    }
+    window.getSelection()?.removeAllRanges();
+    setNoteDialog(null);
+  };
+
+  const deleteNote = () => {
+    if (noteDialog?.kind !== "edit") return;
+    const { id } = noteDialog;
+    notes.update((items) => items.filter((n) => n.id !== id));
+    setNoteDialog(null);
+  };
+
+  const editing = noteDialog?.kind === "edit" ? noteDialog : null;
+  const editedNote = editing ? notes.items.find((n) => n.id === editing.id) : undefined;
 
   const saveCard = (word: string, meaning: string) => {
     const key = word.toLowerCase();
@@ -182,6 +245,9 @@ export function StudyTools({ stageRef, chapterId }: Props) {
           >
             <CardIcon />
           </button>
+          <button type="button" title="Add a note" aria-label="Add a note" onClick={openNote}>
+            <NoteIcon />
+          </button>
         </div>
       )}
 
@@ -193,6 +259,16 @@ export function StudyTools({ stageRef, chapterId }: Props) {
           )}
           onSave={saveCard}
           onClose={() => setDialog(null)}
+        />
+      )}
+
+      {noteDialog && (noteDialog.kind === "new" || editedNote) && (
+        <NoteDialog
+          quote={noteDialog.kind === "new" ? noteDialog.quote : (editedNote?.quote ?? "")}
+          existing={editedNote}
+          onSave={saveNote}
+          onDelete={deleteNote}
+          onClose={() => setNoteDialog(null)}
         />
       )}
     </>
@@ -268,6 +344,99 @@ function FlashcardDialog({
         </div>
       </form>
     </div>
+  );
+}
+
+function NoteDialog({
+  quote,
+  existing,
+  onSave,
+  onDelete,
+  onClose,
+}: {
+  quote: string;
+  existing: Note | undefined;
+  onSave: (text: string) => void;
+  onDelete: () => void;
+  onClose: () => void;
+}) {
+  const [text, setText] = useState(existing?.text ?? "");
+  const canSave = text.trim() !== "";
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fc-backdrop"
+      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+    >
+      <form
+        className="fc-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="nt-title"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canSave) onSave(text.trim());
+        }}
+      >
+        <h2 id="nt-title">{existing ? "Edit note" : "Add note"}</h2>
+
+        <blockquote className="nt-quote">{quote}</blockquote>
+
+        <label>
+          <span>Note</span>
+          <textarea
+            autoFocus
+            rows={5}
+            value={text}
+            maxLength={MAX_NOTE}
+            placeholder="Viết ghi chú của bạn…"
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              // Enter starts a new line here; Ctrl or Cmd + Enter saves.
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                e.currentTarget.form?.requestSubmit();
+              }
+            }}
+          />
+        </label>
+
+        <div className="fc-actions">
+          {existing && (
+            <button type="button" className="btn nt-delete" onClick={onDelete}>
+              Delete
+            </button>
+          )}
+          <button type="button" className="btn" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" className="btn primary" disabled={!canSave}>
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function NoteIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
