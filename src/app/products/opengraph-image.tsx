@@ -11,7 +11,7 @@ export default function Image() {
     title: "Raymond’s Products",
     tagline: "Three hands-on courses: IELTS, system design, and algorithms.",
     chips: ["IELTS", "Design System", "Algo Lab"],
-    accent: { fill: "#bddcf6", edge: "#2b7fd6" },
+    art: "cubes",
     theme: "light",
   });
 }

@@ -11,7 +11,7 @@ export default function Image() {
     title: "IELTS Practice",
     tagline: "A course reader for Band 6–8, in English with Vietnamese beside it.",
     chips: ["16 chapters", "Notes", "Flashcards"],
-    accent: { fill: "#c9ece6", edge: "#1f9d8f" },
+    art: "book",
     theme: "light",
   });
 }
