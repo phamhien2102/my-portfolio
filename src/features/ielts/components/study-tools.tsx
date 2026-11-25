@@ -9,9 +9,13 @@ import {
   useFlashcards,
   useHighlights,
   useNotes,
+  MAX_NOTE,
+  noteDates,
+  withText,
   type HighlightColor,
   type Note,
 } from "../lib/study-store";
+import { NoteCount } from "./note-count";
 
 interface Props {
   stageRef: RefObject<HTMLDivElement | null>;
@@ -29,7 +33,6 @@ interface Pending {
 }
 
 const MAX_WORD = 200;
-const MAX_NOTE = 2000;
 
 /** Which note the dialog is about: a new one on the selected passage, or one that already exists. */
 type NoteTarget =
@@ -174,7 +177,7 @@ export function StudyTools({ stageRef, chapterId }: Props) {
         { id: newId(), chapterId, start, end, quote, text, createdAt: Date.now() },
       ]);
     } else {
-      notes.update((items) => items.map((n) => (n.id === noteDialog.id ? { ...n, text } : n)));
+      notes.update((items) => items.map((n) => (n.id === noteDialog.id ? withText(n, text) : n)));
     }
     window.getSelection()?.removeAllRanges();
     setNoteDialog(null);
@@ -387,6 +390,7 @@ function NoteDialog({
         <h2 id="nt-title">{existing ? "Edit note" : "Add note"}</h2>
 
         <blockquote className="nt-quote">{quote}</blockquote>
+        {existing && <small className="nt-meta">{noteDates(existing)}</small>}
 
         <label>
           <span>Note</span>
@@ -405,6 +409,7 @@ function NoteDialog({
               }
             }}
           />
+          <NoteCount length={text.length} />
         </label>
 
         <div className="fc-actions">

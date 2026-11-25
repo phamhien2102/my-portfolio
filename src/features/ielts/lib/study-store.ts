@@ -25,6 +25,8 @@ export interface Note {
   quote: string;
   text: string;
   createdAt: number;
+  /** When the text was last changed. Notes saved before this field existed, or never edited, have none. */
+  updatedAt?: number;
 }
 
 export interface Flashcard {
@@ -122,6 +124,22 @@ export const useNotes = createListStore<Note>(
     typeof v.text === "string" &&
     typeof v.createdAt === "number",
 );
+
+/** The longest a note's text may be. */
+export const MAX_NOTE = 2000;
+
+const dayMonthYear = (time: number) => new Date(time).toLocaleDateString("en-GB");
+
+/** "Added 24/11/2026 · Edited 25/11/2026": the dates a note was written and last changed, day first. */
+export function noteDates(note: Pick<Note, "createdAt" | "updatedAt">) {
+  const added = `Added ${dayMonthYear(note.createdAt)}`;
+  return note.updatedAt ? `${added} · Edited ${dayMonthYear(note.updatedAt)}` : added;
+}
+
+/** The note with new text; the edit date moves only when the text really changed. */
+export function withText(note: Note, text: string): Note {
+  return text === note.text ? note : { ...note, text, updatedAt: Date.now() };
+}
 
 export const newId = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
