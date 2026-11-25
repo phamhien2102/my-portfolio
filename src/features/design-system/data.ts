@@ -40,7 +40,7 @@ import { urlShortener } from "./lessons/url-shortener";
 import { verticalHorizontal } from "./lessons/vertical-horizontal";
 import type { Module } from "./lib/types";
 
-export const COURSE_TITLE = "System Design";
+export const COURSE_TITLE = "Design System";
 
 /** The course, in reading order: 9 modules and 40 lessons. Each lesson is plain data in `lessons/`. */
 export const MODULES: readonly Module[] = [

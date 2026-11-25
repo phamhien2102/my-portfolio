@@ -86,7 +86,7 @@ export interface CourseModule<L extends CourseLesson> {
   lessons: L[];
 }
 
-/** How the shell looks: the System Design course's green mono style, or Algo Lab's coral one. */
+/** How the shell looks: the Design System course's green mono style, or Algo Lab's coral one. */
 export type CourseVariant = "classic" | "algo";
 
 /** What a course page supplies to the shared shell: how to draw a step, and what changed in it. */
