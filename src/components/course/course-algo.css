@@ -638,6 +638,10 @@
 
 .ds-app[data-variant="algo"] .ds-timeline-steps {
   display: flex;
+  /* overflow-x: auto also clips vertically, which cut the top off the current dot (it is scaled up
+     and has a drop shadow). The padding gives it room; the negative margin keeps the layout. */
+  padding-block: 5px;
+  margin-block: -5px;
   overflow-x: auto;
   scroll-snap-type: x proximity;
   scrollbar-width: none;
@@ -649,6 +653,9 @@
 
 .ds-app[data-variant="algo"] .ds-timeline-steps li {
   position: relative;
+  /* Without min-width: 0 a long step title stretches its column to the full length of the title,
+     which pushes the dot off-centre and leaves a gap in the line before it. */
+  min-width: 0;
   flex: 0 0 clamp(120px, 12vw, 168px);
   scroll-snap-align: center;
 }
@@ -685,4 +692,43 @@
 
 .ds-app[data-variant="algo"] .ds-timeline-steps button {
   min-width: 0;
+}
+
+/* ---- the stage: an isometric floor that fades out toward the edges, as on the real page ---- */
+
+.ds-app[data-variant="algo"] .ds-stage {
+  isolation: isolate;
+}
+
+.ds-app[data-variant="algo"] .ds-stage::before {
+  z-index: 0;
+  background:
+    repeating-linear-gradient(30deg, rgba(70, 65, 59, 0.12) 0 1px, transparent 1px 38px),
+    repeating-linear-gradient(-30deg, rgba(70, 65, 59, 0.12) 0 1px, transparent 1px 38px);
+}
+
+.ds-app[data-variant="algo"][data-theme="dark"] .ds-stage::before {
+  background:
+    repeating-linear-gradient(30deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 38px),
+    repeating-linear-gradient(-30deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 38px);
+}
+
+/* The vignette sits over the floor grid and under the scene. */
+.ds-app[data-variant="algo"] .ds-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 55% 60% at 50% 50%,
+    transparent 30%,
+    color-mix(in srgb, var(--stage) 45%, transparent) 58%,
+    color-mix(in srgb, var(--stage) 86%, transparent) 82%,
+    var(--stage) 100%
+  );
+}
+
+.ds-app[data-variant="algo"] .ds-canvas {
+  z-index: 2;
 }

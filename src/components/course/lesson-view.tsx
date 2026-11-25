@@ -347,6 +347,7 @@ export function LessonView<L extends CourseLesson>({
                     <button
                       type="button"
                       aria-current={i === index ? "step" : undefined}
+                      title={algo ? s.title : undefined}
                       onClick={() => go(i)}
                     >
                       <span className="ds-timeline-dot">{i + 1}</span>
