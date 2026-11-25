@@ -7,10 +7,10 @@
   overflow: visible;
 }
 .ds-app .lg.req {
-  background: #f3b47f;
+  background: #7fb8ec;
 }
 .ds-app .lg.res {
-  background: #9fd28f;
+  background: #8fd6cb;
 }
 .ds-app .lg.warn {
   background: #e5534b;
@@ -41,7 +41,7 @@
 }
 .ds-app .ds-node .spot {
   fill: rgba(127, 194, 120, 0.28);
-  stroke: #5fae57;
+  stroke: #2fb3a3;
   stroke-width: 2.4;
   opacity: 0;
   transform-box: fill-box;
@@ -73,12 +73,12 @@
   fill: var(--ink);
 }
 .ds-app .ds-packet {
-  fill: #f3b47f;
+  fill: #7fb8ec;
   stroke: var(--ink);
   stroke-width: 1.5;
 }
 .ds-app .tone-res .ds-packet {
-  fill: #9fd28f;
+  fill: #8fd6cb;
 }
 .ds-app .tone-warn .ds-packet {
   fill: #e5534b;
@@ -131,16 +131,16 @@
   }
 }
 .ds-app .tone-hand .ds-packet {
-  fill: #f4fbef;
-  stroke: #2f8a43;
+  fill: #eefaf8;
+  stroke: #1d8f83;
   stroke-width: 2.2;
 }
 .ds-app .tone-hand .ds-flow-label {
-  fill: #2f6d3c;
+  fill: #176b62;
 }
 .ds-app .lg.hand {
-  background: #f4fbef;
-  border-color: #2f8a43;
+  background: #eefaf8;
+  border-color: #1d8f83;
   border-width: 2px;
 }
 /* ---- cubes, arrows and label tags --------------------------------------------------- */
@@ -169,7 +169,7 @@
 }
 .ds-app .tone-hand .ds-flow-tag rect {
   fill: var(--green-tile);
-  stroke: #2f6d3c;
+  stroke: #176b62;
 }
 .ds-app .tone-warn .ds-flow-tag rect {
   fill: var(--warn-bg);
@@ -187,35 +187,35 @@
 }
 /* ---- the scene's captions and states (shapes use SVG gradients, see lesson-diagram.tsx) --- */
 .ds-app .ds-pill-shadow {
-  fill: #1c1a17;
+  fill: #101b25;
 }
 .ds-app .ds-pill-face {
-  fill: #fbf6ef;
-  stroke: #211e1b;
+  fill: #f3f8fc;
+  stroke: #14202b;
   stroke-width: 1.3;
 }
 .ds-app .ds-pill-icon path {
   fill: none;
-  stroke: #211e1b;
+  stroke: #14202b;
   stroke-width: 4.4;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 .ds-app .ds-pill-text {
-  fill: #211e1b;
+  fill: #14202b;
 }
 .ds-app .ds-bubble .ds-pill-face {
   stroke-width: 1.6;
 }
 .ds-app .ds-cube-icon path {
   fill: none;
-  stroke: #1d1b19;
+  stroke: #14202b;
   stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 .ds-app .ds-cube-text {
-  fill: #211e1b;
+  fill: #14202b;
   stroke: none;
 }
 /* A node that is down loses its colour and gains a red cross. */
@@ -225,10 +225,10 @@
 }
 /* ---- caption tones, dim links, panels ------------------------------------------------ */
 .ds-app .ds-pill.tone-amber .ds-pill-face {
-  fill: #f6e6c9;
+  fill: #e3ecf4;
 }
 .ds-app .ds-pill.tone-green .ds-pill-face {
-  fill: #dff0de;
+  fill: #d6efec;
 }
 .ds-app .ds-pill.tone-violet .ds-pill-face {
   fill: #e7ddf5;
@@ -237,34 +237,34 @@
   fill: #fbd9d4;
 }
 .ds-app .ds-link.is-dim {
-  stroke: #b0a698;
+  stroke: #9db0c2;
   stroke-width: 1.6;
   stroke-dasharray: 4 5;
 }
 .ds-app .ds-arrowhead-muted {
-  fill: #a59c90;
-  stroke: #a59c90;
+  fill: #93a6b8;
+  stroke: #93a6b8;
 }
 .ds-app .ds-panel-shadow {
-  fill: #1c1a17;
+  fill: #101b25;
 }
 .ds-app .ds-panel-face {
-  fill: #fbf6ef;
-  stroke: #211e1b;
+  fill: #f3f8fc;
+  stroke: #14202b;
   stroke-width: 1.4;
 }
 .ds-app .ds-panel-title {
   font-size: 11px;
   font-weight: 800;
-  fill: #211e1b;
+  fill: #14202b;
 }
 .ds-app .ds-panel-line,
 .ds-app .ds-panel-note {
   font-size: 9.5px;
-  fill: #4a443d;
+  fill: #3d5163;
 }
 .ds-app .ds-panel-value {
   font-size: 9.5px;
   font-weight: 800;
-  fill: #211e1b;
+  fill: #14202b;
 }

@@ -42,7 +42,7 @@ export function CourseTree({
   return (
     <aside id="ds-sidebar" className="ds-sidebar" aria-label={ui.course}>
       <div className="ds-tree-root">
-        <Folder color="#d5b07a" />
+        <Folder color="#8fb4d6" />
         <span>{ui.course}</span>
         <span className="ds-tree-meta">{ui.lessonsCount(total)}</span>
       </div>

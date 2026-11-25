@@ -28,18 +28,19 @@ run `npx prettier --write <paths>` on the files you touched.
 
 Pages are a few lines: metadata plus one component imported from a feature's public API.
 
-| Route                               | Feature                                                                   | Notes                                                           |
-| ----------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `/`                                 | composes `about`, `projects`, `skills`, `experience`, `contact`, `reveal` | the only page in `SITE.nav`                                     |
-| `/resume`                           | `resume`                                                                  | printable; `robots: noindex` (personal details)                 |
-| `/algorithms`, `/algorithms/[slug]` | `algorithms`                                                              | LeetCode pattern walkthroughs                                   |
-| `/dating`                           | `date`                                                                    | date invite as an airport check-in                              |
-| `/bloom-pool`                       | `bloom-pool`                                                              | own `layout.tsx` with a light `viewport` theme                  |
-| `/native`                           | `native`                                                                  | SwiftUI + Kotlin roadmap; light page, `robots: noindex`         |
-| `/ielts`                            | `ielts`                                                                   | IELTS course reader; light page, `robots: noindex`              |
-| `/design-system`                    | `design-system`                                                           | interactive system design course; light page, `robots: noindex` |
-| `/algo-lab`                         | `algo-lab`                                                                | interactive DSA course; light page, `robots: noindex`           |
-| `/hide-pages`                       | `hide-pages`                                                              | index of every unlisted page; `robots: noindex`                 |
+| Route                               | Feature                                                                   | Notes                                                                         |
+| ----------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `/`                                 | composes `about`, `projects`, `skills`, `experience`, `contact`, `reveal` | the only page in `SITE.nav`                                                   |
+| `/resume`                           | `resume`                                                                  | printable; `robots: noindex` (personal details)                               |
+| `/algorithms`, `/algorithms/[slug]` | `algorithms`                                                              | LeetCode pattern walkthroughs                                                 |
+| `/dating`                           | `date`                                                                    | date invite as an airport check-in                                            |
+| `/bloom-pool`                       | `bloom-pool`                                                              | own `layout.tsx` with a light `viewport` theme                                |
+| `/native`                           | `native`                                                                  | SwiftUI + Kotlin roadmap; light page, `robots: noindex`                       |
+| `/ielts`                            | `ielts`                                                                   | IELTS course reader; light page, `robots: noindex`                            |
+| `/design-system`                    | `design-system`                                                           | interactive system design course; light page, `robots: noindex`               |
+| `/algo-lab`                         | `algo-lab`                                                                | interactive DSA course; light page, `robots: noindex`                         |
+| `/products`                         | `products`                                                                | entry point to `/ielts`, `/design-system`, `/algo-lab`; light page, indexable |
+| `/hide-pages`                       | `hide-pages`                                                              | index of every unlisted page; `robots: noindex`                               |
 
 **Unlisted pages** are kept out of `SITE.nav` _and_ set `robots: { index: false, follow: false }`
 in their `metadata`. Follow both halves when adding another one.

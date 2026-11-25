@@ -4,28 +4,28 @@
 
 .ielts-app {
   color-scheme: light;
-  --paper: #f4ebe0;
-  --paper-2: #f7efe4;
-  --sheet: #f9f2e8;
-  --card: #f8f0e6;
-  --tile: #efe5d6;
-  --line: #ddd3c5;
-  --line-strong: #c6bbac;
-  --edge: #46413b;
-  --ink: #1d1b18;
-  --muted: #6f6961;
-  --green: #cfe3b2;
-  --green-2: #b2d491;
-  --green-tile: #e8efd9;
-  --green-line: #c9d6b3;
-  --violet: #e7ddf5;
-  --violet-tile: #ebe3f1;
-  --violet-line: #d5c8e2;
-  --orange-tile: #fcebd6;
-  --yellow: #f7e2a8;
+  --paper: #edf3f8;
+  --paper-2: #f1f6fa;
+  --sheet: #f4f8fb;
+  --card: #f2f7fb;
+  --tile: #e1ebf4;
+  --line: #d3dfea;
+  --line-strong: #b6c8da;
+  --edge: #334556;
+  --ink: #12202c;
+  --muted: #5b6f82;
+  --green: #bddcf6;
+  --green-2: #86bfe8;
+  --green-tile: #e1effb;
+  --green-line: #bcd7ee;
+  --violet: #c9ece6;
+  --violet-tile: #dff3ef;
+  --violet-line: #b2dbd3;
+  --orange-tile: #e3eefb;
+  --yellow: #cfe0f1;
   --mark: #f6dd8a;
   --rust: #b8432f;
-  --link: #1f63a0;
+  --link: #1f68b8;
   --radius: 12px;
   --pop: 1.5px 2.5px 0 var(--ink);
   /* The phone top bar's height, which the course drawer hangs from. */
@@ -276,7 +276,7 @@ html:has(.ielts-app) {
 .ielts-app .tick {
   margin-left: auto;
   font-weight: 800;
-  color: #2f7d3f;
+  color: #1a7f74;
 }
 
 .ielts-app .progress {
@@ -301,7 +301,7 @@ html:has(.ielts-app) {
   border-radius: 14px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 10px 22px -14px rgba(70, 65, 59, 0.35);
+    0 10px 22px -14px rgba(50, 70, 90, 0.35);
 }
 
 .ielts-app .lesson-head {
@@ -517,7 +517,7 @@ html:has(.ielts-app) {
   position: absolute;
   left: -1.05rem;
   font-weight: 800;
-  color: #4f9a55;
+  color: #1f9d8f;
 }
 
 /* tables: one rounded card with a firm edge */
@@ -639,7 +639,7 @@ html:has(.ielts-app) {
 .ielts-app .passage {
   margin: 1.1rem 0;
   padding: 0.9rem 1.2rem;
-  background: #fffbf3;
+  background: #fbfdff;
   border: 1.5px solid var(--edge);
   border-radius: var(--radius);
 }
@@ -673,7 +673,7 @@ html:has(.ielts-app) {
   height: auto;
   margin: 1.2rem 0;
   padding: 0.4rem;
-  background: #fffbf3;
+  background: #fbfdff;
   border: 1.5px solid var(--edge);
   border-radius: var(--radius);
 }
@@ -706,7 +706,7 @@ html:has(.ielts-app) {
     overscroll-behavior: contain;
     border-width: 0 1px 0 0;
     border-radius: 0 14px 14px 0;
-    box-shadow: 10px 0 30px -18px rgba(29, 27, 24, 0.55);
+    box-shadow: 10px 0 30px -18px rgba(18, 32, 44, 0.55);
     visibility: hidden;
     transform: translateX(-105%);
     transition:
@@ -725,7 +725,7 @@ html:has(.ielts-app) {
     inset: var(--topbar-h) 0 0;
     z-index: 35;
     padding: 0;
-    background: rgba(29, 27, 24, 0.35);
+    background: rgba(18, 32, 44, 0.35);
     border: 0;
     cursor: pointer;
   }
@@ -1070,11 +1070,11 @@ html:has(.ielts-app) {
 }
 
 .ielts-app .fc-front {
-  background: linear-gradient(145deg, #f1f7e4, var(--green) 140%);
+  background: linear-gradient(145deg, #eaf4fd, var(--green) 140%);
 }
 
 .ielts-app .fc-back {
-  background: linear-gradient(145deg, #f3edfa, #d9cbee 140%);
+  background: linear-gradient(145deg, #e9f7f4, #b9e3dc 140%);
   transform: rotateY(180deg);
 }
 

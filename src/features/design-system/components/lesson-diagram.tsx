@@ -111,12 +111,12 @@ function mix(a: string, b: string, t: number) {
 
 /** The base colour of each kind of block; the gradients are worked out from it. */
 const TONES = {
-  orange: "#fbd5b0",
-  green: "#c9e3b4",
+  orange: "#cfe3f6",
+  green: "#bfe6df",
   blue: "#c4d9f0",
   yellow: "#f6dc94",
   purple: "#dccdf0",
-  slab: "#ece3d6",
+  slab: "#e3ecf4",
 } as const;
 
 type Tone = keyof typeof TONES;
@@ -191,11 +191,11 @@ export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
               </linearGradient>
               <linearGradient id={`g-${tone}-left`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0" stopColor={base} />
-                <stop offset="1" stopColor={mix(base, "#8a6a40", 0.14)} />
+                <stop offset="1" stopColor={mix(base, "#3b6a96", 0.14)} />
               </linearGradient>
               <linearGradient id={`g-${tone}-right`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor={mix(base, "#6b4f2c", 0.16)} />
-                <stop offset="1" stopColor={mix(base, "#6b4f2c", 0.3)} />
+                <stop offset="0" stopColor={mix(base, "#2f5170", 0.16)} />
+                <stop offset="1" stopColor={mix(base, "#2f5170", 0.3)} />
               </linearGradient>
             </g>
           );
@@ -423,7 +423,7 @@ function Cube({ node }: { node: DiagramNode }) {
         cy="62"
         rx="58"
         ry="17"
-        fill="#6b5236"
+        fill="#3d5a78"
         opacity="0.22"
         filter="url(#ds-blur-lg)"
       />
@@ -442,7 +442,7 @@ function Cube({ node }: { node: DiagramNode }) {
       <path
         d={rounded(CUBE_SHAPE.outline, 9)}
         fill="none"
-        stroke="#211e1b"
+        stroke="#14202b"
         strokeWidth="1.9"
         strokeLinejoin="round"
       />
@@ -508,7 +508,7 @@ function Device({ node }: { node: DiagramNode }) {
         cy="58"
         rx="104"
         ry="24"
-        fill="#6b5236"
+        fill="#3d5a78"
         opacity="0.18"
         filter="url(#ds-blur-lg)"
       />
@@ -519,7 +519,7 @@ function Device({ node }: { node: DiagramNode }) {
       <path
         d={rounded(PLATFORM.outline, 11)}
         fill="none"
-        stroke="#3b3631"
+        stroke="#334556"
         strokeWidth="1.5"
         strokeLinejoin="round"
       />
@@ -531,13 +531,13 @@ function Device({ node }: { node: DiagramNode }) {
         <path
           d={rounded(BASE.outline, 5)}
           fill="none"
-          stroke="#211e1b"
+          stroke="#14202b"
           strokeWidth="1.4"
           strokeLinejoin="round"
         />
       </g>
       <g
-        stroke="#b3aa9d"
+        stroke="#9fb2c4"
         strokeWidth="3"
         strokeLinecap="round"
         strokeDasharray="3.4 2.4"
@@ -550,7 +550,7 @@ function Device({ node }: { node: DiagramNode }) {
       <path
         d={`M${at(along(0.4, 0.78))} L${at(along(0.6, 0.78))} L${at(along(0.6, 0.92))} L${at(along(0.4, 0.92))} Z`}
         fill="#e7e0d6"
-        stroke="#b3aa9d"
+        stroke="#9fb2c4"
         strokeWidth="1"
       />
       {/* the screen: a dark back, the lit front, and what is on it */}
@@ -558,15 +558,15 @@ function Device({ node }: { node: DiagramNode }) {
       <path
         d={rounded(move(panel(0, 0, 1, 1)), 3)}
         fill="#2f2b36"
-        stroke="#211e1b"
+        stroke="#14202b"
         strokeWidth="1.5"
         strokeLinejoin="round"
       />
-      <path d={rounded(move(panel(0.07, 0.09, 0.93, 0.92)), 2)} fill="#fbf8f4" />
+      <path d={rounded(move(panel(0.07, 0.09, 0.93, 0.92)), 2)} fill="#f5f9fc" />
       <path d={rounded(move(panel(0.07, 0.8, 0.93, 0.92)), 1.5)} fill="#e6dccf" />
       <path d={rounded(move(panel(0.14, 0.44, 0.86, 0.72)), 2)} fill="url(#ds-screen)" />
-      <path d={rounded(move(panel(0.14, 0.3, 0.7, 0.36)), 1)} fill="#d8cec1" />
-      <path d={rounded(move(panel(0.14, 0.18, 0.55, 0.24)), 1)} fill="#d8cec1" />
+      <path d={rounded(move(panel(0.14, 0.3, 0.7, 0.36)), 1)} fill="#c3d1de" />
+      <path d={rounded(move(panel(0.14, 0.18, 0.55, 0.24)), 1)} fill="#c3d1de" />
     </g>
   );
 }
