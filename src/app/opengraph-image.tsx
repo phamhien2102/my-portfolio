@@ -11,7 +11,7 @@ export default function Image() {
     title: SITE.name,
     tagline: SITE.role,
     chips: ["React Native", "ReactJS", "iOS · Android"],
-    accent: { fill: "#bddcf6", edge: "#4aa3e8" },
+    art: "stack",
     theme: "dark",
   });
 }

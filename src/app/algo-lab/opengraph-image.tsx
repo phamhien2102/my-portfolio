@@ -10,7 +10,7 @@ export default function Image() {
     title: "Algo Lab",
     tagline: "Data structures and algorithms, step by step.",
     chips: ["14 modules", "86 lessons", "EN · VI · FR · DE"],
-    accent: { fill: "#d5dcf6", edge: "#4338ca" },
+    art: "blocks",
     theme: "light",
   });
 }
