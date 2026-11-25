@@ -656,7 +656,7 @@
   /* Without min-width: 0 a long step title stretches its column to the full length of the title,
      which pushes the dot off-centre and leaves a gap in the line before it. */
   min-width: 0;
-  flex: 0 0 clamp(120px, 12vw, 168px);
+  flex: 0 0 clamp(132px, 13vw, 176px);
   scroll-snap-align: center;
 }
 
@@ -680,14 +680,20 @@
   z-index: 1;
 }
 
+/* A step title wraps onto up to three lines instead of being cut to "Memory is numbered sl…", which
+   made the steps impossible to tell apart. The column keeps its width, so the dots stay evenly spaced. */
 .ds-app[data-variant="algo"] .ds-timeline-label {
-  display: block;
+  display: -webkit-box;
   max-width: 100%;
   min-height: 0;
   overflow: hidden;
-  font-size: 13px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 12.5px;
+  line-height: 1.3;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 .ds-app[data-variant="algo"] .ds-timeline-steps button {
@@ -731,4 +737,110 @@
 
 .ds-app[data-variant="algo"] .ds-canvas {
   z-index: 2;
+}
+
+/* ---- phones: the top bar has to fit in one row. The algo rules above set a 250px search box, 22px
+   brand and 20/16px padding with more weight than the shared phone rules, so the bar ran past the
+   screen and the whole page scrolled sideways. ---- */
+
+@media (max-width: 819px) {
+  .ds-app[data-variant="algo"] .ds-topbar {
+    gap: 8px;
+    padding-inline: 10px;
+  }
+
+  /* The search box turns into an icon button, as on the shared shell. */
+  .ds-app[data-variant="algo"] .ds-search {
+    flex: none;
+    justify-content: center;
+    width: 40px;
+    padding: 0;
+  }
+
+  /* The brand may shrink and truncate rather than push the buttons off screen. */
+  .ds-app[data-variant="algo"] .ds-brand {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .ds-app[data-variant="algo"] .ds-brand-name {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 17px;
+    text-overflow: ellipsis;
+  }
+
+  .ds-app[data-variant="algo"] .ds-brand-name span {
+    padding-inline: 6px;
+  }
+}
+
+@media (max-width: 400px) {
+  .ds-app[data-variant="algo"] .ds-theme-btn,
+  .ds-app[data-variant="algo"] .ds-menu-btn,
+  .ds-app[data-variant="algo"] .ds-search {
+    width: 36px;
+    height: 36px;
+  }
+
+  .ds-app[data-variant="algo"] .ds-topbar {
+    gap: 6px;
+  }
+}
+
+/* ---- navigation drawer (tablet and phone): the sidebar sits in a fixed panel instead of a padded grid
+   cell, so it needs its own padding. The negative margins above only make sense next to that grid. ---- */
+
+@media (max-width: 1179px) {
+  .ds-app[data-variant="algo"] .ds-sidebar {
+    padding: 16px 14px 14px;
+  }
+
+  .ds-app[data-variant="algo"] .ds-course {
+    margin: 10px 0 12px;
+    padding-inline-end: 4px;
+  }
+
+  .ds-app[data-variant="algo"] .ds-progress-line {
+    margin-inline-start: 0;
+  }
+
+  /* The count ("0/10") must stay inside the row instead of running into the panel edge. */
+  .ds-app[data-variant="algo"] .ds-tree-meta,
+  .ds-app[data-variant="algo"] .ds-mod-count {
+    flex: none;
+  }
+}
+
+/* ---- phones: the lesson page content lines up on one edge ---- */
+
+@media (max-width: 819px) {
+  /* The heading had 22px of its own on top of the card's padding, so the title sat further in than
+     the stage and timeline below it, and at 40px it took half the screen. */
+  .ds-app[data-variant="algo"] .ds-lesson-head--algo {
+    padding: 14px 4px 0;
+  }
+
+  .ds-app[data-variant="algo"] .ds-title {
+    font-size: clamp(26px, 8vw, 34px);
+  }
+
+  .ds-app[data-variant="algo"] .ds-module-badge {
+    gap: 10px;
+    text-align: start;
+  }
+
+  .ds-app[data-variant="algo"] .ds-module-name {
+    font-size: 15px;
+  }
+
+  /* "← → to step" is a keyboard hint, which a touch screen cannot use. */
+  .ds-app[data-variant="algo"] .ds-timeline-keys {
+    display: none;
+  }
+
+  .ds-app[data-variant="algo"] .ds-guide {
+    padding: 14px 16px 16px;
+  }
 }
