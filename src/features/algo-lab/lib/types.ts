@@ -77,6 +77,8 @@ export interface Frame extends Base {
   text?: string;
   tone?: Tone;
   dashed?: boolean;
+  /** A raised slab with sides, for a region of memory, instead of a flat outline. */
+  solid?: boolean;
 }
 
 export type Item = Cell | Disc | Edge | Pointer | Label | Frame;

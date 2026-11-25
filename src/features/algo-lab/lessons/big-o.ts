@@ -1,4 +1,4 @@
-import { bars, cell, label, matrix, ptr, row, scene } from "../lib/scenes";
+import { bars, cell, frame, label, matrix, ptr, row, scene } from "../lib/scenes";
 import type { AlgoLesson, Tone } from "../lib/types";
 
 const EIGHT = [4, 9, 2, 7, 5, 1, 8, 6];
@@ -232,11 +232,14 @@ export const bigO: AlgoLesson = {
         { label: "Extra space", value: "O(1) vs O(n)" },
       ],
       scene: scene(
+        // Memory is drawn as solid slabs: the input already owns its slab, the copy needs a new one.
+        frame("inmem", 78, 65, 224, 70, "input", { solid: true }),
+        frame("outmem", 338, 65, 224, 70, "extra memory", { solid: true, tone: "warn" }),
         row([1, 2, 3, 4], { id: "in", y: 100, x: 190, w: 44, index: true }),
         row([4, 3, 2, 1], { id: "out", y: 100, x: 450, w: 44, tones: () => "mark" }),
         cell("ghostnote", 190, 190, "in place: O(1)", { w: 130, h: 30, tone: "done" }),
         cell("copynote", 450, 190, "copy: O(n)", { w: 130, h: 30, tone: "warn" }),
-        label("cap", 320, 250, "same answer, different memory bill", { size: 14, weight: 800 }),
+        label("cap", 320, 272, "same answer, different memory bill", { size: 14, weight: 800 }),
       ),
     },
   ],

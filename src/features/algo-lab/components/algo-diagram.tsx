@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, type CSSProperties } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -20,6 +20,8 @@ const SIN = 0.5;
 const CELL_W = 52;
 const CELL_H = 46;
 const DISC_R = 20;
+/** How thick a solid region of memory (a frame with `solid`) is. */
+const SLAB = 16;
 /** How thick a round puck is. */
 const DISC_T = 14;
 
@@ -206,6 +208,8 @@ const SETTLED = new Set<Tone>(["muted", "done", "ghost"]);
 interface Motion {
   frames: Keyframe[];
   duration: number;
+  /** A block falling in: played with no easing of its own and staggered with its neighbours. */
+  drops?: boolean;
 }
 
 /**
@@ -220,6 +224,21 @@ const beat = (lift: number, scale: number, at = 0.3, hold = 0.25): Keyframe[] =>
   { transform: "translateY(0px) scale(1)" },
 ];
 
+/**
+ * A block that comes on stage falls in from above, lands, and bounces twice before it settles. Each
+ * keyframe carries its own easing (gravity on the way down, deceleration on the way up) so the
+ * animation itself is played with `linear`.
+ */
+const DROP: Keyframe[] = [
+  { transform: "translateY(-300px)", opacity: 0, easing: "cubic-bezier(0.5, 0, 0.9, 0.6)" },
+  { transform: "translateY(0px)", opacity: 1, offset: 0.45, easing: "ease-out" },
+  { transform: "translateY(-22px)", opacity: 1, offset: 0.62, easing: "ease-in" },
+  { transform: "translateY(0px)", opacity: 1, offset: 0.78, easing: "ease-out" },
+  { transform: "translateY(-7px)", opacity: 1, offset: 0.89, easing: "ease-in" },
+  { transform: "translateY(0px)", opacity: 1 },
+];
+const DROP_MS = 1100;
+
 /** How far a block swells when it is highlighted, and how far it shrinks when it is set aside. */
 const SWELL = 1.45;
 const SHRINK = 0.55;
@@ -233,15 +252,7 @@ function motionFor(before: Item | undefined, item: Cell | Disc): Motion | undefi
   const tone: Tone = item.tone ?? "plain";
   if (!before || (before.t !== "cell" && before.t !== "disc")) {
     if (tone === "ghost") return undefined;
-    return {
-      duration: 900,
-      frames: [
-        { transform: "translateY(0px) scale(0)", opacity: 0 },
-        { transform: "translateY(0px) scale(1.3)", opacity: 1, offset: 0.55 },
-        { transform: "translateY(0px) scale(1.3)", opacity: 1, offset: 0.7 },
-        { transform: "translateY(0px) scale(1)", opacity: 1 },
-      ],
-    };
+    return { duration: DROP_MS, frames: DROP, drops: true };
   }
   const toneChanged = (before.tone ?? "plain") !== tone;
   const moved = before.x !== item.x || before.y !== item.y;
@@ -270,18 +281,32 @@ export function AlgoDiagram({ scene, title }: { scene: AlgoScene; title: string 
   const bodies = useRef(new Map<string, SVGGElement>());
   const previous = useRef<Map<string, Item> | null>(null);
 
-  useEffect(() => {
+  // Before paint, so a block that is about to fall in is never seen at rest for a frame first.
+  useLayoutEffect(() => {
     const before = previous.current;
     previous.current = new Map(scene.items.map((i) => [i.id, i]));
-    // The first scene just appears; a later one animates what changed from the one before.
-    if (!before || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    for (const item of scene.items) {
-      if (item.t !== "cell" && item.t !== "disc") continue;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Blocks that come on stage fall in one after another, back to front. The first scene of a
+    // lesson has no "before", so all of its blocks fall.
+    let order = 0;
+    const stage = [...scene.items]
+      .filter((i): i is Cell | Disc => i.t === "cell" || i.t === "disc")
+      .sort((a, b) => a.y - b.y);
+    for (const item of stage) {
       const el = bodies.current.get(item.id);
-      const motion = motionFor(before.get(item.id), item);
+      const motion = motionFor(before?.get(item.id), item);
       if (!el || !motion) continue;
-      el.getAnimations().forEach((a) => a.cancel());
-      el.animate(motion.frames, { duration: motion.duration, easing: "ease-in-out" });
+      el.getAnimations().forEach((anim) => anim.cancel());
+      if (motion.drops) {
+        el.animate(motion.frames, {
+          duration: motion.duration,
+          delay: Math.min(order++, 16) * 45,
+          easing: "linear",
+          fill: "backwards",
+        });
+      } else {
+        el.animate(motion.frames, { duration: motion.duration, easing: "ease-in-out" });
+      }
     }
   }, [scene]);
 
@@ -358,6 +383,38 @@ export function AlgoDiagram({ scene, title }: { scene: AlgoScene; title: string 
         {frames.map((fr) => {
           const d = `M${pt(fr.x, fr.y, 0)}L${pt(fr.x + fr.w, fr.y, 0)}L${pt(fr.x + fr.w, fr.y + fr.h, 0)}L${pt(fr.x, fr.y + fr.h, 0)}Z`;
           const [tx, ty] = project(fr.x + 10, fr.y - 7);
+          // A region of memory with thickness: its top is the floor and its sides go down into it.
+          const left = `M${pt(fr.x, fr.y + fr.h, 0)}L${pt(fr.x + fr.w, fr.y + fr.h, 0)}L${pt(fr.x + fr.w, fr.y + fr.h, -SLAB)}L${pt(fr.x, fr.y + fr.h, -SLAB)}Z`;
+          const right = `M${pt(fr.x + fr.w, fr.y + fr.h, 0)}L${pt(fr.x + fr.w, fr.y, 0)}L${pt(fr.x + fr.w, fr.y, -SLAB)}L${pt(fr.x + fr.w, fr.y + fr.h, -SLAB)}Z`;
+          if (fr.solid) {
+            return (
+              <g key={fr.id} className="al-item">
+                <path
+                  className={cn("al-slab-left", `tone-${fr.tone ?? "plain"}`)}
+                  d={left}
+                  style={morph(left)}
+                />
+                <path
+                  className={cn("al-slab-right", `tone-${fr.tone ?? "plain"}`)}
+                  d={right}
+                  style={morph(right)}
+                />
+                <path
+                  className={cn("al-slab-top", `tone-${fr.tone ?? "plain"}`)}
+                  d={d}
+                  style={morph(d)}
+                />
+                {fr.text && (
+                  <text
+                    className="al-frame-text"
+                    transform={`translate(${f(tx)} ${f(ty)}) ${FLAT}`}
+                  >
+                    {fr.text}
+                  </text>
+                )}
+              </g>
+            );
+          }
           return (
             <g key={fr.id} className="al-item">
               <path
