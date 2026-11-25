@@ -9,7 +9,9 @@ import {
   useFlashcards,
   useHighlights,
   useNotes,
+  MAX_MEANING,
   MAX_NOTE,
+  MAX_WORD,
   noteDates,
   withText,
   type HighlightColor,
@@ -31,8 +33,6 @@ interface Pending {
   y: number;
   below: boolean;
 }
-
-const MAX_WORD = 200;
 
 /** Which note the dialog is about: a new one on the selected passage, or one that already exists. */
 type NoteTarget =
@@ -326,6 +326,7 @@ function FlashcardDialog({
             autoFocus
             rows={3}
             value={meaning}
+            maxLength={MAX_MEANING}
             placeholder="Nhập nghĩa của từ…"
             onChange={(e) => setMeaning(e.target.value)}
             onKeyDown={(e) => {
