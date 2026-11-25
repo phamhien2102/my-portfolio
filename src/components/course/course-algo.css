@@ -4,31 +4,31 @@
 
 .ds-app[data-variant="algo"] {
   /* The real page's tokens: warm paper, a coral accent, near-black ink. */
-  --paper: #f7f4ee;
-  --paper-2: #f9f7f2;
-  --sheet: #f9f7f2;
-  --card: #f7f4ee;
-  --stage: #faf7f1;
-  --field: #f9f7f2;
-  --line: #dfdbd2;
-  --line-strong: #cfc9bf;
-  --ink: #2a2b2f;
-  --ink-2: #434247;
-  --muted: #77746f;
-  --muted-2: #a5a19a;
-  --green: #e2705a;
-  --green-2: #d6624b;
-  --green-tile: #fcece5;
-  --green-tile-line: #f7cec0;
-  --violet: #fae0d6;
-  --violet-tile: #fcece5;
-  --violet-tile-line: #f7cec0;
-  --sand: #e9e3da;
-  --coral: #e2705a;
-  --coral-ink: #7c2717;
-  --coral-soft: #fae0d6;
-  --drop: #2a2b2f;
-  --drop-2: #5d5e63;
+  --paper: #f1f5f9;
+  --paper-2: #f5f8fb;
+  --sheet: #f5f8fb;
+  --card: #f1f5f9;
+  --stage: #f7fafc;
+  --field: #f8fafc;
+  --line: #d6e0ea;
+  --line-strong: #bccad8;
+  --ink: #17232f;
+  --ink-2: #33444f;
+  --muted: #5f7080;
+  --muted-2: #92a2b2;
+  --green: #2b7fd6;
+  --green-2: #1f68b8;
+  --green-tile: #e5f0fb;
+  --green-tile-line: #bcd8f3;
+  --violet: #d3efea;
+  --violet-tile: #e6f4f1;
+  --violet-tile-line: #b8ddd6;
+  --sand: #e3eaf1;
+  --coral: #2b7fd6;
+  --coral-ink: #12447a;
+  --coral-soft: #d8e9fa;
+  --drop: #17232f;
+  --drop-2: #566a7b;
 
   font-family:
     var(--font-inter),
@@ -45,27 +45,27 @@
 }
 
 .ds-app[data-variant="algo"][data-theme="dark"] {
-  --paper: #17171a;
-  --paper-2: #1c1c20;
-  --sheet: #1e1e22;
-  --card: #1f1f23;
-  --stage: #1b1b1f;
-  --field: #26262b;
-  --line: #2d2d33;
-  --line-strong: #43434b;
-  --green: #e8694e;
-  --green-2: #f07a5f;
-  --green-tile: #271612;
-  --green-tile-line: #4c2219;
-  --violet: #4c2219;
-  --violet-tile: #271612;
-  --violet-tile-line: #4c2219;
-  --coral: #e8694e;
-  --coral-ink: #f6ab98;
-  --coral-soft: #4c2219;
-  --ink: #f2f0eb;
-  --ink-2: #c8c5bf;
-  --muted: #908d87;
+  --paper: #10181f;
+  --paper-2: #141d25;
+  --sheet: #172029;
+  --card: #151e27;
+  --stage: #121b23;
+  --field: #1d2832;
+  --line: #25323d;
+  --line-strong: #394a58;
+  --green: #3b8fe6;
+  --green-2: #5aa4f0;
+  --green-tile: #12263a;
+  --green-tile-line: #1d4166;
+  --violet: #1d4a45;
+  --violet-tile: #13292b;
+  --violet-tile-line: #1d4a45;
+  --coral: #3b8fe6;
+  --coral-ink: #9cc9f5;
+  --coral-soft: #1d3a58;
+  --ink: #e8f0f7;
+  --ink-2: #c2cfdb;
+  --muted: #8a9cad;
   --line: #26282d;
   --line-strong: #383b42;
 }
@@ -80,15 +80,15 @@
 
 .ds-app[data-variant="algo"] .ds-nav-item.is-active {
   background: var(--green);
-  box-shadow: 0 2px 0 rgba(168, 68, 47, 0.45);
+  box-shadow: 0 2px 0 rgba(25, 80, 150, 0.45);
 }
 
 .ds-app[data-variant="algo"] .ds-btn-next {
-  box-shadow: 0 2px 0 rgba(168, 68, 47, 0.45);
+  box-shadow: 0 2px 0 rgba(25, 80, 150, 0.45);
 }
 
 .ds-app[data-variant="algo"] .ds-timeline-steps .is-current .ds-timeline-dot {
-  box-shadow: 0 1.5px 0 rgba(168, 68, 47, 0.5);
+  box-shadow: 0 1.5px 0 rgba(25, 80, 150, 0.5);
 }
 
 .ds-app[data-variant="algo"] .ds-btn-ghost,
@@ -403,12 +403,12 @@
 }
 
 .ds-app[data-variant="algo"] .ds-code-line.is-on {
-  background: rgba(224, 119, 95, 0.22);
-  border-inline-start-color: #e0775f;
+  background: rgba(80, 150, 230, 0.22);
+  border-inline-start-color: #4f93e0;
 }
 
 .ds-app[data-variant="algo"] .ds-code .kw {
-  color: #f0907a;
+  color: #8fbdf0;
   font-weight: 700;
 }
 
@@ -597,12 +597,12 @@
 
 .ds-app[data-variant="algo"] .ds-code.has-focus .ds-code-line.is-on {
   opacity: 1;
-  background: rgba(226, 112, 90, 0.11);
-  border-inline-start-color: #e2705a;
+  background: rgba(43, 127, 214, 0.11);
+  border-inline-start-color: #2b7fd6;
 }
 
 .ds-app[data-variant="algo"] .ds-code .kw {
-  color: #f08a6d;
+  color: #7fb4ee;
 }
 
 .ds-app[data-variant="algo"] .ds-codecard {
@@ -710,8 +710,8 @@
 .ds-app[data-variant="algo"] .ds-stage::before {
   z-index: 0;
   background:
-    repeating-linear-gradient(30deg, rgba(70, 65, 59, 0.12) 0 1px, transparent 1px 38px),
-    repeating-linear-gradient(-30deg, rgba(70, 65, 59, 0.12) 0 1px, transparent 1px 38px);
+    repeating-linear-gradient(30deg, rgba(50, 70, 90, 0.12) 0 1px, transparent 1px 38px),
+    repeating-linear-gradient(-30deg, rgba(50, 70, 90, 0.12) 0 1px, transparent 1px 38px);
 }
 
 .ds-app[data-variant="algo"][data-theme="dark"] .ds-stage::before {

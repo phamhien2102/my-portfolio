@@ -7,33 +7,33 @@
    leaks into the dark site. Light and dark themes are switched by data-theme on the root. */
 .ds-app {
   color-scheme: light;
-  --paper: #f4ebe0;
-  --paper-2: #f7efe4;
-  --sheet: #f9f2e8;
-  --card: #f8f0e6;
-  --stage: #faf3e9;
-  --field: #fbf7f1;
-  --line: #ddd3c5;
-  --line-strong: #c6bbac;
-  --ink: #1d1b18;
-  --ink-2: #34302b;
-  --muted: #6f6961;
-  --muted-2: #8b847a;
-  --green: #cfe3b2;
-  --green-2: #b2d491;
-  --green-tile: #e8efd9;
-  --green-tile-line: #c9d6b3;
-  --violet: #e7ddf5;
-  --violet-tile: #ebe3f1;
-  --violet-tile-line: #d5c8e2;
-  --mint: #dff0de;
-  --sand: #f6e6c9;
+  --paper: #edf3f8;
+  --paper-2: #f1f6fa;
+  --sheet: #f4f8fb;
+  --card: #f2f7fb;
+  --stage: #f6fafd;
+  --field: #fafcff;
+  --line: #d3dfea;
+  --line-strong: #b6c8da;
+  --ink: #12202c;
+  --ink-2: #293a4a;
+  --muted: #5b6f82;
+  --muted-2: #8396a8;
+  --green: #bddcf6;
+  --green-2: #86bfe8;
+  --green-tile: #e1effb;
+  --green-tile-line: #bcd7ee;
+  --violet: #c9ece6;
+  --violet-tile: #dff3ef;
+  --violet-tile-line: #b2dbd3;
+  --mint: #d6efec;
+  --sand: #e3ebf3;
   --warn-bg: #fbebe7;
   --warn-line: #ebbcb3;
   --warn-icon: #f6cfc7;
   --warn-ink: #8f2a22;
-  --drop: #1d1b18;
-  --drop-2: #3a352f;
+  --drop: #12202c;
+  --drop-2: #2f4256;
   --glass: rgba(255, 255, 255, 0.5);
   --radius: 12px;
   --pop: 1.5px 2.5px 0 var(--drop);
@@ -41,14 +41,14 @@
 
   --blue: #cfe0f1;
   --sc-user: #f7e2a8;
-  --sc-server: #cfe3b2;
-  --sc-ctrl: #e7ddf5;
+  --sc-server: #bfe6df;
+  --sc-ctrl: #d5dcf6;
   --sc-db: #cfe0f1;
   --sc-cache: #fcdcbd;
   --sc-dns: #f1d78a;
-  --plat-t: #f1e8da;
-  --plat-l: #dcd0bd;
-  --plat-r: #cbbea9;
+  --plat-t: #e8eff6;
+  --plat-l: #d0dbe7;
+  --plat-r: #bccbdb;
 
   position: relative;
   display: grid;
@@ -70,46 +70,46 @@
 }
 .ds-app[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #211e1a;
-  --paper-2: #25211c;
-  --sheet: #28241f;
-  --card: #26231e;
-  --stage: #231f1b;
-  --field: #2d2924;
-  --line: #342f28;
-  --line-strong: #4f473d;
-  --ink: #efe6d6;
-  --ink-2: #ddd3c2;
-  --muted: #a3998b;
-  --muted-2: #8d7f6c;
-  --green: #3f4c2b;
-  --green-2: #55703a;
-  --green-tile: #2f3a24;
-  --green-tile-line: #3b422e;
-  --violet: #493563;
-  --violet-tile: #3a2f4a;
-  --violet-tile-line: #41354e;
-  --mint: #34503a;
-  --sand: #5a4a31;
+  --paper: #111a22;
+  --paper-2: #15202a;
+  --sheet: #18242e;
+  --card: #16222c;
+  --stage: #131e27;
+  --field: #1d2a35;
+  --line: #263540;
+  --line-strong: #3a4e5e;
+  --ink: #e4eef7;
+  --ink-2: #c6d5e2;
+  --muted: #93a6b7;
+  --muted-2: #7a8fa2;
+  --green: #254a6b;
+  --green-2: #356f9f;
+  --green-tile: #1b3447;
+  --green-tile-line: #27475f;
+  --violet: #1f4f4b;
+  --violet-tile: #1a3a3a;
+  --violet-tile-line: #245250;
+  --mint: #21514d;
+  --sand: #2d4152;
   --warn-bg: #3d2724;
   --warn-line: #5d3a35;
   --warn-icon: #6b3a33;
   --warn-ink: #f0b3aa;
-  --drop: #050403;
-  --drop-2: #0b0907;
+  --drop: #04080b;
+  --drop-2: #0a1218;
   --glass: rgba(255, 255, 255, 0.04);
   --tint: rgba(255, 255, 255, 0.03);
 
   --blue: #2f4a63;
   --sc-user: #6b5a2c;
-  --sc-server: #4b6334;
-  --sc-ctrl: #5a4580;
+  --sc-server: #2c5f58;
+  --sc-ctrl: #3b4a80;
   --sc-db: #2f4a63;
   --sc-cache: #7a5530;
   --sc-dns: #7d6a2a;
-  --plat-t: #34302a;
-  --plat-l: #2a2722;
-  --plat-r: #1f1c18;
+  --plat-t: #243340;
+  --plat-l: #1b2833;
+  --plat-r: #141f28;
 }
 .ds-app,
 .ds-app *,
@@ -161,7 +161,7 @@
   border-radius: var(--radius);
   box-shadow:
     inset 0 1px 0 var(--tint),
-    0 10px 22px -16px rgba(70, 65, 59, 0.4);
+    0 10px 22px -16px rgba(50, 70, 90, 0.4);
 }
 /* ---- top bar -------------------------------------------------------------------- */
 .ds-app .ds-topbar {
@@ -173,7 +173,7 @@
   padding-inline: 25px 18px;
   border-bottom: 1px solid var(--line-strong);
   background: linear-gradient(var(--glass), transparent);
-  box-shadow: 0 8px 18px -16px rgba(70, 65, 59, 0.5);
+  box-shadow: 0 8px 18px -16px rgba(50, 70, 90, 0.5);
 }
 .ds-app .ds-brand {
   display: flex;
@@ -186,7 +186,7 @@
 .ds-app .ds-logo {
   flex: none;
   color: var(--ink);
-  filter: drop-shadow(1px 1.5px 0 rgba(29, 27, 24, 0.25));
+  filter: drop-shadow(1px 1.5px 0 rgba(18, 32, 44, 0.25));
 }
 .ds-app .ds-brand-name {
   font-size: 19px;
@@ -334,7 +334,7 @@
 }
 .ds-app .ds-folder {
   flex: none;
-  color: rgba(29, 27, 24, 0.55);
+  color: rgba(18, 32, 44, 0.55);
 }
 .ds-app .ds-tree-meta {
   margin-inline-start: auto;
@@ -577,16 +577,16 @@
     transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .ds-app .ds-check.is-on {
-  color: #12240f;
-  background: #a6d38b;
-  border-color: #1f3b1c;
+  color: #0c2238;
+  background: #9ccbf0;
+  border-color: #1c4a74;
 }
 .ds-app .ds-check.is-on .ds-i {
   opacity: 1;
   transform: none;
 }
 .ds-app .ds-check.is-part {
-  background: linear-gradient(90deg, #cde6ba 50%, var(--field) 50%);
+  background: linear-gradient(90deg, #c3def5 50%, var(--field) 50%);
 }
 .ds-app .ds-progress-count {
   margin-inline-start: auto;
@@ -605,7 +605,7 @@
   border-radius: 14px;
   box-shadow:
     inset 0 1px 0 var(--tint),
-    0 18px 40px -30px rgba(70, 65, 59, 0.6);
+    0 18px 40px -30px rgba(50, 70, 90, 0.6);
 }
 .ds-app .ds-lesson-head {
   padding: 18px 2px 0 18px;
@@ -692,8 +692,8 @@
   position: absolute;
   inset: 0;
   background:
-    repeating-linear-gradient(30deg, rgba(70, 65, 59, 0.1) 0 1px, transparent 1px 34px),
-    repeating-linear-gradient(-30deg, rgba(70, 65, 59, 0.1) 0 1px, transparent 1px 34px);
+    repeating-linear-gradient(30deg, rgba(50, 70, 90, 0.1) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(-30deg, rgba(50, 70, 90, 0.1) 0 1px, transparent 1px 34px);
   pointer-events: none;
 }
 .ds-app .ds-canvas {
@@ -1122,9 +1122,9 @@
   height: 16px;
   font-size: 10px;
   font-weight: 800;
-  color: #12240f;
-  background: #a6d38b;
-  border: 1.2px solid #1f3b1c;
+  color: #0c2238;
+  background: #9ccbf0;
+  border: 1.2px solid #1c4a74;
   border-radius: 4px;
 }
 .ds-app .ds-guide-nav {
@@ -1196,7 +1196,7 @@
   display: grid;
   place-items: start center;
   padding: 12vh 12px 12px;
-  background: rgba(29, 27, 24, 0.35);
+  background: rgba(18, 32, 44, 0.35);
 }
 .ds-app .ds-sx-dialog {
   width: min(640px, 100%);
@@ -1215,8 +1215,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 52px;
-  padding-inline: 16px 12px;
+  flex: none;
+  height: 58px;
+  padding-inline: 20px 16px;
   border-bottom: 1px solid var(--line-strong);
 }
 .ds-app .ds-sx-bar input {
@@ -1230,14 +1231,18 @@
   outline: 0;
 }
 .ds-app .ds-sx-list {
-  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
   overflow-y: auto;
 }
 .ds-app .ds-sx-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 10px;
+  flex: none;
+  gap: 14px;
+  padding: 10px 14px;
   cursor: pointer;
   border: 1.3px solid transparent;
   border-radius: 9px;
@@ -1280,7 +1285,7 @@
   color: var(--muted);
 }
 .ds-app .ds-sx-empty {
-  padding: 22px 16px;
+  padding: 28px 20px;
   color: var(--muted);
 }
 /* A narrow stage: the Replay / Play buttons shrink to icons so the number chips keep their row. */
@@ -1329,7 +1334,7 @@
     inset: 54px 0 0;
     z-index: 35;
     display: block;
-    background: rgba(29, 27, 24, 0.3);
+    background: rgba(18, 32, 44, 0.3);
   }
 }
 /* ---- stack: one column, page scrolls, guide navigation pinned to the bottom ----- */
@@ -1456,7 +1461,7 @@
     padding: 10px max(12px, calc((100vw - 640px) / 2)) calc(10px + env(safe-area-inset-bottom));
     background: var(--paper);
     border-top: 1px solid var(--line-strong);
-    box-shadow: 0 -10px 24px -18px rgba(70, 65, 59, 0.6);
+    box-shadow: 0 -10px 24px -18px rgba(50, 70, 90, 0.6);
   }
   .ds-app .ds-guide-hint {
     display: none;
@@ -1513,9 +1518,9 @@
     transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .ds-app .ds-goals li.is-done .ds-box {
-  color: #12240f;
-  background: #a6d38b;
-  border-color: #1f3b1c;
+  color: #0c2238;
+  background: #9ccbf0;
+  border-color: #1c4a74;
 }
 .ds-app .ds-goals li.is-done .ds-box .ds-i {
   opacity: 1;
@@ -1537,7 +1542,7 @@
   }
 }
 .ds-app .ds-chapter.green {
-  color: #1f4a1f;
+  color: #173f66;
   background: var(--green);
 }
 

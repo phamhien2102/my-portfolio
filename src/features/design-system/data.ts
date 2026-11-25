@@ -47,19 +47,19 @@ export const MODULES: readonly Module[] = [
   {
     id: "foundations",
     name: "01. Foundations",
-    color: "#d5b07a",
+    color: "#8fb4d6",
     lessons: [requestLifecycle, latencyThroughput, napkinMath],
   },
   {
     id: "scaling",
     name: "02. Scaling",
-    color: "#3fa456",
+    color: "#1f9d8f",
     lessons: [verticalHorizontal, loadBalancing, stateless, caching, cdn],
   },
   {
     id: "data",
     name: "03. Data & Storage",
-    color: "#7c63d0",
+    color: "#5b6fd6",
     lessons: [
       sqlNosql,
       indexes,
@@ -77,37 +77,37 @@ export const MODULES: readonly Module[] = [
   {
     id: "communication",
     name: "04. Communication",
-    color: "#e8834d",
+    color: "#2f86ce",
     lessons: [apis, messageQueues, pubsub, realtime],
   },
   {
     id: "reliability",
     name: "05. Reliability",
-    color: "#2f86ce",
+    color: "#4aa3e8",
     lessons: [redundancy, rateLimiting, timeoutsRetries, observability],
   },
   {
     id: "architecture",
     name: "06. Architecture",
-    color: "#2a9d8f",
+    color: "#17a8a0",
     lessons: [microservices, serviceDiscovery, sagas, batchStream],
   },
   {
     id: "security",
     name: "07. Security",
-    color: "#d9577a",
+    color: "#6a8fe0",
     lessons: [authentication, authorization, encryption],
   },
   {
     id: "shipping",
     name: "08. Shipping",
-    color: "#8c9a3c",
+    color: "#3a9fb5",
     lessons: [testing, cicd],
   },
   {
     id: "whole-systems",
     name: "09. Whole Systems",
-    color: "#64728a",
+    color: "#5a7a9e",
     lessons: [hldLld, urlShortener, designNewsFeed, designChat],
   },
 ];

@@ -19,7 +19,7 @@ export interface OutlinePart {
   chapters: readonly OutlineChapter[];
 }
 
-const PART_COLORS = ["#d9b46c", "#6fbf73", "#9b86d6", "#ee9a5f", "#5aa2dd", "#e07a96"] as const;
+const PART_COLORS = ["#8fb4d6", "#1f9d8f", "#5b6fd6", "#2f86ce", "#4aa3e8", "#17a8a0"] as const;
 const WORDS_PER_MINUTE = 180;
 const VIETNAMESE = /[ăâđêôơưĂÂĐÊÔƠƯẠ-ỹ]/;
 

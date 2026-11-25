@@ -15,21 +15,21 @@ export const Logo = (p: P) => (
   <svg viewBox="0 0 32 32" width={28} height={28} aria-hidden="true" className="ds-logo" {...p}>
     <path
       d="M16 3 28 10 16 17 4 10z"
-      fill="#cfe3b2"
+      fill="#bddcf6"
       stroke="currentColor"
       strokeWidth="1.6"
       strokeLinejoin="round"
     />
     <path
       d="M4 10v11l12 7V17z"
-      fill="#e7ddf5"
+      fill="#c9ece6"
       stroke="currentColor"
       strokeWidth="1.6"
       strokeLinejoin="round"
     />
     <path
       d="M28 10v11l-12 7V17z"
-      fill="#f7e2a8"
+      fill="#cfe0f1"
       stroke="currentColor"
       strokeWidth="1.6"
       strokeLinejoin="round"
@@ -228,18 +228,18 @@ export const Cheat = (p: P) => (
 /** Algo Lab's mark: a dark tile with three stacked layers. */
 export const LogoTile = (p: P) => (
   <svg viewBox="0 0 32 32" width={30} height={30} aria-hidden="true" className="ds-logo" {...p}>
-    <rect width="32" height="32" rx="8" fill="#26262a" />
+    <rect width="32" height="32" rx="8" fill="#17232f" />
     <path
       d="m16 7 9 4.5-9 4.5-9-4.500z"
-      fill="#e0775f"
-      stroke="#e0775f"
+      fill="#2b7fd6"
+      stroke="#2b7fd6"
       strokeWidth="1.5"
       strokeLinejoin="round"
     />
     <path
       d="m7 16 9 4.5 9-4.500M7 20.5 16 25l9-4.5"
       fill="none"
-      stroke="#f4efe6"
+      stroke="#eaf3fb"
       strokeWidth="1.7"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -293,8 +293,8 @@ export const FolderLine = ({ filled }: { filled?: boolean }) => (
   <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden="true" className="ds-folder">
     <path
       d="M3 7a2 2 0 0 1 2-2h4l2 2.500h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"
-      fill={filled ? "#d96f57" : "none"}
-      stroke={filled ? "#b5503b" : "currentColor"}
+      fill={filled ? "#4f93e0" : "none"}
+      stroke={filled ? "#1f68b8" : "currentColor"}
       strokeWidth="1.6"
       strokeLinejoin="round"
     />
@@ -304,14 +304,14 @@ export const FolderLine = ({ filled }: { filled?: boolean }) => (
 /** A little staircase of isometric blocks, the badge beside a lesson title. */
 export const IsoStairs = () => (
   <svg viewBox="0 0 64 44" width={64} height={44} aria-hidden="true" className="ds-iso-stairs">
-    <g stroke="#26262a" strokeWidth="1.4" strokeLinejoin="round">
-      <path d="M4 33 14 28v6L4 39Z" fill="#e0775f" />
-      <path d="m14 28 8-4 6 3v6l-8 4-6-3Z" fill="#fdf7ef" />
-      <path d="m20 33 8-4v6l-8 4Z" fill="#e0775f" />
-      <path d="m26 22 8-4 6 3v6l-8 4-6-3Z" fill="#fdf7ef" />
-      <path d="m32 27 8-4v6l-8 4Z" fill="#e0775f" />
-      <path d="m38 16 8-4 6 3v6l-8 4-6-3Z" fill="#fdf7ef" />
-      <path d="m44 21 8-4v6l-8 4Z" fill="#e0775f" />
+    <g stroke="#17232f" strokeWidth="1.4" strokeLinejoin="round">
+      <path d="M4 33 14 28v6L4 39Z" fill="#2b7fd6" />
+      <path d="m14 28 8-4 6 3v6l-8 4-6-3Z" fill="#f4f9fd" />
+      <path d="m20 33 8-4v6l-8 4Z" fill="#2b7fd6" />
+      <path d="m26 22 8-4 6 3v6l-8 4-6-3Z" fill="#f4f9fd" />
+      <path d="m32 27 8-4v6l-8 4Z" fill="#2b7fd6" />
+      <path d="m38 16 8-4 6 3v6l-8 4-6-3Z" fill="#f4f9fd" />
+      <path d="m44 21 8-4v6l-8 4Z" fill="#2b7fd6" />
     </g>
   </svg>
 );

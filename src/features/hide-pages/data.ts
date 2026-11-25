@@ -50,6 +50,15 @@ export const HIDDEN_PAGES: readonly HiddenPage[] = [
     noindex: false,
   },
   {
+    path: "/products",
+    title: "Products",
+    blurb:
+      "The entry point of the three pages that are going live: IELTS, Design System, Algo Lab.",
+    group: "Learning",
+    access: "Direct URL only",
+    noindex: false,
+  },
+  {
     path: "/design-system",
     title: "Design System course",
     blurb:

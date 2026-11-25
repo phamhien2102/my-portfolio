@@ -1,0 +1,269 @@
+/* /products: the front door of the live pages. Cool blue and teal on pale slate, monospace type,
+   firm dark edges and a small hard shadow, like the course pages it links to. Every selector is
+   scoped to .pr-app so nothing leaks into the dark site. */
+
+.pr-app {
+  color-scheme: light;
+  --paper: #edf3f8;
+  --sheet: #f4f8fb;
+  --card: #f6fafd;
+  --line: #d3dfea;
+  --line-strong: #b6c8da;
+  --ink: #12202c;
+  --muted: #5b6f82;
+  --blue: #bddcf6;
+  --blue-2: #86bfe8;
+  --blue-ink: #12447a;
+  --teal: #c9ece6;
+  --teal-2: #7fd0c4;
+  --teal-ink: #0f5a52;
+  --indigo: #d5dcf6;
+  --indigo-2: #98a8ec;
+  --indigo-ink: #27358a;
+  --pop: 1.5px 2.5px 0 var(--ink);
+
+  min-height: 100svh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-jbm), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+}
+
+.pr-app,
+.pr-app *,
+.pr-app *::before,
+.pr-app *::after {
+  box-sizing: border-box;
+}
+
+.pr-app ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pr-app :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* ---- top bar ---------------------------------------------------------------------- */
+
+.pr-app .pr-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.pr-app .pr-brand {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.pr-app .pr-brand > span {
+  background: linear-gradient(transparent 62%, var(--blue-2) 62%);
+}
+
+.pr-app .pr-home {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.pr-app .pr-home:hover {
+  color: var(--ink);
+}
+
+/* ---- hero ------------------------------------------------------------------------- */
+
+.pr-app .pr-shell {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 3rem;
+}
+
+.pr-app .pr-hero {
+  max-width: 40rem;
+  margin-bottom: 2rem;
+}
+
+.pr-app .pr-eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pr-app h1 {
+  margin: 0;
+  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.pr-app .pr-sub {
+  margin: 0.9rem 0 0;
+  color: var(--muted);
+}
+
+/* ---- cards ------------------------------------------------------------------------ */
+
+.pr-app .pr-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+}
+
+.pr-app .pr-card {
+  --tint: var(--blue);
+  --tint-2: var(--blue-2);
+  --tint-ink: var(--blue-ink);
+  display: flex;
+}
+
+.pr-app .pr-card[data-tone="teal"] {
+  --tint: var(--teal);
+  --tint-2: var(--teal-2);
+  --tint-ink: var(--teal-ink);
+}
+
+.pr-app .pr-card[data-tone="indigo"] {
+  --tint: var(--indigo);
+  --tint-2: var(--indigo-2);
+  --tint-ink: var(--indigo-ink);
+}
+
+.pr-app .pr-card-link {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1.4rem 1.4rem 1.3rem;
+  color: inherit;
+  text-decoration: none;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 3px 4px 0 var(--ink);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.pr-app .pr-card-link:hover {
+  transform: translate(-1px, -2px);
+  box-shadow: 4px 6px 0 var(--ink);
+}
+
+.pr-app .pr-path {
+  align-self: flex-start;
+  padding: 0 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--tint-ink);
+  background: var(--tint);
+  border: 1px solid var(--tint-2);
+  border-radius: 999px;
+}
+
+.pr-app .pr-card h2 {
+  margin: 0.8rem 0 0;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  font-weight: 800;
+  background: linear-gradient(transparent 66%, var(--tint) 66%);
+  align-self: flex-start;
+}
+
+.pr-app .pr-tagline {
+  margin: 0.4rem 0 0;
+  font-weight: 700;
+}
+
+.pr-app .pr-blurb {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+}
+
+.pr-app .pr-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+
+.pr-app .pr-chip {
+  padding: 0 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--tint-ink);
+  background: var(--tint);
+  border: 1.2px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--pop);
+}
+
+.pr-app .pr-points {
+  display: grid;
+  gap: 0.35rem;
+  margin: 1rem 0 1.2rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed var(--line-strong);
+}
+
+.pr-app .pr-points li {
+  position: relative;
+  padding-inline-start: 1.1rem;
+  line-height: 1.5;
+}
+
+.pr-app .pr-points li::before {
+  content: "›";
+  position: absolute;
+  inset-inline-start: 0;
+  font-weight: 800;
+  color: var(--tint-ink);
+}
+
+.pr-app .pr-cta {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 0.35rem 0.9rem;
+  font-weight: 800;
+  background: var(--tint);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+}
+
+.pr-app .pr-card-link:hover .pr-cta {
+  background: var(--tint-2);
+}
+
+@media (max-width: 480px) {
+  .pr-app .pr-shell {
+    padding-top: 1.75rem;
+  }
+  .pr-app .pr-card-link {
+    padding: 1.15rem 1.1rem 1.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pr-app .pr-card-link {
+    transition: none;
+  }
+}

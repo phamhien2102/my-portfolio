@@ -17,6 +17,15 @@ export interface Project {
 
 export const PROJECTS: readonly Project[] = [
   {
+    title: "Raymond’s Products",
+    summary:
+      "The front door to three hands-on courses: an IELTS course reader with notes and flashcards, an interactive system design course, and a step-by-step data structures and algorithms lab, in English, Vietnamese, French and German.",
+    tags: ["Next.js", "TypeScript", "SVG", "i18n"],
+    year: "Nov 25, 2026",
+    href: "/products",
+    addedAt: "2026-11-25",
+  },
+  {
     title: "Date Airways",
     summary:
       "A date invite told as an airport check-in: a split-flap board that cancels every flight but one, a CAPTCHA full of Raymonds, and a hold-to-take-off cockpit. Try it: name guest, code DEMO2026.",
