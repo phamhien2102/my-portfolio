@@ -1,0 +1,608 @@
+/* /native: the layout of /ielts (top bar, course tree, one sheet with Back / Next). Ported, not shared:
+   a feature may not import another feature. A warm-paper course reader. Cream background, monospace type, 12px cards with a firm dark
+   edge and a small hard shadow, colour-coded chips. Every selector is scoped to .nv-app so
+   nothing leaks into the dark site; the html:has() rule only matches while this page is mounted. */
+
+.nv-app {
+  color-scheme: light;
+  --paper: #edf3f8;
+  --paper-2: #f1f6fa;
+  --sheet: #f4f8fb;
+  --card: #f2f7fb;
+  --tile: #e1ebf4;
+  --line: #d3dfea;
+  --line-strong: #b6c8da;
+  --edge: #334556;
+  --ink: #12202c;
+  --muted: #5b6f82;
+  --green: #bddcf6;
+  --green-2: #86bfe8;
+  --green-tile: #e1effb;
+  --green-line: #bcd7ee;
+  --violet: #c9ece6;
+  --violet-tile: #dff3ef;
+  --violet-line: #b2dbd3;
+  --orange-tile: #e3eefb;
+  --yellow: #cfe0f1;
+  --mark: #f6dd8a;
+  --rust: #b8432f;
+  --link: #1f68b8;
+  --radius: 12px;
+  --pop: 1.5px 2.5px 0 var(--ink);
+  /* The phone top bar's height, which the course drawer hangs from. */
+  --topbar-h: 3.5rem;
+
+  min-height: 100svh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+}
+
+html:has(.nv-app) {
+  scroll-padding-top: 5rem;
+}
+
+.nv-app,
+.nv-app *,
+.nv-app *::before,
+.nv-app *::after {
+  box-sizing: border-box;
+}
+
+.nv-app :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.nv-app .muted {
+  color: var(--muted);
+}
+
+/* ---- top bar ---------------------------------------------------------------------- */
+
+.nv-app .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.nv-app .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.nv-app .brand {
+  white-space: nowrap;
+}
+
+.nv-app .brand-name > span {
+  background: linear-gradient(transparent 62%, var(--green-2) 62%);
+}
+
+.nv-app .topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nv-app .topbar-left {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+/* The hamburger in the top-left corner. Phones only: on a wide screen the course menu is folded away
+   with the arrows in its header and brought back from the chapter's header. */
+.nv-app .menu-btn {
+  display: none;
+  flex: none;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  color: var(--ink);
+  background: var(--green);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+  cursor: pointer;
+}
+
+.nv-app .menu-icon {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+/* ---- shell: course tree + chapter -------------------------------------------------- */
+
+.nv-app .shell {
+  display: grid;
+  grid-template-columns: 17.5rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  max-width: 88rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2rem;
+}
+
+.nv-app .side {
+  position: sticky;
+  top: 4.1rem;
+  max-height: calc(100svh - 5rem);
+  overflow-y: auto;
+  padding: 0.75rem 0.6rem 0.6rem;
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.nv-app .side-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.45rem 0.7rem;
+  font-weight: 800;
+}
+
+.nv-app .side-head .muted {
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.nv-app .parts,
+.nv-app .tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nv-app .part-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.4rem 0.45rem;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.nv-app .part-toggle:hover {
+  background: var(--tile);
+}
+
+.nv-app .part-name {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.nv-app .count {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.nv-app .icon {
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.nv-app .icon.file {
+  color: var(--muted);
+}
+
+.nv-app .chevron {
+  flex: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.nv-app .chevron.is-open {
+  transform: rotate(90deg);
+}
+
+.nv-app .tree {
+  margin: 0.1rem 0 0.4rem 1.15rem;
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--line-strong);
+}
+
+.nv-app .leaf {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.1rem 0;
+  padding: 0.3rem 0.5rem;
+  color: var(--ink);
+  text-decoration: none;
+  border: 1.5px solid transparent;
+  border-radius: 9px;
+}
+
+.nv-app .leaf:hover {
+  background: var(--tile);
+  color: var(--ink);
+}
+
+.nv-app .leaf.is-active {
+  font-weight: 800;
+  background: var(--green);
+  border-color: var(--ink);
+  box-shadow: var(--pop);
+}
+
+.nv-app .leaf.is-active .icon.file {
+  color: var(--ink);
+}
+
+.nv-app .tick {
+  margin-left: auto;
+  font-weight: 800;
+  color: #1a7f74;
+}
+
+.nv-app .progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.6rem 0.15rem 0.1rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.72rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+/* ---- chapter card --------------------------------------------------------------- */
+
+.nv-app .lesson {
+  min-width: 0;
+  padding: 1.1rem 1.5rem 1.4rem;
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 10px 22px -14px rgba(50, 70, 90, 0.35);
+}
+
+.nv-app .lesson-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px dashed var(--line-strong);
+}
+
+.nv-app .crumbs {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.nv-app .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nv-app .chip {
+  padding: 0.12rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--pop);
+}
+
+.nv-app .chip.y {
+  background: var(--yellow);
+}
+
+.nv-app .chip.g {
+  background: var(--green);
+}
+
+.nv-app .chip.v {
+  background: var(--violet);
+}
+
+.nv-app .stage {
+  max-width: 56rem;
+}
+
+.nv-app .lesson-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  max-width: 56rem;
+  margin-top: 2.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px dashed var(--line-strong);
+}
+
+.nv-app .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+  cursor: pointer;
+}
+
+.nv-app .btn:hover {
+  color: var(--ink);
+  background: var(--tile);
+}
+
+.nv-app .btn.primary {
+  background: var(--green);
+}
+
+.nv-app .btn.primary:hover {
+  background: var(--green-2);
+}
+
+.nv-app .btn.is-on {
+  background: var(--green-tile);
+  border-color: var(--edge);
+}
+
+.nv-app .btn.is-disabled {
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--line-strong);
+  box-shadow: none;
+  cursor: default;
+}
+
+.nv-app .colophon {
+  margin: 0;
+  padding: 0 1.25rem 2.5rem;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+/* ---- small screens: the tree folds into a menu --------------------------------------- */
+
+@media (max-width: 62rem) {
+  .nv-app .menu-btn {
+    display: grid;
+  }
+
+  .nv-app .shell {
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 0.75rem;
+  }
+
+  /* The tree is a drawer under the top bar. It used to open inline above the chapter, so a reader
+     deep in a chapter who tapped "Course" saw nothing happen: the tree appeared off screen at the
+     top of the page. Fixed to the viewport, it opens where the reader is. */
+  .nv-app .side {
+    position: fixed;
+    top: var(--topbar-h);
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    width: min(21rem, 88vw);
+    max-height: none;
+    padding: 0.9rem 0.8rem 1.2rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-width: 0 1px 0 0;
+    border-radius: 0 14px 14px 0;
+    box-shadow: 10px 0 30px -18px rgba(18, 32, 44, 0.55);
+    visibility: hidden;
+    transform: translateX(-105%);
+    transition:
+      transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1),
+      visibility 0s linear 0.28s;
+  }
+
+  .nv-app .side.is-open {
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  .nv-app .side-backdrop {
+    position: fixed;
+    inset: var(--topbar-h) 0 0;
+    z-index: 35;
+    padding: 0;
+    background: rgba(18, 32, 44, 0.35);
+    border: 0;
+    cursor: pointer;
+  }
+
+  .nv-app .lesson {
+    padding-inline: 1rem;
+  }
+
+  .nv-app .topbar {
+    box-sizing: border-box;
+    height: var(--topbar-h);
+    gap: 0.5rem;
+    padding-block: 0;
+    padding-inline: 0.75rem;
+  }
+
+  /* The brand may shrink and truncate rather than push the buttons off the screen. */
+  .nv-app .brand {
+    flex: 0 1 auto;
+    min-width: 0;
+    font-size: 0.95rem;
+  }
+
+  .nv-app .brand-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nv-app .topbar-right {
+    flex: none;
+    gap: 0.4rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .nv-app .cards-btn {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.72rem;
+  }
+
+  .nv-app .menu-btn {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .nv-app .topbar-left {
+    gap: 0.7rem;
+  }
+
+  .nv-app .brand {
+    gap: 0.4rem;
+    font-size: 0.88rem;
+  }
+}
+
+/* The backdrop only exists for the drawer. */
+.nv-app .side-backdrop {
+  display: none;
+}
+
+@media (max-width: 62rem) {
+  .nv-app .side-backdrop {
+    display: block;
+  }
+}
+
+/* ---- native-only additions ------------------------------------------------------------ */
+
+/* The chrome is monospace like /ielts; the reading content keeps the page's own sans type. */
+.nv-app .topbar,
+.nv-app .side,
+.nv-app .lesson-head,
+.nv-app .lesson-foot {
+  font-family: var(--font-jbm), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.nv-app .leaf,
+.nv-app .brand {
+  color: var(--ink);
+}
+
+.nv-app .top-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--green);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+}
+
+.nv-app .top-link:hover {
+  background: var(--green-2);
+}
+
+.nv-app .filter {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.nv-app .filter button {
+  padding: 0.12rem 0.65rem;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.nv-app .filter button[aria-pressed="true"] {
+  background: var(--green);
+  box-shadow: var(--pop);
+}
+
+.nv-app .bar {
+  height: 0.4rem;
+  overflow: hidden;
+  background: var(--line);
+  border-radius: 999px;
+}
+
+.nv-app .bar > i {
+  display: block;
+  height: 100%;
+  background: #0f766e;
+  border-radius: 999px;
+  transition: width 0.5s;
+}
+
+.nv-app .stage {
+  max-width: 60rem;
+}
+
+/* A phase card sits inside the sheet, which is narrower than the page the card was made for: let
+   every block in it shrink to the sheet instead of pushing a track card past the edge. */
+.nv-app .stage section,
+.nv-app .stage section div,
+.nv-app .stage section ul,
+.nv-app .stage section li {
+  min-width: 0;
+}

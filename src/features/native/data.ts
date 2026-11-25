@@ -23,14 +23,14 @@ export const TRACKS: readonly Track[] = [
     label: "iOS",
     platform: "iOS",
     stack: "Swift · SwiftUI · Xcode",
-    accent: "#c2410c",
+    accent: "#1d6fd6",
   },
   {
     id: "kotlin",
     label: "Android",
     platform: "Android",
     stack: "Kotlin · Compose · Android Studio",
-    accent: "#6d28d9",
+    accent: "#0f766e",
   },
 ];
 
@@ -174,7 +174,7 @@ export const PHASES: readonly Phase[] = [
     title: "Declarative UI",
     weeks: "3 weeks",
     goal: "Learn the two view layers side by side. You already think in components; find out where they disagree.",
-    accent: "#4d7c0f",
+    accent: "#0e7490",
     steps: {
       swift: [
         {
@@ -449,7 +449,7 @@ export const PHASES: readonly Phase[] = [
     title: "Persistence and offline",
     weeks: "3 weeks",
     goal: "Work on the underground. Cache first, sync later, never lose something the user typed.",
-    accent: "#b45309",
+    accent: "#4338ca",
     steps: {
       swift: [
         {
@@ -531,7 +531,7 @@ export const PHASES: readonly Phase[] = [
     title: "Platform power",
     weeks: "4 weeks",
     goal: "Do the things that needed a third-party library and a prayer from JavaScript.",
-    accent: "#be185d",
+    accent: "#3b5bdb",
     steps: {
       swift: [
         {
@@ -609,7 +609,7 @@ export const PHASES: readonly Phase[] = [
     title: "Ship quality",
     weeks: "4 weeks",
     goal: "Everything between it runs on my simulator and strangers are using it.",
-    accent: "#15803d",
+    accent: "#0891b2",
     steps: {
       swift: [
         {
@@ -686,7 +686,7 @@ export const PHASES: readonly Phase[] = [
     title: "Bring it back to React Native",
     weeks: "2 weeks",
     goal: "Native knowledge pays twice: the React Native apps you already maintain get better modules.",
-    accent: "#a21caf",
+    accent: "#5b3fd1",
     bonus: true,
     steps: {
       swift: [
@@ -767,7 +767,7 @@ export const CAPSTONES: readonly Capstone[] = [
     blurb:
       "An offline-first expense splitter for a group trip: shared currencies, settle-up maths, a widget with what you owe today.",
     hard: "Conflict resolution when two phones edit the same trip offline.",
-    accent: "#b45309",
+    accent: "#4338ca",
   },
   {
     id: "capstone-transit",
@@ -783,7 +783,7 @@ export const CAPSTONES: readonly Capstone[] = [
     blurb:
       "Camera, voice memo and text in one entry, searchable offline, synced to your own small backend.",
     hard: "Adaptive layout: the same app on a phone, an iPad and a folded or unfolded Android.",
-    accent: "#be185d",
+    accent: "#3b5bdb",
   },
 ];
 

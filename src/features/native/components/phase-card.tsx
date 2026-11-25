@@ -32,7 +32,7 @@ function Check({ id, accent, label, detail, href, source, strong }: CheckProps) 
           aria-hidden="true"
           className={cn(
             "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border text-[11px] leading-none text-white transition",
-            done ? "border-transparent" : "border-zinc-300 group-hover:border-zinc-500",
+            done ? "border-transparent" : "border-slate-300 group-hover:border-slate-500",
           )}
           style={done ? { background: accent, borderColor: accent } : undefined}
         >
@@ -41,14 +41,14 @@ function Check({ id, accent, label, detail, href, source, strong }: CheckProps) 
         <span className="min-w-0">
           <span
             className={cn(
-              "block font-bold text-zinc-900",
+              "block font-bold text-slate-900",
               strong ? "text-base" : "text-sm",
-              done && "text-zinc-400 line-through decoration-zinc-300",
+              done && "text-slate-400 line-through decoration-zinc-300",
             )}
           >
             {label}
           </span>
-          <span className={cn("mt-1 block text-sm text-zinc-600", done && "text-zinc-400")}>
+          <span className={cn("mt-1 block text-sm text-slate-600", done && "text-slate-400")}>
             {detail}
           </span>
         </span>
@@ -81,7 +81,10 @@ function TrackColumn({
   if (!meta) return null;
   return (
     <div
-      className={cn("rounded-3xl border border-zinc-200 bg-zinc-50 p-4", single && "sm:col-span-2")}
+      className={cn(
+        "rounded-3xl border border-slate-200 bg-slate-50 p-4",
+        single && "sm:col-span-2",
+      )}
     >
       <div className="flex items-baseline gap-2 px-3 pt-1 pb-2">
         <span
@@ -95,7 +98,7 @@ function TrackColumn({
         >
           {meta.platform}
         </h4>
-        <span className="truncate font-mono text-[11px] text-zinc-500">{meta.stack}</span>
+        <span className="truncate font-mono text-[11px] text-slate-500">{meta.stack}</span>
       </div>
       <ul className={cn(single && "sm:grid sm:grid-cols-2 sm:gap-x-2")}>
         {steps.map((step) => (
@@ -118,11 +121,11 @@ function TrackColumn({
 /** The endpoints and a trimmed response for the service a phase's app calls. */
 function ApiNote({ api, accent }: { api: ShipApi; accent: string }) {
   return (
-    <div className="mt-3 rounded-2xl border border-zinc-200 bg-white p-4">
+    <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-4">
       <p className="font-mono text-xs tracking-[0.25em]" style={{ color: accent }}>
         API · {api.name.toUpperCase()}
       </p>
-      <p className="mt-2 text-sm text-zinc-600">{api.note}</p>
+      <p className="mt-2 text-sm text-slate-600">{api.note}</p>
       <ul className="mt-3 space-y-2">
         {api.endpoints.map((endpoint) => (
           <li key={endpoint.url}>
@@ -135,13 +138,13 @@ function ApiNote({ api, accent }: { api: ShipApi; accent: string }) {
             >
               {endpoint.label} ↗
             </a>
-            <code className="mt-1 block overflow-x-auto rounded-lg bg-zinc-50 px-3 py-2 font-mono text-[11px] whitespace-nowrap text-zinc-600">
+            <code className="mt-1 block overflow-x-auto rounded-lg bg-slate-50 px-3 py-2 font-mono text-[11px] whitespace-nowrap text-slate-600">
               GET {endpoint.url}
             </code>
           </li>
         ))}
       </ul>
-      <pre className="mt-3 overflow-x-auto rounded-lg bg-zinc-900 p-3 font-mono text-[11px] leading-relaxed text-zinc-100">
+      <pre className="mt-3 overflow-x-auto rounded-lg bg-slate-900 p-3 font-mono text-[11px] leading-relaxed text-slate-100">
         {api.sample}
       </pre>
     </div>
@@ -158,7 +161,7 @@ export function PhaseCard({ phase, tracks }: { phase: Phase; tracks: readonly Tr
   return (
     <section
       aria-labelledby={`phase-${phase.id}`}
-      className="relative overflow-hidden rounded-[2rem] border border-zinc-200 bg-white p-5 shadow-sm sm:p-7"
+      className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-7"
     >
       <span
         aria-hidden="true"
@@ -176,27 +179,27 @@ export function PhaseCard({ phase, tracks }: { phase: Phase; tracks: readonly Tr
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <h3
               id={`phase-${phase.id}`}
-              className="text-2xl font-black tracking-tight text-zinc-900 sm:text-3xl"
+              className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl"
             >
               {phase.title}
             </h3>
-            <span className="rounded-full border border-zinc-300 px-2.5 py-0.5 font-mono text-[11px] tracking-wider text-zinc-500">
+            <span className="rounded-full border border-slate-300 px-2.5 py-0.5 font-mono text-[11px] tracking-wider text-slate-500">
               {phase.weeks}
             </span>
             {phase.bonus && (
-              <span className="rounded-full border border-zinc-300 px-2.5 py-0.5 font-mono text-[11px] tracking-wider text-zinc-500">
+              <span className="rounded-full border border-slate-300 px-2.5 py-0.5 font-mono text-[11px] tracking-wider text-slate-500">
                 BONUS
               </span>
             )}
             {complete && (
-              <span className="rounded-full border border-[#15803d]/30 bg-[#15803d]/10 px-2.5 py-0.5 font-mono text-[11px] tracking-wider text-[#15803d]">
+              <span className="rounded-full border border-[#0f766e]/30 bg-[#0f766e]/10 px-2.5 py-0.5 font-mono text-[11px] tracking-wider text-[#0f766e]">
                 ✓ DONE
               </span>
             )}
           </div>
-          <p className="mt-2 max-w-3xl text-zinc-600">{phase.goal}</p>
+          <p className="mt-2 max-w-3xl text-slate-600">{phase.goal}</p>
         </div>
-        <span className="font-mono text-xs text-zinc-500 tabular-nums">
+        <span className="font-mono text-xs text-slate-500 tabular-nums">
           {done} / {ids.length}
         </span>
       </header>
@@ -230,7 +233,7 @@ export function PhaseCard({ phase, tracks }: { phase: Phase; tracks: readonly Tr
           {phase.ship.proves.map((item) => (
             <li
               key={item}
-              className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-xs text-zinc-600"
+              className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600"
             >
               {item}
             </li>
