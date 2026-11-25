@@ -239,7 +239,7 @@ export const bigO: AlgoLesson = {
         row([4, 3, 2, 1], { id: "out", y: 100, x: 450, w: 44, tones: () => "mark" }),
         cell("ghostnote", 190, 190, "in place: O(1)", { w: 130, h: 30, tone: "done" }),
         cell("copynote", 450, 190, "copy: O(n)", { w: 130, h: 30, tone: "warn" }),
-        label("cap", 320, 272, "same answer, different memory bill", { size: 14, weight: 800 }),
+        label("cap", 235, 272, "same answer, different memory bill", { size: 14, weight: 800 }),
       ),
     },
   ],

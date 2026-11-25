@@ -747,3 +747,27 @@
     animation: al-slab-in 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
   }
 }
+
+/* The name of a solid memory region: a plate under its front corner, above everything else. */
+.ds-app .al-slab-label rect {
+  fill: #fbfdff;
+  stroke: #14202b;
+  stroke-width: 1.5;
+}
+
+.ds-app .al-slab-label text {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: #14202b;
+}
+
+.ds-app[data-theme="dark"] .al-slab-label rect {
+  fill: #16222d;
+  stroke: #7fa8cc;
+}
+
+.ds-app[data-theme="dark"] .al-slab-label text {
+  fill: #e4eef7;
+}

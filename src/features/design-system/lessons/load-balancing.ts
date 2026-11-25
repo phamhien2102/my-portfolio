@@ -76,6 +76,8 @@ export const loadBalancing: Lesson = {
       ],
       scene: {
         show: ["users", "lb", "a", "b", "c"],
+        // The balancer is in front now: users no longer reach Server B directly.
+        hideLinks: ["direct"],
         hot: ["lb"],
         flows: [{ link: "ul", label: "request" }],
         badges: { lb: "one public address" },
@@ -96,6 +98,8 @@ export const loadBalancing: Lesson = {
       ],
       scene: {
         show: ["users", "lb", "a", "b", "c"],
+        // The balancer is in front now: users no longer reach Server B directly.
+        hideLinks: ["direct"],
         hot: ["a", "b", "c"],
         flows: [
           { link: "la", delay: 0 },
@@ -124,6 +128,8 @@ export const loadBalancing: Lesson = {
       },
       scene: {
         show: ["users", "lb", "a", "b", "c"],
+        // The balancer is in front now: users no longer reach Server B directly.
+        hideLinks: ["direct"],
         hot: ["a", "c"],
         down: ["b"],
         flows: [
@@ -148,6 +154,8 @@ export const loadBalancing: Lesson = {
       ],
       scene: {
         show: ["users", "lb", "a", "b", "c"],
+        // The balancer is in front now: users no longer reach Server B directly.
+        hideLinks: ["direct"],
         hot: ["b"],
         flows: [{ link: "lb2", label: "fewest connections" }],
         badges: { a: "41 open", b: "6 open", c: "37 open" },
@@ -172,6 +180,8 @@ export const loadBalancing: Lesson = {
       },
       scene: {
         show: ["users", "lb", "a", "b", "c"],
+        // The balancer is in front now: users no longer reach Server B directly.
+        hideLinks: ["direct"],
         hot: ["lb"],
         badges: { lb: "still one box?" },
       },
