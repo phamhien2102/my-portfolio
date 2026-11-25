@@ -1195,6 +1195,111 @@ html:has(.ielts-app) {
   cursor: not-allowed;
 }
 
+/* The "?" beside Import, and the how-to it opens. Quiet, like the buttons next to it. */
+.ielts-app .fc-help-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.ielts-app .fc-help-btn:hover,
+.ielts-app .fc-help-btn[aria-expanded="true"] {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* The how-to is a tooltip: fixed to the window, so it can never change the panel's shape or be
+   clipped by it. The arrow is outside the scrolling body so the scroll does not cut it off. */
+.ielts-app .fc-tip {
+  position: fixed;
+  z-index: 90;
+}
+
+.ielts-app .fc-tip-body {
+  padding: 0.75rem 0.9rem;
+  overflow-y: auto;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--sheet);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 3px 4px 0 var(--ink);
+}
+
+.ielts-app .fc-tip-body strong {
+  display: block;
+  font-size: 0.78rem;
+}
+
+.ielts-app .fc-tip-body ol {
+  margin: 0.4rem 0 0;
+  padding-left: 1.2rem;
+  list-style: decimal;
+}
+
+.ielts-app .fc-tip-body ul {
+  margin: 0.6rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  list-style: disc;
+}
+
+.ielts-app .fc-tip-arrow {
+  position: absolute;
+  width: 0.7rem;
+  height: 0.7rem;
+  background: var(--sheet);
+  border: 1.5px solid var(--ink);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.ielts-app .fc-tip[data-side="top"] .fc-tip-arrow {
+  bottom: -0.42rem;
+  border-top-color: transparent;
+  border-left-color: transparent;
+}
+
+.ielts-app .fc-tip[data-side="bottom"] .fc-tip-arrow {
+  top: -0.42rem;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.ielts-app .fc-sample {
+  margin: 0.6rem 0 0;
+  font-size: 0.7rem;
+  border-collapse: collapse;
+}
+
+.ielts-app .fc-sample th,
+.ielts-app .fc-sample td {
+  padding: 0.1rem 0.6rem;
+  text-align: left;
+  border: 1px solid var(--line-strong);
+}
+
+.ielts-app .fc-sample th {
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--tile);
+}
+
+.ielts-app .fc-sample td {
+  background: var(--card);
+}
+
 .ielts-app .fc-notice {
   flex-basis: 100%;
   font-size: 0.75rem;

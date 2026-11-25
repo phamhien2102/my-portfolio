@@ -72,13 +72,15 @@ function createListStore<T>(key: string, isItem: (value: unknown) => value is T)
   };
 
   // Read fresh from storage so two quick writes in one tick don't clobber each other.
-  const update = (change: (items: T[]) => T[]) => {
+  // Returns false when the browser refused to store it (storage full, or blocked).
+  const update = (change: (items: T[]) => T[]): boolean => {
     try {
       window.localStorage.setItem(key, JSON.stringify(change(parse(read()))));
     } catch {
-      return;
+      return false;
     }
     window.dispatchEvent(new Event(event));
+    return true;
   };
 
   return function useList() {
@@ -127,6 +129,11 @@ export const useNotes = createListStore<Note>(
 
 /** The longest a note's text may be. */
 export const MAX_NOTE = 2000;
+
+/** Flashcard limits: how many cards in all, and how long a word and a meaning may be. */
+export const MAX_CARDS = 2000;
+export const MAX_WORD = 200;
+export const MAX_MEANING = 1000;
 
 const dayMonthYear = (time: number) => new Date(time).toLocaleDateString("en-GB");
 
