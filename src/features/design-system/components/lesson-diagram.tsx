@@ -1,3 +1,7 @@
+"use client";
+
+import { useLayoutEffect, useRef } from "react";
+
 import type { DiagramLink, DiagramNode, Flow, NodeKind, Panel, Scene, Tag } from "../lib/types";
 import { cn } from "@/lib/cn";
 
@@ -151,7 +155,73 @@ const KIND_GLYPH: Record<NodeKind, string> = {
  * there is no timer in React. `prefers-reduced-motion` hides them in CSS; the links and badges
  * still say what is happening.
  */
+/**
+ * What falls in from above, and how: gravity on the way down (each keyframe has its own easing, so
+ * the animation itself is `linear`), then two bounces. Played with the Web Animations API, once per
+ * thing per lesson, so stepping back, looping or pressing Replay does not make everything fall again.
+ */
+const DROP: Keyframe[] = [
+  { transform: "translateY(-300px)", opacity: 0, easing: "cubic-bezier(0.5, 0, 0.9, 0.6)" },
+  { transform: "translateY(0px)", opacity: 1, offset: 0.45, easing: "ease-out" },
+  { transform: "translateY(-22px)", opacity: 1, offset: 0.62, easing: "ease-in" },
+  { transform: "translateY(0px)", opacity: 1, offset: 0.78, easing: "ease-out" },
+  { transform: "translateY(-7px)", opacity: 1, offset: 0.89, easing: "ease-in" },
+  { transform: "translateY(0px)", opacity: 1 },
+];
+const DROP_MS = 1100;
+/** When each kind starts to fall, and the gap between two of the same kind: blocks, then arrows, then labels. */
+const DROP_TIMING: Record<string, { base: number; gap: number }> = {
+  node: { base: 0, gap: 90 },
+  link: { base: 450, gap: 80 },
+  note: { base: 0, gap: 90 },
+  label: { base: 800, gap: 40 },
+  panel: { base: 800, gap: 40 },
+};
+
+/** What has already fallen, per lesson (see the layout effect in `LessonDiagram`). */
+const DROPPED = new WeakMap<object, Set<string>>();
+
 export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  // Before paint, so nothing shows at rest for a frame before it falls. A thing that is new to this
+  // lesson falls once; one that was already on stage in an earlier step does not fall again.
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    // Kept per lesson (its `nodes` array is the same for every step; the title is not, it names the
+    // step) and outside the component, so even a remount of the stage does not make things fall again.
+    let seen = DROPPED.get(nodes);
+    if (!seen) DROPPED.set(nodes, (seen = new Set()));
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const order: Record<string, number> = {};
+    // When the last thing that is new in this step lands. The packets (the dots that run along the
+    // arrows) wait for it, so they never run along an arrow that is still in the air.
+    let lands = 0;
+    svg.querySelectorAll<SVGElement>("[data-drop]").forEach((el) => {
+      const key = el.dataset.drop ?? "";
+      if (seen.has(key)) return;
+      seen.add(key);
+      if (reduce) return;
+      const kind = key.split(":")[0];
+      const timing = DROP_TIMING[kind] ?? DROP_TIMING.label;
+      const n = (order[kind] = (order[kind] ?? -1) + 1);
+      lands = Math.max(lands, timing.base + Math.min(n, 6) * timing.gap + DROP_MS);
+      el.animate(DROP, {
+        duration: DROP_MS,
+        delay: timing.base + Math.min(n, 6) * timing.gap,
+        easing: "linear",
+        fill: "backwards",
+      });
+    });
+    // Each packet is told once (data-held), when it first appears: later renders must not move it.
+    svg.querySelectorAll<SVGElement>(".ds-pkt").forEach((el) => {
+      if (el.hasAttribute("data-held")) return;
+      el.setAttribute("data-held", "");
+      el.style.setProperty("--wait", `${lands / 1000}s`);
+    });
+  });
+
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const shown = new Set(scene.show);
   const hot = new Set(scene.hot);
@@ -159,13 +229,43 @@ export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
   const flows = scene.flows ?? [];
   const dim = new Set(scene.dim);
 
-  const visibleLinks = links.filter((l) => shown.has(l.from) && shown.has(l.to));
+  const hidden = new Set(scene.hideLinks);
+  const visibleLinks = links.filter(
+    (l) => shown.has(l.from) && shown.has(l.to) && !hidden.has(l.id),
+  );
 
   const geometry = (link: DiagramLink, reverse = false) => {
     const a = byId.get(reverse ? link.to : link.from)!;
     const b = byId.get(reverse ? link.from : link.to)!;
     return { a: edge(a, b), b: edge(b, a) };
   };
+
+  // Pills that sit on links, then the tags of the flows: no tag may land on another or on a pill.
+  const pillBoxes: Box[] = visibleLinks.flatMap((link) => {
+    const raw = scene.linkLabels?.[link.id];
+    if (!raw) return [];
+    const { a, b } = geometry(link);
+    const w = tagBox(asTag(raw));
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    let nx = -dy / len;
+    let ny = dx / len;
+    if (ny < 0 || (ny === 0 && nx < 0)) {
+      nx = -nx;
+      ny = -ny;
+    }
+    const reach = Math.abs(nx) * (w * 0.3) + Math.abs(ny) * 13 + 6;
+    return [{ x: (a.x + b.x) / 2 + nx * reach, y: (a.y + b.y) / 2 + ny * reach, w, h: 21 }];
+  });
+  const flowSpots = settleTags(
+    flows.map((flow) => {
+      const link = links.find((l) => l.id === flow.link);
+      if (!link || !shown.has(link.from) || !shown.has(link.to)) return null;
+      return { flow, geometry: geometry(link, flow.reverse) };
+    }),
+    pillBoxes,
+  );
 
   const camera = fitCamera(
     nodes.filter((n) => shown.has(n.id)),
@@ -174,6 +274,7 @@ export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
 
   return (
     <svg
+      ref={svgRef}
       className="ds-diagram"
       viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
       preserveAspectRatio="xMidYMid meet"
@@ -264,6 +365,7 @@ export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
               <line
                 key={link.id}
                 className={cn("ds-link", cut && "is-cut", muted && "is-dim")}
+                data-drop={`link:${link.id}`}
                 x1={a.x}
                 y1={a.y}
                 x2={b.x}
@@ -286,10 +388,22 @@ export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
                 node={n}
                 hot={hot.has(n.id)}
                 down={down.has(n.id)}
+                label={scene.labels?.[n.id]}
+                sceneKey={sceneKey}
+              />
+            ))}
+        </g>
+
+        <g>
+          {nodes
+            .filter((n) => shown.has(n.id))
+            .map((n) => (
+              <BlockNotes
+                key={n.id}
+                node={n}
                 badge={scene.badges?.[n.id]}
                 bubble={scene.bubbles?.[n.id] ? asTag(scene.bubbles[n.id]) : undefined}
                 label={scene.labels?.[n.id]}
-                sceneKey={sceneKey}
               />
             ))}
         </g>
@@ -315,6 +429,7 @@ export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
             return [
               <Pill
                 key={link.id}
+                drop={`label:${link.id}`}
                 cx={(a.x + b.x) / 2 + nx * reach}
                 cy={(a.y + b.y) / 2 + ny * reach}
                 w={w}
@@ -334,7 +449,14 @@ export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
           {flows.map((flow, i) => {
             const link = links.find((l) => l.id === flow.link);
             if (!link || !shown.has(link.from) || !shown.has(link.to)) return null;
-            return <Packet key={i} flow={flow} geometry={geometry(link, flow.reverse)} />;
+            return (
+              <Packet
+                key={i}
+                flow={flow}
+                geometry={geometry(link, flow.reverse)}
+                spot={flowSpots[i]}
+              />
+            );
           })}
         </g>
       </g>
@@ -581,6 +703,7 @@ function Pill({
   glyph,
   tone,
   className,
+  drop,
 }: {
   cx: number;
   cy: number;
@@ -590,9 +713,11 @@ function Pill({
   glyph?: string;
   tone?: string;
   className?: string;
+  /** Marks the pill as something that falls in the first time it appears (see `DROP`). */
+  drop?: string;
 }) {
   return (
-    <g className={cn("ds-pill", tone && `tone-${tone}`, className)}>
+    <g className={cn("ds-pill", tone && `tone-${tone}`, className)} data-drop={drop}>
       <rect
         className="ds-pill-shadow"
         x={cx - w / 2}
@@ -625,16 +750,12 @@ function Block({
   node: baseNode,
   hot,
   down,
-  badge,
-  bubble,
   label,
   sceneKey,
 }: {
   node: DiagramNode;
   hot: boolean;
   down: boolean;
-  badge?: string;
-  bubble?: Tag;
   /** Replaces the node's own label for this step. */
   label?: string;
   sceneKey: string;
@@ -643,12 +764,12 @@ function Block({
   const { x, y } = node;
   const isUser = node.kind === "user";
   const cube = !isUser;
-  const youW = node.label.length * 6.2 + 38;
-  const badgeW = badge ? badge.length * 6 + 16 : 0;
-  const badgeX = Math.min(Math.max(x, badgeW / 2 + 4), VIEW_W - badgeW / 2 - 4);
-  const badgeY = cube ? y + 66 : y + 118;
   return (
-    <g className={cn("ds-node", hot && "is-hot", down && "is-down")} data-kind={node.kind}>
+    <g
+      className={cn("ds-node", hot && "is-hot", down && "is-down")}
+      data-kind={node.kind}
+      data-drop={`node:${node.id}`}
+    >
       {/* The focus effect: two glowing rings burst out from the block and fade. Keyed by the step,
           so it plays again on every step and on Replay. */}
       {hot && !down && (
@@ -673,6 +794,36 @@ function Block({
           <path d={`M${x - 5} ${y + (cube ? 3 : 11)} l10 10 m0 -10 l-10 10`} />
         </g>
       )}
+    </g>
+  );
+}
+
+/**
+ * What is written around a block: the speech bubble above it, the name under a device and the
+ * caption under a cube. These are drawn in a layer of their own after every block, so a block that
+ * sits lower on the page can never cover the caption of the one above it.
+ */
+function BlockNotes({
+  node: baseNode,
+  badge,
+  bubble,
+  label,
+}: {
+  node: DiagramNode;
+  badge?: string;
+  bubble?: Tag;
+  label?: string;
+}) {
+  const node = label ? { ...baseNode, label } : baseNode;
+  const { x, y } = node;
+  const isUser = node.kind === "user";
+  const cube = !isUser;
+  const youW = node.label.length * 6.2 + 38;
+  const badgeW = badge ? badge.length * 6 + 16 : 0;
+  const badgeX = Math.min(Math.max(x, badgeW / 2 + 4), VIEW_W - badgeW / 2 - 4);
+  const badgeY = cube ? y + 66 : y + 118;
+  return (
+    <g className="ds-notes" data-drop={`note:${node.id}`}>
       {bubble && (
         <Pill
           cx={isUser ? x - 32 : x}
@@ -706,14 +857,12 @@ function Block({
   );
 }
 
-function Packet({ flow, geometry }: { flow: Flow; geometry: { a: Point; b: Point } }) {
+/** Where a flow's tag sits by default: beside the middle of its link. Requests go on one side of the
+ * line and replies on the other, and how far it moves out depends on how much of the tag lies along
+ * the normal. */
+function flowTagSpot(flow: Flow, geometry: { a: Point; b: Point }) {
   const { a, b } = geometry;
-  const delay = `${flow.delay ?? 0}s`;
-  const path = `M${a.x} ${a.y} L${b.x} ${b.y}`;
   const tone = flow.tone ?? "req";
-
-  // The label sits beside the middle of the link, clear of the line: requests on one side and
-  // replies on the other. How far it moves depends on how much of the tag lies along the normal.
   const mx = (a.x + b.x) / 2;
   const my = (a.y + b.y) / 2;
   const dx = b.x - a.x;
@@ -723,9 +872,90 @@ function Packet({ flow, geometry }: { flow: Flow; geometry: { a: Point; b: Point
   const ny = dx / len;
   const w = flow.label ? tagWidth(flow.label) : 0;
   const reach = Math.abs(nx) * (w / 2) + Math.abs(ny) * 11 + 9;
-  const side = tone === "req" || tone === "hand" ? -1 : 1;
-  const lx = mx + nx * reach * side;
-  const ly = my + ny * reach * side;
+  // A flow that runs against the link's own direction has its normal turned round, so the side has
+  // to be turned back: otherwise a request and its answer land on the same side and overlap.
+  const side = (tone === "req" || tone === "hand" ? -1 : 1) * (flow.reverse ? -1 : 1);
+  return {
+    x: mx + nx * reach * side,
+    y: my + ny * reach * side,
+    w,
+    /** Unit vector along the link, the direction a tag can slide to get out of another's way. */
+    tx: dx / len,
+    ty: dy / len,
+  };
+}
+
+interface Box {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+const overlaps = (p: Box, q: Box, gap = 4) =>
+  Math.abs(p.x - q.x) < (p.w + q.w) / 2 + gap && Math.abs(p.y - q.y) < (p.h + q.h) / 2 + gap;
+
+/**
+ * Settles the tags of a step's flows so no two of them (nor a pill that sits on a link) cover each
+ * other: each tag takes its default spot, and if that is taken it slides along its link, then out
+ * from it, to the nearest free one. Tags come in the order the step lists them, so the first keeps
+ * its place.
+ */
+function settleTags(
+  items: Array<{ flow: Flow; geometry: { a: Point; b: Point } } | null>,
+  taken: Box[],
+): Array<{ x: number; y: number } | null> {
+  const placed = [...taken];
+  return items.map((item) => {
+    if (!item || !item.flow.label) return null;
+    const base = flowTagSpot(item.flow, item.geometry);
+    const h = 22;
+    const tries: Array<[number, number]> = [[0, 0]];
+    for (const out of [0, 1, 2]) {
+      for (const along of [0, 1, -1, 2, -2, 3, -3]) {
+        if (out === 0 && along === 0) continue;
+        tries.push([along * 24, out * 22]);
+      }
+    }
+    // "Out" keeps the side the tag was on: along the same normal as its default spot.
+    const nx = base.ty;
+    const ny = -base.tx;
+    const sx =
+      Math.sign(
+        (base.x - (item.geometry.a.x + item.geometry.b.x) / 2) * nx +
+          (base.y - (item.geometry.a.y + item.geometry.b.y) / 2) * ny,
+      ) || 1;
+    let spot = { x: base.x, y: base.y };
+    for (const [along, out] of tries) {
+      const x = base.x + base.tx * along + nx * sx * out;
+      const y = base.y + base.ty * along + ny * sx * out;
+      if (!placed.some((q) => overlaps({ x, y, w: base.w, h }, q))) {
+        spot = { x, y };
+        break;
+      }
+    }
+    placed.push({ x: spot.x, y: spot.y, w: base.w, h });
+    return spot;
+  });
+}
+
+function Packet({
+  flow,
+  geometry,
+  spot,
+}: {
+  flow: Flow;
+  geometry: { a: Point; b: Point };
+  /** Where the tag goes, after `settleTags` has kept it clear of the others. */
+  spot: { x: number; y: number } | null;
+}) {
+  const { a, b } = geometry;
+  const delay = `${flow.delay ?? 0}s`;
+  const path = `M${a.x} ${a.y} L${b.x} ${b.y}`;
+  const tone = flow.tone ?? "req";
+  const lx = spot?.x ?? 0;
+  const ly = spot?.y ?? 0;
+  const w = flow.label ? tagWidth(flow.label) : 0;
 
   return (
     <g className={`ds-pkt tone-${tone}`}>
@@ -754,7 +984,11 @@ const panelSize = (p: Panel) => ({ w: PANEL_W, h: 34 + p.lines.length * 15 });
 function PanelCard({ panel }: { panel: Panel }) {
   const { w, h } = panelSize(panel);
   return (
-    <g className="ds-panel" transform={`translate(${panel.x} ${panel.y})`}>
+    <g
+      className="ds-panel"
+      data-drop={`panel:${panel.title}`}
+      transform={`translate(${panel.x} ${panel.y})`}
+    >
       <rect className="ds-panel-shadow" x="0" y="2" width={w} height={h} rx="10" />
       <rect className="ds-panel-face" x="0" y="0" width={w} height={h} rx="10" />
       {panel.icon && (

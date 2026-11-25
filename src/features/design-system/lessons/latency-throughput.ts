@@ -62,10 +62,7 @@ export const latencyThroughput: Lesson = {
         kind: "tip",
         text: "You lower latency by shortening the path: fewer hops, closer servers, caches, faster queries.",
       },
-      metrics: [
-        { label: "Latency", value: "40 ms", level: "good" },
-        { label: "Workers", value: "1", level: "warn" },
-      ],
+      metrics: [{ label: "Latency", value: "40 ms", level: "good" }],
       scene: {
         show: ["you", "web", "w1"],
         hot: ["w1"],
@@ -74,6 +71,20 @@ export const latencyThroughput: Lesson = {
           { link: "a" },
           { link: "a", reverse: true, tone: "res", delay: 0.8 },
           { link: "in", reverse: true, tone: "res", delay: 1.2, label: "answer · 40 ms" },
+        ],
+        panels: [
+          {
+            x: 20,
+            y: -70,
+            title: "Where the 40 ms goes",
+            icon: "timer",
+            lines: [
+              "Network, there and back\t10 ms",
+              "Waiting in line\t5 ms",
+              "Doing the work\t25 ms",
+              "Latency (total)\t40 ms",
+            ],
+          },
         ],
       },
     },
@@ -104,21 +115,28 @@ export const latencyThroughput: Lesson = {
       short: "Not the same",
       title: "A fast system can have low capacity",
       body: [
-        "Picture a one-lane road. A car crosses in 10 seconds (low latency for each car), but only a few cars can pass per minute.",
-        "Now picture a ten-lane highway with a long detour: each car takes a minute, yet thousands pass. The two numbers move independently, so you need to track both.",
+        "Picture a one-lane road. Each car crosses in 10 seconds (low latency), but only 6 cars get through per minute (low throughput).",
+        "Now picture a road with 100 lanes and a long detour: each car takes a whole minute (high latency), yet 100 cars finish every minute (high throughput). The two numbers move independently, so you need to track both.",
       ],
       callout: {
         kind: "insight",
         text: "Shipping a truck of hard drives has awful latency (days) and enormous throughput. Plenty of real systems choose that trade on purpose.",
       },
       metrics: [
-        { label: "Latency", value: "40 ms", level: "good" },
-        { label: "Throughput", value: "25 rps", level: "warn" },
-        { label: "Workers", value: "1", level: "warn" },
+        { label: "Latency", value: "10 s  vs  60 s" },
+        { label: "Throughput", value: "6  vs  100 per min" },
       ],
       scene: {
-        show: ["you", "web", "w1"],
-        badges: { w1: "fast, but narrow", you: "cares about latency" },
+        show: ["you", "web", "w1", "w2"],
+        labels: { you: "cars", web: "junction", w1: "One lane", w2: "100 lanes" },
+        badges: {
+          w1: "10 s per car · 6 per min",
+          w2: "60 s per car · 100 per min",
+        },
+        flows: [
+          { link: "a", label: "fast, but narrow" },
+          { link: "b", delay: 0.3, label: "slow, but wide" },
+        ],
       },
     },
     {
@@ -153,14 +171,14 @@ export const latencyThroughput: Lesson = {
       title: "Push past the limit and a queue appears",
       body: [
         "Capacity is `75 rps`. If `100` requests arrive each second, `25` of them cannot start. They wait, and the line grows every second.",
-        "Waiting time is added to every request behind them, so latency is no longer `40 ms`. It keeps climbing until something times out or crashes.",
+        "Waiting time is added to every request behind them. After about 3 seconds the line holds roughly `75` requests, so a new arrival waits about 1 second (`75 / 75 per second`) on top of its `40 ms`. The line keeps growing, and so does the wait, until something times out or crashes.",
       ],
       callout: {
         kind: "warn",
-        text: "Latency does not rise gently. Past roughly 70-80% utilisation it curves sharply upward, because bursts find every worker busy.",
+        text: "Latency does not rise gently even before the limit: past roughly 70-80% utilisation it curves sharply upward, because bursts find every worker busy. Above 100% is the extreme end of that curve.",
       },
       metrics: [
-        { label: "Latency", value: "900 ms", level: "bad" },
+        { label: "Latency", value: "~1 s and rising", level: "bad" },
         { label: "Throughput", value: "75 rps", level: "warn" },
         { label: "Waiting", value: "25 more / s", level: "bad" },
         { label: "Workers", value: "3", level: "good" },
@@ -181,7 +199,7 @@ export const latencyThroughput: Lesson = {
       title: "Averages hide the slow ones",
       body: [
         "Suppose 99 requests take `40 ms` and one takes `2 s`. The average is about `60 ms`, which looks fine, yet one user in a hundred waited two full seconds.",
-        "So report percentiles. p50 is the median, p99 is the time that 99% of requests beat. A page that fires 30 backend calls hits the p99 of at least one of them most of the time.",
+        "So report percentiles. p50 is the median, p99 is the time that 99% of requests beat. A page that fires 30 backend calls has about a 1 in 4 chance (`1 - 0.99^30`, roughly `26%`) that at least one of them is a p99 slow one, and with 100 calls it is nearly 2 in 3.",
       ],
       callout: {
         kind: "insight",
@@ -196,7 +214,7 @@ export const latencyThroughput: Lesson = {
         hot: ["w2"],
         flows: [
           { link: "b", tone: "warn", label: "one slow request" },
-          { link: "a", reverse: true, tone: "res", delay: 0.3 },
+          { link: "b", reverse: true, tone: "res", delay: 1.2, label: "answer after 2 s" },
         ],
         badges: { w2: "a 2 s outlier" },
       },
@@ -216,13 +234,16 @@ export const latencyThroughput: Lesson = {
       metrics: [
         { label: "Latency", value: "200 ms", level: "good" },
         { label: "Throughput", value: "500 rps", level: "good" },
-        { label: "Waiting", value: "100 in flight", level: "warn" },
-        { label: "Workers", value: "15", level: "good" },
+        { label: "Workers", value: "10 needed, plus margin", level: "warn" },
       ],
       scene: {
-        show: ["you", "web", "w1", "w2", "w3"],
+        show: ["you", "web"],
         hot: ["web"],
-        badges: { web: "500 x 0.2 s = 100", you: "500 rps" },
+        flows: [
+          { link: "in", label: "500 rps" },
+          { link: "in", delay: 0.3 },
+        ],
+        badges: { web: "500 x 0.2 s = 100 in flight", you: "500 rps · 200 ms" },
       },
     },
     {
@@ -233,7 +254,7 @@ export const latencyThroughput: Lesson = {
         "Keep utilisation under about 70%, track p99 rather than the average, and treat a growing queue as the first sign of trouble.",
       ],
       metrics: [
-        { label: "Latency", value: "p99 under 200 ms", level: "good" },
+        { label: "Latency", value: "watch p99", level: "good" },
         { label: "Throughput", value: "75 rps", level: "good" },
         { label: "Waiting", value: "none", level: "good" },
         { label: "Workers", value: "3", level: "good" },

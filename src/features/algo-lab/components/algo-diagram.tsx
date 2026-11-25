@@ -404,14 +404,6 @@ export function AlgoDiagram({ scene, title }: { scene: AlgoScene; title: string 
                   d={d}
                   style={morph(d)}
                 />
-                {fr.text && (
-                  <text
-                    className="al-frame-text"
-                    transform={`translate(${f(tx)} ${f(ty)}) ${FLAT}`}
-                  >
-                    {fr.text}
-                  </text>
-                )}
               </g>
             );
           }
@@ -644,6 +636,27 @@ export function AlgoDiagram({ scene, title }: { scene: AlgoScene; title: string 
             </g>
           );
         })}
+
+        {/* The names of solid regions are drawn last, on a small plate under the slab's front corner, so
+            no block, arrow or pointer can ever cover them. */}
+        {frames
+          .filter((fr) => fr.solid && fr.text)
+          .map((fr) => {
+            const [bx, by] = project(fr.x + fr.w, fr.y + fr.h, -SLAB);
+            const w = (fr.text ?? "").length * 6.6 + 20;
+            return (
+              <g
+                key={`${fr.id}-name`}
+                className="al-slab-label"
+                transform={`translate(${f(bx)} ${f(by + 18)})`}
+              >
+                <rect x={-w / 2} y={-10} width={w} height={20} rx={10} />
+                <text y={4} textAnchor="middle">
+                  {fr.text}
+                </text>
+              </g>
+            );
+          })}
       </g>
     </svg>
   );

@@ -72,6 +72,22 @@
   font-weight: 600;
   fill: var(--ink);
 }
+/* The packets and their tags appear only once the step's arrows have landed (--wait, set in the
+   diagram), so they never run along an arrow that is still falling. */
+@keyframes ds-pkt-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ds-app .ds-pkt {
+    animation: ds-pkt-in 0.35s ease-out backwards;
+    animation-delay: var(--wait, 0s);
+  }
+}
 .ds-app .ds-packet {
   fill: #7fb8ec;
   stroke: var(--ink);

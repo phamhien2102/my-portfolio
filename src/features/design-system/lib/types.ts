@@ -63,6 +63,8 @@ export interface Scene {
   linkLabels?: Record<string, string | Tag>;
   /** Links drawn muted and dashed: still there, but no longer in use. */
   dim?: string[];
+  /** Links left out of this step altogether, such as a direct line that a load balancer replaces. */
+  hideLinks?: string[];
   /** Replaces a node's label for this step, e.g. "you · Sydney". */
   labels?: Record<string, string>;
   /** Figures drawn on the stage, such as a recap of where the time went. */

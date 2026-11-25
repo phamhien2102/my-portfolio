@@ -9,7 +9,7 @@ export const verticalHorizontal: Lesson = {
   goals: [
     "What scaling up and scaling out mean",
     "Why a bigger machine is simple but capped",
-    "How a load balancer spreads work across servers",
+    "Where a load balancer fits in front of the servers",
     "How horizontal scaling survives failures",
     "A rule for choosing between the two",
   ],
@@ -136,8 +136,9 @@ export const verticalHorizontal: Lesson = {
       short: "Scale out",
       title: "Horizontal: more machines",
       body: [
-        "Scaling out (horizontal) adds several ordinary servers and puts a load balancer in front. The balancer picks a server for each request, perhaps in turn.",
+        "Scaling out (horizontal) adds several ordinary servers and puts a load balancer in front. The balancer picks a server for each request, perhaps in turn: A, then B, then C, then A again.",
         "Three `4-core` servers give about `600` requests per second, and adding a fourth gives `800`. Capacity grows in steps, with no theoretical cap.",
+        "How the balancer chooses a server is the subject of the next lesson, Load Balancing.",
       ],
       callout: {
         kind: "insight",
@@ -151,6 +152,8 @@ export const verticalHorizontal: Lesson = {
       ],
       scene: {
         show: ["you", "lb", "s1", "s2", "s3"],
+        // With a load balancer in front, users no longer reach Server B directly.
+        hideLinks: ["v"],
         hot: ["lb"],
         flows: [
           { link: "in", label: "400 rps" },
@@ -166,7 +169,7 @@ export const verticalHorizontal: Lesson = {
       title: "Failures stop being fatal",
       body: [
         "Now Server B crashes. The load balancer notices through health checks and stops sending it traffic. Servers A and C carry on.",
-        "You lost a third of the capacity, not all of it. Users see little or nothing, and you can patch machines one at a time with no downtime.",
+        "You lost a third of the capacity, not all of it. With `300` requests per second, the two survivors run at `75%` of their `400` rps and users see little or nothing. You can also patch machines one at a time with no downtime.",
       ],
       callout: {
         kind: "tip",
@@ -180,9 +183,11 @@ export const verticalHorizontal: Lesson = {
       ],
       scene: {
         show: ["you", "lb", "s1", "s2", "s3"],
+        // With a load balancer in front, users no longer reach Server B directly.
+        hideLinks: ["v"],
         down: ["s2"],
         flows: [
-          { link: "in", label: "400 rps" },
+          { link: "in", label: "300 rps" },
           { link: "a", delay: 0.3 },
           { link: "c", delay: 0.5 },
         ],
@@ -208,6 +213,8 @@ export const verticalHorizontal: Lesson = {
       ],
       scene: {
         show: ["you", "lb", "s1", "s2", "s3"],
+        // With a load balancer in front, users no longer reach Server B directly.
+        hideLinks: ["v"],
         hot: ["s1", "s3"],
         badges: { s1: "has the session?", s3: "no idea who you are" },
       },
@@ -255,6 +262,8 @@ export const verticalHorizontal: Lesson = {
       ],
       scene: {
         show: ["you", "lb", "s1", "s2", "s3"],
+        // With a load balancer in front, users no longer reach Server B directly.
+        hideLinks: ["v"],
         hot: ["lb"],
         flows: [
           { link: "in", label: "50,000 rps" },
@@ -280,6 +289,8 @@ export const verticalHorizontal: Lesson = {
       ],
       scene: {
         show: ["you", "lb", "s1", "s2", "s3"],
+        // With a load balancer in front, users no longer reach Server B directly.
+        hideLinks: ["v"],
         badges: { s2: "bigger: simple, capped", lb: "wider: resilient, more work" },
       },
     },
