@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { cn } from "@/lib/cn";
 
 import { changesOf, chapterOf } from "./guide";
+import type { CourseUi } from "./i18n";
 import { renderInline } from "./inline";
 import {
   Alert,
@@ -22,6 +23,9 @@ import {
 import type { CourseLesson, CourseModule, CourseVariant, SceneEngine } from "./types";
 
 interface Props<L extends CourseLesson> {
+  ui: CourseUi;
+  /** The reader chose a language this lesson has no translation for, so it is in English. */
+  untranslated?: boolean;
   lesson: L;
   module: CourseModule<L>;
   initialStep: number;
@@ -34,11 +38,7 @@ interface Props<L extends CourseLesson> {
 
 const AUTOPLAY_MS = 5500;
 
-const CALLOUT = {
-  warn: { title: "Watch out", Icon: Alert },
-  tip: { title: "Good to know", Icon: Bulb },
-  insight: { title: "Key idea", Icon: Sparkle },
-} as const;
+const CALLOUT_ICON = { warn: Alert, tip: Bulb, insight: Sparkle } as const;
 
 /** Wrap the keywords of a pseudocode line so the code card can colour them. */
 const KEYWORDS =
@@ -56,12 +56,6 @@ function highlight(line: string) {
   );
 }
 
-const CALLOUT_ALGO = {
-  ...CALLOUT,
-  tip: { title: "Tip", Icon: Bulb },
-  insight: { title: "Notice", Icon: Bulb },
-} as const;
-
 const QUERY = "(prefers-reduced-motion: reduce)";
 const subscribeMotion = (onChange: () => void) => {
   const query = window.matchMedia(QUERY);
@@ -75,6 +69,8 @@ const subscribeMotion = (onChange: () => void) => {
  * search result that points at a step, starts fresh at the right step.
  */
 export function LessonView<L extends CourseLesson>({
+  ui,
+  untranslated,
   lesson,
   module,
   initialStep,
@@ -173,27 +169,32 @@ export function LessonView<L extends CourseLesson>({
   const chapter =
     algo && !step.chapter
       ? index === 0
-        ? { label: "Concept", tone: "coral" as const }
+        ? { label: ui.concept, tone: "coral" as const }
         : index === last
-          ? { label: "Recap", tone: "ink" as const }
+          ? { label: ui.recap, tone: "ink" as const }
           : {
-              label: failing ? "Watch out" : "Walkthrough",
+              label: failing ? ui.watchOut : ui.walkthrough,
               tone: failing ? ("amber" as const) : ("coral" as const),
             }
-      : chapterOf(lesson, index, failing);
+      : chapterOf(lesson, index, !!failing, ui);
   const moduleNumber = /^(\d+)\.\s*(.*)$/.exec(module.name);
   const changes = changesOf(lesson, index, engine);
-  const callout =
-    step.callout &&
-    (algo && step.callout.kind === "insight" ? CALLOUT_ALGO : CALLOUT)[step.callout.kind];
+  // Algo Lab names two of the boxes differently from the classic course.
+  const callout = step.callout && {
+    Icon: algo && step.callout.kind === "insight" ? Bulb : CALLOUT_ICON[step.callout.kind],
+    title:
+      algo && step.callout.kind !== "warn"
+        ? ui.calloutAlgo[step.callout.kind]
+        : ui.callout[step.callout.kind],
+  };
   const nextLabel =
     index < last
-      ? `Next: ${lesson.steps[index + 1].short}`
+      ? ui.nextLabel(lesson.steps[index + 1].short)
       : next
-        ? `Next lesson: ${next.title}`
-        : "Finish course";
+        ? ui.nextLesson(next.title)
+        : ui.finishCourse;
   const position = module.lessons.findIndex((l) => l.id === lesson.id) + 1;
-  const level = lesson.level[0].toUpperCase() + lesson.level.slice(1);
+  const level = ui.levels[lesson.level];
 
   // A goal ticks off once the reader has passed its share of the steps.
   const goalDone = (i: number) => index >= Math.ceil(((i + 1) * last) / lesson.goals.length);
@@ -211,30 +212,33 @@ export function LessonView<L extends CourseLesson>({
                     {moduleNumber && <b>{moduleNumber[1]}</b>}
                     {moduleNumber ? moduleNumber[2] : module.name}
                   </span>
-                  <small>
-                    Lesson {position} of {module.lessons.length}
-                  </small>
+                  <small>{ui.lessonOf(position, module.lessons.length)}</small>
                 </div>
                 <IsoStairs />
               </div>
             </div>
+            {untranslated && (
+              <p className="ds-i18n-note" role="note">
+                {ui.untranslated}
+              </p>
+            )}
           </header>
         ) : (
           <header className="ds-lesson-head">
             <p className="ds-crumb">
               {module.name}
               <span>/</span>
-              Lesson {position} of {module.lessons.length}
+              {ui.lessonOf(position, module.lessons.length)}
             </p>
             <div className="ds-lesson-head-row">
               <div className="ds-lesson-titles">
                 <h1 className="ds-title">{lesson.title}</h1>
                 <p className="ds-subtitle">{lesson.summary}</p>
               </div>
-              <ul className="ds-tags" aria-label="About this lesson">
+              <ul className="ds-tags" aria-label={ui.aboutLesson}>
                 <li className="ds-tag sand">
                   <Glyph name="timer" size={12} />
-                  {lesson.minutes} min
+                  {ui.minutes(lesson.minutes)}
                 </li>
                 <li className="ds-tag green">
                   <Glyph name="gauge" size={12} />
@@ -242,7 +246,7 @@ export function LessonView<L extends CourseLesson>({
                 </li>
                 <li className="ds-tag violet">
                   <Glyph name="queue" size={12} />
-                  {lesson.steps.length} steps
+                  {ui.stepsCount(lesson.steps.length)}
                 </li>
               </ul>
             </div>
@@ -309,15 +313,15 @@ export function LessonView<L extends CourseLesson>({
           style={{ "--n": lesson.steps.length } as React.CSSProperties}
         >
           <div className="ds-timeline-head">
-            <span className="ds-eyebrow">In this lesson</span>
+            <span className="ds-eyebrow">{ui.inThisLesson}</span>
             <span className="ds-timeline-count">
               {algo && (
                 <span className="ds-timeline-keys">
                   <kbd>←</kbd>
-                  <kbd>→</kbd> to step
+                  <kbd>→</kbd> {ui.toStep}
                 </span>
               )}
-              Step {index + 1} of {lesson.steps.length}
+              {ui.stepOf(index + 1, lesson.steps.length)}
             </span>
           </div>
           <div className={cn("ds-timeline-row", algo && "has-nav")}>
@@ -325,7 +329,7 @@ export function LessonView<L extends CourseLesson>({
               <button
                 type="button"
                 className="ds-timeline-nav prev"
-                aria-label="Previous step"
+                aria-label={ui.previousStep}
                 disabled={index === 0}
                 onClick={() => go(index - 1)}
               >
@@ -361,7 +365,7 @@ export function LessonView<L extends CourseLesson>({
               <button
                 type="button"
                 className="ds-timeline-nav next"
-                aria-label="Next step"
+                aria-label={ui.nextStep}
                 disabled={index === last}
                 onClick={() => go(index + 1)}
               >
@@ -375,9 +379,7 @@ export function LessonView<L extends CourseLesson>({
       <div className="ds-rail">
         <article className="ds-card ds-guide">
           <div className="ds-guide-meta">
-            <span className="ds-eyebrow">
-              Step {index + 1} / {lesson.steps.length}
-            </span>
+            <span className="ds-eyebrow">{ui.stepSlash(index + 1, lesson.steps.length)}</span>
             <span className={cn("ds-chapter", chapter.tone)}>{chapter.label}</span>
           </div>
 
@@ -403,7 +405,7 @@ export function LessonView<L extends CourseLesson>({
 
             {changes.length > 0 && (
               <div className="ds-changes">
-                <p className="ds-eyebrow">What changed</p>
+                <p className="ds-eyebrow">{ui.whatChanged}</p>
                 <ul>
                   {changes.map((c, i) => (
                     <li key={`${i}-${c.kind}-${c.text}`} className={cn("ds-chg", c.kind)}>
@@ -417,7 +419,7 @@ export function LessonView<L extends CourseLesson>({
 
             {index === last && (
               <div className="ds-changes">
-                <p className="ds-eyebrow">Key takeaways</p>
+                <p className="ds-eyebrow">{ui.keyTakeaways}</p>
                 <ul className="ds-takeaways">
                   {lesson.takeaways.map((t, i) => (
                     <li key={i}>{t}</li>
@@ -433,10 +435,10 @@ export function LessonView<L extends CourseLesson>({
               className="ds-btn-ghost"
               onClick={goBack}
               disabled={index === 0 && !previous}
-              aria-label="Previous step"
+              aria-label={ui.previousStep}
             >
               <Arrow dir="left" />
-              Back
+              {ui.back}
             </button>
             <button
               type="button"
@@ -450,15 +452,16 @@ export function LessonView<L extends CourseLesson>({
           </div>
           <p className="ds-guide-hint">
             <kbd>←</kbd>
-            <kbd>→</kbd> step · <kbd>R</kbd> replay · <kbd>Space</kbd> {playing ? "pause" : "play"}
+            <kbd>→</kbd> {ui.hintStep} · <kbd>R</kbd> {ui.hintReplay} · <kbd>Space</kbd>{" "}
+            {playing ? ui.hintPause : ui.hintPlay}
           </p>
         </article>
 
         {algo && lesson.pseudocode && (
-          <section className="ds-card ds-codecard" aria-label="Pseudocode">
+          <section className="ds-card ds-codecard" aria-label={ui.pseudocode}>
             <h2>
               <Glyph name="list" size={18} />
-              Pseudocode
+              {ui.pseudocode}
             </h2>
             <pre className={cn("ds-code", !!step.lines?.length && "has-focus")}>
               <code>
@@ -477,8 +480,8 @@ export function LessonView<L extends CourseLesson>({
         )}
 
         {algo && (
-          <section className="ds-card ds-numbers" aria-label="By the numbers">
-            <h2>By the numbers</h2>
+          <section className="ds-card ds-numbers" aria-label={ui.byTheNumbers}>
+            <h2>{ui.byTheNumbers}</h2>
             <ul>
               {lesson.hud.map((slot, i) => {
                 const metric = step.metrics?.find((m) => m.label === slot.label);
@@ -494,8 +497,8 @@ export function LessonView<L extends CourseLesson>({
         )}
 
         {!algo && (
-          <section className="ds-card ds-goals" aria-label="What you will learn">
-            <h2 className="ds-eyebrow">You&rsquo;ll learn</h2>
+          <section className="ds-card ds-goals" aria-label={ui.whatYouWillLearn}>
+            <h2 className="ds-eyebrow">{ui.youllLearn}</h2>
             <ul>
               {lesson.goals.map((goal, i) => (
                 <li key={`${i}-${goal}`} className={cn(goalDone(i) && "is-done")}>

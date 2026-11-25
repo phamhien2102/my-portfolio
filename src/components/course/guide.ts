@@ -1,17 +1,19 @@
+import type { CourseUi } from "./i18n";
 import type { Change, ChapterTone, CourseLesson, SceneEngine } from "./types";
 
 /** The small coloured tag above a step's title, worked out from where the step sits. */
 export function chapterOf<L extends CourseLesson>(
   lesson: L,
   index: number,
-  failing = false,
+  failing: boolean,
+  ui: CourseUi,
 ): { label: string; tone: ChapterTone } {
   const step = lesson.steps[index];
   if (step.chapter) return step.chapter;
-  if (index === 0) return { label: "Problem", tone: "red" };
-  if (failing) return { label: "Failure", tone: "amber" };
-  if (index === lesson.steps.length - 1) return { label: "Recap", tone: "ink" };
-  return { label: "Technique", tone: "blue" };
+  if (index === 0) return { label: ui.problem, tone: "red" };
+  if (failing) return { label: ui.failure, tone: "amber" };
+  if (index === lesson.steps.length - 1) return { label: ui.recap, tone: "ink" };
+  return { label: ui.technique, tone: "blue" };
 }
 
 const MAX_CHANGES = 6;

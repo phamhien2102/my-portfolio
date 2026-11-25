@@ -5,9 +5,11 @@ import { useState } from "react";
 import { cn } from "@/lib/cn";
 
 import { Check, Chevron, FileIcon, Folder, FolderLine } from "./icons";
+import type { CourseUi } from "./i18n";
 import type { CourseLesson, CourseModule, CourseVariant } from "./types";
 
 interface Props {
+  ui: CourseUi;
   variant: CourseVariant;
   modules: readonly CourseModule<CourseLesson>[];
   activeId: string;
@@ -19,6 +21,7 @@ interface Props {
 
 /** The left column: modules as coloured folders with their lessons, and a progress drawer. */
 export function CourseTree({
+  ui,
   variant,
   modules,
   activeId,
@@ -37,11 +40,11 @@ export function CourseTree({
   const percent = total ? Math.round((done / total) * 100) : 0;
 
   return (
-    <aside id="ds-sidebar" className="ds-sidebar" aria-label="Course">
+    <aside id="ds-sidebar" className="ds-sidebar" aria-label={ui.course}>
       <div className="ds-tree-root">
         <Folder color="#d5b07a" />
-        <span>Course</span>
-        <span className="ds-tree-meta">{total} lessons</span>
+        <span>{ui.course}</span>
+        <span className="ds-tree-meta">{ui.lessonsCount(total)}</span>
       </div>
 
       <nav className="ds-course">
@@ -111,7 +114,7 @@ export function CourseTree({
 
       {algo && (
         <div className="ds-progress-line">
-          <span>Progress</span>
+          <span>{ui.progress}</span>
           <div
             className="ds-bar"
             role="progressbar"
@@ -134,7 +137,7 @@ export function CourseTree({
           aria-expanded={progressOpen}
           onClick={() => setProgressOpen((o) => !o)}
         >
-          <span className="ds-eyebrow">Progress</span>
+          <span className="ds-eyebrow">{ui.progress}</span>
           <span className="ds-progress-pct">
             {done} / {total}
           </span>

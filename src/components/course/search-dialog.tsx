@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
+import type { CourseUi } from "./i18n";
 import { SearchIcon } from "./icons";
 import type { CourseLesson, CourseModule } from "./types";
 
@@ -17,13 +18,13 @@ interface Hit {
 }
 
 /** Every lesson and every step, flattened once so typing only has to filter. */
-function buildIndex(modules: readonly CourseModule<CourseLesson>[]): Hit[] {
+function buildIndex(modules: readonly CourseModule<CourseLesson>[], ui: CourseUi): Hit[] {
   return modules.flatMap((module) =>
     module.lessons.flatMap((lesson) => [
       {
         key: lesson.id,
         title: lesson.title,
-        meta: `${module.name} · ${lesson.minutes} min`,
+        meta: `${module.name} · ${ui.minutes(lesson.minutes)}`,
         href: `#${lesson.id}`,
         kind: "lesson" as const,
         text: `${lesson.title} ${lesson.summary}`.toLowerCase(),
@@ -31,7 +32,7 @@ function buildIndex(modules: readonly CourseModule<CourseLesson>[]): Hit[] {
       ...lesson.steps.map((step, i) => ({
         key: `${lesson.id}/${i + 1}`,
         title: step.title,
-        meta: `${lesson.title} · step ${i + 1}`,
+        meta: `${lesson.title} · ${ui.stepWord(i + 1)}`,
         href: `#${lesson.id}/${i + 1}`,
         kind: "step" as const,
         text: `${step.title} ${step.body.join(" ")}`.toLowerCase(),
@@ -41,15 +42,17 @@ function buildIndex(modules: readonly CourseModule<CourseLesson>[]): Hit[] {
 }
 
 export function SearchDialog({
+  ui,
   modules,
   placeholder,
   onClose,
 }: {
+  ui: CourseUi;
   modules: readonly CourseModule<CourseLesson>[];
   placeholder: string;
   onClose: () => void;
 }) {
-  const index = useMemo(() => buildIndex(modules), [modules]);
+  const index = useMemo(() => buildIndex(modules, ui), [modules, ui]);
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
   const listRef = useRef<HTMLUListElement>(null);
@@ -78,14 +81,14 @@ export function SearchDialog({
 
   return (
     <div className="ds-sx" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="ds-sx-dialog" role="dialog" aria-modal="true" aria-label="Search the course">
+      <div className="ds-sx-dialog" role="dialog" aria-modal="true" aria-label={ui.searchTheCourse}>
         <div className="ds-sx-bar">
           <SearchIcon />
           <input
             autoFocus
             value={query}
             placeholder={placeholder}
-            aria-label="Search"
+            aria-label={ui.search}
             onChange={(e) => {
               setQuery(e.target.value);
               setCursor(0);
@@ -115,7 +118,7 @@ export function SearchDialog({
                 onClick={() => open(hit)}
               >
                 <span className={cn("ds-sx-kind", hit.kind)}>
-                  {hit.kind === "lesson" ? "Lesson" : "Step"}
+                  {hit.kind === "lesson" ? ui.lessonKind : ui.stepKind}
                 </span>
                 <span className="ds-sx-main">
                   <b>{hit.title}</b>
@@ -125,7 +128,7 @@ export function SearchDialog({
             ))}
           </ul>
         ) : (
-          <p className="ds-sx-empty">Nothing matches “{query}”.</p>
+          <p className="ds-sx-empty">{ui.nothingMatches(query)}</p>
         )}
       </div>
     </div>

@@ -844,3 +844,107 @@
     padding: 14px 16px 16px;
   }
 }
+
+/* ---- the language picker in the top bar ---------------------------------------------------- */
+
+.ds-app .ds-lang {
+  position: relative;
+  flex: none;
+}
+
+.ds-app[data-variant="algo"] .ds-lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink);
+  background: var(--glass);
+  border: 1.3px solid var(--line-strong);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.ds-app[data-variant="algo"] .ds-lang-btn:hover,
+.ds-app[data-variant="algo"] .ds-lang-btn[aria-expanded="true"] {
+  border-color: var(--muted-2);
+}
+
+.ds-app[data-variant="algo"] .ds-lang-chev {
+  width: 13px;
+  height: 13px;
+  transform: rotate(90deg);
+  opacity: 0.7;
+}
+
+.ds-app[data-variant="algo"] .ds-lang-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  inset-inline-end: 0;
+  z-index: 60;
+  min-width: 190px;
+  padding: 6px;
+  background: var(--paper);
+  border: 1.3px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.45);
+}
+
+.ds-app[data-variant="algo"] .ds-lang-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: var(--ink);
+  text-align: start;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ds-app[data-variant="algo"] .ds-lang-item > span {
+  flex: 1;
+}
+
+.ds-app[data-variant="algo"] .ds-lang-item > b {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.ds-app[data-variant="algo"] .ds-lang-item:hover,
+.ds-app[data-variant="algo"] .ds-lang-item:focus-visible {
+  background: var(--field);
+  outline: 0;
+}
+
+.ds-app[data-variant="algo"] .ds-lang-item.is-on {
+  font-weight: 700;
+  color: var(--coral-ink);
+  background: var(--coral-soft);
+}
+
+@media (max-width: 819px) {
+  .ds-app[data-variant="algo"] .ds-lang-btn {
+    gap: 5px;
+    height: 36px;
+    padding: 0 9px;
+  }
+
+  /* The short code is enough on a phone: the globe says what it is. */
+  .ds-app[data-variant="algo"] .ds-lang-chev {
+    display: none;
+  }
+}
+
+/* On a narrow screen the language picker needs the room, so the brand keeps only "Algo Lab". */
+@media (max-width: 480px) {
+  .ds-app[data-variant="algo"] .ds-brand-owner {
+    display: none;
+  }
+}

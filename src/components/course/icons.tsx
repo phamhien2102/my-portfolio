@@ -50,6 +50,16 @@ export const SearchIcon = (p: P) => (
   </svg>
 );
 
+export const Globe = (p: P) => (
+  <svg {...base} width={17} height={17} {...p}>
+    <circle cx="12" cy="12" r="8.5" {...stroke} />
+    <path
+      d="M3.5 12h17M12 3.5c2.6 2.4 3.8 5.2 3.8 8.5s-1.2 6.1-3.8 8.5c-2.6-2.4-3.8-5.2-3.8-8.5S9.4 5.9 12 3.5Z"
+      {...stroke}
+    />
+  </svg>
+);
+
 export const Sun = (p: P) => (
   <svg {...base} width={17} height={17} {...p}>
     <circle cx="12" cy="12" r="4" {...stroke} />
