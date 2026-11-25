@@ -1,5 +1,9 @@
 import { useSyncExternalStore } from "react";
 
+import { de } from "./locales/de";
+import { en } from "./locales/en";
+import { fr } from "./locales/fr";
+import { vi } from "./locales/vi";
 import type { CalloutKind, CourseLesson, CourseModule, Level } from "./types";
 
 /** The languages a course page can offer. English is the original; the others are translations. */
@@ -22,8 +26,9 @@ interface LocaleStore {
 const stores = new Map<string, LocaleStore>();
 
 /**
- * The chosen language, kept in localStorage under `<key>-locale`. One store per course page,
- * created once so the hook is stable. The server and the first client render are always English;
+ * The chosen language, kept in localStorage under `<key>-locale`. The course pages all use the
+ * same key, so a language picked on one applies to the others; a page with no translations stays
+ * in English. One store per key, created once so the hook is stable. The server and the first client render are always English;
  * a saved choice applies right after hydration, so the markup matches.
  */
 export function localeStore(key: string): LocaleStore {
@@ -92,6 +97,8 @@ export interface LessonText {
   takeaways?: string[];
   hud?: string[];
   pseudocode?: string[];
+  /** Words that belong to the lesson as a whole, keyed by the page's own ids (see `mapLesson`). */
+  labels?: Record<string, string>;
   steps?: StepText[];
 }
 
@@ -104,12 +111,28 @@ export interface Translations {
 /** Puts a step's translated `labels` into a scene. Only the page knows what its scenes are made of. */
 export type SceneLabeller = (scene: unknown, labels: Record<string, string>) => unknown;
 
+/** Puts a lesson's translated `labels` into the lesson itself, such as the names on a diagram. */
+export type LessonLabeller = (lesson: unknown, labels: Record<string, string>) => unknown;
+
+/**
+ * Everything one language adds to a page, kept in one file per language: the page's own words
+ * (`ui`, whatever shape the page gives them) and the translated course.
+ */
+export interface LocaleBundle<U = unknown> {
+  ui: U;
+  translations: Translations;
+}
+
 /** What a page adds to offer its course in more than one language (the picker shows up with it). */
-export interface CourseI18n {
-  /** Loads one language's translations when the reader first picks it. */
-  load: (locale: Exclude<Locale, "en">) => Promise<Translations>;
+export interface CourseI18n<U = unknown> {
+  /** The page's own words in English, the language the course is written in. */
+  english: U;
+  /** Loads one language when the reader first picks it. The shell switches to it all at once. */
+  load: (locale: Exclude<Locale, "en">) => Promise<LocaleBundle<U>>;
   /** Puts a step's translated scene labels into the page's own kind of scene. */
   mapScene?: SceneLabeller;
+  /** Puts a lesson's translated `labels` into the lesson (for words that are not in a step). */
+  mapLesson?: LessonLabeller;
 }
 
 /**
@@ -120,7 +143,7 @@ export interface CourseI18n {
 export function localizeModules<L extends CourseLesson>(
   modules: readonly CourseModule<L>[],
   translations: Translations | undefined,
-  mapScene?: SceneLabeller,
+  mappers: Pick<CourseI18n, "mapScene" | "mapLesson"> = {},
 ): readonly CourseModule<L>[] {
   if (!translations) return modules;
   return modules.map((module) => ({
@@ -128,7 +151,7 @@ export function localizeModules<L extends CourseLesson>(
     name: translations.modules?.[module.id] ?? module.name,
     lessons: module.lessons.map((lesson) => {
       const text = translations.lessons[lesson.id];
-      return text ? localizeLesson(lesson, text, mapScene) : lesson;
+      return text ? localizeLesson(lesson, text, mappers) : lesson;
     }),
   }));
 }
@@ -136,7 +159,7 @@ export function localizeModules<L extends CourseLesson>(
 function localizeLesson<L extends CourseLesson>(
   lesson: L,
   text: LessonText,
-  mapScene?: SceneLabeller,
+  { mapScene, mapLesson }: Pick<CourseI18n, "mapScene" | "mapLesson">,
 ): L {
   // Metrics point at the HUD slots by label, so a translated label has to be renamed in both.
   const renamed = new Map<string, string>();
@@ -146,7 +169,7 @@ function localizeLesson<L extends CourseLesson>(
     return { ...slot, label };
   });
 
-  return {
+  const localized = {
     ...lesson,
     title: text.title ?? lesson.title,
     summary: text.summary ?? lesson.summary,
@@ -173,6 +196,7 @@ function localizeLesson<L extends CourseLesson>(
       };
     }),
   } as L;
+  return text.labels && mapLesson ? (mapLesson(localized, text.labels) as L) : localized;
 }
 
 // ---- the words of the course shell -----------------------------------------------------------
@@ -186,6 +210,11 @@ export interface CourseUi {
   comingSoon: string;
   switchToLight: string;
   switchToDark: string;
+  /** The classic course page only: the chips above the stage and its play controls. */
+  numbersForStep: string;
+  replay: string;
+  play: string;
+  pause: string;
   language: string;
   searchTheCourse: string;
   search: string;
@@ -237,224 +266,5 @@ export interface CourseUi {
   untranslated: string;
 }
 
-const en: CourseUi = {
-  courseMenu: "Course menu",
-  closeMenu: "Close menu",
-  sections: "Sections",
-  soon: "soon",
-  comingSoon: "Coming soon",
-  switchToLight: "Switch to light theme",
-  switchToDark: "Switch to dark theme",
-  language: "Language",
-  searchTheCourse: "Search the course",
-  search: "Search",
-  lessonKind: "Lesson",
-  stepKind: "Step",
-  nothingMatches: (q) => `Nothing matches “${q}”.`,
-  minutes: (n) => `${n} min`,
-  stepWord: (n) => `step ${n}`,
-  course: "Course",
-  lessonsCount: (n) => `${n} lessons`,
-  progress: "Progress",
-  concept: "Concept",
-  recap: "Recap",
-  watchOut: "Watch out",
-  walkthrough: "Walkthrough",
-  problem: "Problem",
-  failure: "Failure",
-  technique: "Technique",
-  callout: { warn: "Watch out", tip: "Good to know", insight: "Key idea" },
-  calloutAlgo: { tip: "Tip", insight: "Notice" },
-  lessonOf: (p, n) => `Lesson ${p} of ${n}`,
-  levels: { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" },
-  stepsCount: (n) => `${n} steps`,
-  aboutLesson: "About this lesson",
-  inThisLesson: "In this lesson",
-  toStep: "to step",
-  stepOf: (i, n) => `Step ${i} of ${n}`,
-  stepSlash: (i, n) => `Step ${i} / ${n}`,
-  previousStep: "Previous step",
-  nextStep: "Next step",
-  whatChanged: "What changed",
-  keyTakeaways: "Key takeaways",
-  back: "Back",
-  nextLabel: (short) => `Next: ${short}`,
-  nextLesson: (title) => `Next lesson: ${title}`,
-  finishCourse: "Finish course",
-  hintStep: "step",
-  hintReplay: "replay",
-  hintPause: "pause",
-  hintPlay: "play",
-  pseudocode: "Pseudocode",
-  byTheNumbers: "By the numbers",
-  youllLearn: "You’ll learn",
-  whatYouWillLearn: "What you will learn",
-  untranslated: "This lesson has not been translated yet, so it is shown in English.",
-};
-
-const vi: CourseUi = {
-  courseMenu: "Menu khóa học",
-  closeMenu: "Đóng menu",
-  sections: "Các mục",
-  soon: "sắp có",
-  comingSoon: "Sắp ra mắt",
-  switchToLight: "Chuyển sang giao diện sáng",
-  switchToDark: "Chuyển sang giao diện tối",
-  language: "Ngôn ngữ",
-  searchTheCourse: "Tìm trong khóa học",
-  search: "Tìm kiếm",
-  lessonKind: "Bài học",
-  stepKind: "Bước",
-  nothingMatches: (q) => `Không có kết quả nào cho “${q}”.`,
-  minutes: (n) => `${n} phút`,
-  stepWord: (n) => `bước ${n}`,
-  course: "Khóa học",
-  lessonsCount: (n) => `${n} bài học`,
-  progress: "Tiến độ",
-  concept: "Khái niệm",
-  recap: "Tóm tắt",
-  watchOut: "Lưu ý",
-  walkthrough: "Từng bước",
-  problem: "Vấn đề",
-  failure: "Thất bại",
-  technique: "Kỹ thuật",
-  callout: { warn: "Lưu ý", tip: "Nên biết", insight: "Ý chính" },
-  calloutAlgo: { tip: "Mẹo", insight: "Chú ý" },
-  lessonOf: (p, n) => `Bài ${p} / ${n}`,
-  levels: { beginner: "Cơ bản", intermediate: "Trung cấp", advanced: "Nâng cao" },
-  stepsCount: (n) => `${n} bước`,
-  aboutLesson: "Về bài học này",
-  inThisLesson: "Trong bài này",
-  toStep: "để chuyển bước",
-  stepOf: (i, n) => `Bước ${i} / ${n}`,
-  stepSlash: (i, n) => `Bước ${i} / ${n}`,
-  previousStep: "Bước trước",
-  nextStep: "Bước sau",
-  whatChanged: "Điều gì đã thay đổi",
-  keyTakeaways: "Điểm cần nhớ",
-  back: "Quay lại",
-  nextLabel: (short) => `Tiếp: ${short}`,
-  nextLesson: (title) => `Bài tiếp theo: ${title}`,
-  finishCourse: "Hoàn thành khóa học",
-  hintStep: "chuyển bước",
-  hintReplay: "chạy lại",
-  hintPause: "tạm dừng",
-  hintPlay: "phát",
-  pseudocode: "Mã giả",
-  byTheNumbers: "Các con số",
-  youllLearn: "Bạn sẽ học",
-  whatYouWillLearn: "Bạn sẽ học được gì",
-  untranslated: "Bài học này chưa được dịch nên đang hiển thị bằng tiếng Anh.",
-};
-
-const fr: CourseUi = {
-  courseMenu: "Menu du cours",
-  closeMenu: "Fermer le menu",
-  sections: "Sections",
-  soon: "bientôt",
-  comingSoon: "Bientôt disponible",
-  switchToLight: "Passer au thème clair",
-  switchToDark: "Passer au thème sombre",
-  language: "Langue",
-  searchTheCourse: "Rechercher dans le cours",
-  search: "Rechercher",
-  lessonKind: "Leçon",
-  stepKind: "Étape",
-  nothingMatches: (q) => `Aucun résultat pour « ${q} ».`,
-  minutes: (n) => `${n} min`,
-  stepWord: (n) => `étape ${n}`,
-  course: "Cours",
-  lessonsCount: (n) => `${n} leçons`,
-  progress: "Progression",
-  concept: "Concept",
-  recap: "Récapitulatif",
-  watchOut: "Attention",
-  walkthrough: "Pas à pas",
-  problem: "Problème",
-  failure: "Échec",
-  technique: "Technique",
-  callout: { warn: "Attention", tip: "Bon à savoir", insight: "Idée clé" },
-  calloutAlgo: { tip: "Astuce", insight: "À noter" },
-  lessonOf: (p, n) => `Leçon ${p} sur ${n}`,
-  levels: { beginner: "Débutant", intermediate: "Intermédiaire", advanced: "Avancé" },
-  stepsCount: (n) => `${n} étapes`,
-  aboutLesson: "À propos de cette leçon",
-  inThisLesson: "Dans cette leçon",
-  toStep: "pour changer d’étape",
-  stepOf: (i, n) => `Étape ${i} sur ${n}`,
-  stepSlash: (i, n) => `Étape ${i} / ${n}`,
-  previousStep: "Étape précédente",
-  nextStep: "Étape suivante",
-  whatChanged: "Ce qui a changé",
-  keyTakeaways: "À retenir",
-  back: "Retour",
-  nextLabel: (short) => `Suivant : ${short}`,
-  nextLesson: (title) => `Leçon suivante : ${title}`,
-  finishCourse: "Terminer le cours",
-  hintStep: "étape",
-  hintReplay: "rejouer",
-  hintPause: "pause",
-  hintPlay: "lecture",
-  pseudocode: "Pseudo-code",
-  byTheNumbers: "En chiffres",
-  youllLearn: "Vous allez apprendre",
-  whatYouWillLearn: "Ce que vous allez apprendre",
-  untranslated: "Cette leçon n’est pas encore traduite ; elle s’affiche en anglais.",
-};
-
-const de: CourseUi = {
-  courseMenu: "Kursmenü",
-  closeMenu: "Menü schließen",
-  sections: "Bereiche",
-  soon: "bald",
-  comingSoon: "Demnächst verfügbar",
-  switchToLight: "Zum hellen Design wechseln",
-  switchToDark: "Zum dunklen Design wechseln",
-  language: "Sprache",
-  searchTheCourse: "Im Kurs suchen",
-  search: "Suchen",
-  lessonKind: "Lektion",
-  stepKind: "Schritt",
-  nothingMatches: (q) => `Keine Treffer für „${q}“.`,
-  minutes: (n) => `${n} Min.`,
-  stepWord: (n) => `Schritt ${n}`,
-  course: "Kurs",
-  lessonsCount: (n) => `${n} Lektionen`,
-  progress: "Fortschritt",
-  concept: "Konzept",
-  recap: "Zusammenfassung",
-  watchOut: "Achtung",
-  walkthrough: "Schritt für Schritt",
-  problem: "Problem",
-  failure: "Fehlschlag",
-  technique: "Technik",
-  callout: { warn: "Achtung", tip: "Gut zu wissen", insight: "Kernidee" },
-  calloutAlgo: { tip: "Tipp", insight: "Beachte" },
-  lessonOf: (p, n) => `Lektion ${p} von ${n}`,
-  levels: { beginner: "Einsteiger", intermediate: "Fortgeschritten", advanced: "Experte" },
-  stepsCount: (n) => `${n} Schritte`,
-  aboutLesson: "Über diese Lektion",
-  inThisLesson: "In dieser Lektion",
-  toStep: "zum Wechseln",
-  stepOf: (i, n) => `Schritt ${i} von ${n}`,
-  stepSlash: (i, n) => `Schritt ${i} / ${n}`,
-  previousStep: "Vorheriger Schritt",
-  nextStep: "Nächster Schritt",
-  whatChanged: "Was sich geändert hat",
-  keyTakeaways: "Das Wichtigste",
-  back: "Zurück",
-  nextLabel: (short) => `Weiter: ${short}`,
-  nextLesson: (title) => `Nächste Lektion: ${title}`,
-  finishCourse: "Kurs abschließen",
-  hintStep: "Schritt",
-  hintReplay: "wiederholen",
-  hintPause: "Pause",
-  hintPlay: "Abspielen",
-  pseudocode: "Pseudocode",
-  byTheNumbers: "In Zahlen",
-  youllLearn: "Das lernst du",
-  whatYouWillLearn: "Was du lernen wirst",
-  untranslated: "Diese Lektion ist noch nicht übersetzt und wird auf Englisch angezeigt.",
-};
-
+/** The shell's words in every language, one file each in ./locales. */
 export const COURSE_UI: Record<Locale, CourseUi> = { en, vi, fr, de };

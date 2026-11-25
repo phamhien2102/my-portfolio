@@ -13,7 +13,7 @@ import {
   localizeModules,
   type CourseI18n,
   type Locale,
-  type Translations,
+  type LocaleBundle,
 } from "./i18n";
 import { Logo, LogoTile, Menu, Moon, SearchIcon, Sun } from "./icons";
 import { LanguageMenu } from "./language-menu";
@@ -42,22 +42,22 @@ export interface NavItem {
   soon?: boolean;
 }
 
-/** A value that may depend on the language: given as is, or as a function of the language. */
-type PerLocale<T> = T | ((locale: Locale) => T);
-const resolve = <T,>(value: PerLocale<T>, locale: Locale): T =>
-  typeof value === "function" ? (value as (locale: Locale) => T)(locale) : value;
+/** A value that depends on the page's own words: given as is, or as a function of them. */
+type FromUi<T, U> = T | ((ui: U) => T);
+const resolve = <T, U>(value: FromUi<T, U>, ui: U): T =>
+  typeof value === "function" ? (value as (ui: U) => T)(ui) : value;
 
-interface Props<L extends CourseLesson> {
+interface Props<L extends CourseLesson, U> {
   modules: readonly CourseModule<L>[];
-  engine: PerLocale<SceneEngine<L>>;
+  engine: FromUi<SceneEngine<L>, U>;
   fontClassName: string;
   /** Prefix of the localStorage keys for progress and theme, e.g. "design-system". */
   storageKey: string;
   /** The wordmark next to the logo. */
   brand: React.ReactNode;
-  nav: PerLocale<readonly NavItem[]>;
-  searchPlaceholder: PerLocale<string>;
-  i18n?: CourseI18n;
+  nav: FromUi<readonly NavItem[], U>;
+  searchPlaceholder: FromUi<string, U>;
+  i18n?: CourseI18n<U>;
   /** "classic" (Design System: green, mono) or "algo" (Algo Lab: coral, Inter, extra rail cards). */
   variant?: CourseVariant;
 }
@@ -75,7 +75,7 @@ const serverHash = () => "";
  * it at step 4. It is read with useSyncExternalStore, so the server render and the first client
  * render agree and a lesson can be linked to.
  */
-export function CourseApp<L extends CourseLesson>({
+export function CourseApp<L extends CourseLesson, U = undefined>({
   modules: sourceModules,
   engine: engineSource,
   fontClassName,
@@ -85,17 +85,17 @@ export function CourseApp<L extends CourseLesson>({
   searchPlaceholder: placeholderSource,
   i18n,
   variant = "classic",
-}: Props<L>) {
-  // The language, and the translations of it once they have been fetched. English needs neither.
-  const { locale, setLocale } = localeStore(storageKey).useLocale();
-  const [loaded, setLoaded] = useState<Partial<Record<Locale, Translations>>>({});
+}: Props<L, U>) {
+  // The language, and the file of it once it has been fetched. English is built in.
+  const { locale, setLocale } = localeStore("course").useLocale();
+  const [loaded, setLoaded] = useState<Partial<Record<Locale, LocaleBundle<U>>>>({});
   useEffect(() => {
     if (locale === "en" || !i18n || loaded[locale]) return;
     let current = true;
     i18n
       .load(locale)
-      .then((translations) => {
-        if (current) setLoaded((all) => ({ ...all, [locale]: translations }));
+      .then((bundle) => {
+        if (current) setLoaded((all) => ({ ...all, [locale]: bundle }));
       })
       // Offline or a failed chunk: the course simply stays in English.
       .catch(() => undefined);
@@ -104,15 +104,23 @@ export function CourseApp<L extends CourseLesson>({
     };
   }, [locale, i18n, loaded]);
 
-  const ui = COURSE_UI[i18n ? locale : "en"];
-  const translations = i18n && locale !== "en" ? loaded[locale] : undefined;
+  // Until the language's file has arrived the whole page stays in English, so the shell's words and
+  // the course never show up in two languages at once.
+  const bundle = i18n && locale !== "en" ? loaded[locale] : undefined;
+  const ui = COURSE_UI[bundle ? locale : "en"];
+  const pageUi = (bundle?.ui ?? i18n?.english) as U;
+  const translations = bundle?.translations;
   const modules = useMemo(
-    () => localizeModules(sourceModules, translations, i18n?.mapScene),
-    [sourceModules, translations, i18n?.mapScene],
+    () =>
+      localizeModules(sourceModules, translations, {
+        mapScene: i18n?.mapScene,
+        mapLesson: i18n?.mapLesson,
+      }),
+    [sourceModules, translations, i18n?.mapScene, i18n?.mapLesson],
   );
-  const engine = useMemo(() => resolve(engineSource, locale), [engineSource, locale]);
-  const nav = resolve(navSource, locale);
-  const searchPlaceholder = resolve(placeholderSource, locale);
+  const engine = useMemo(() => resolve(engineSource, pageUi), [engineSource, pageUi]);
+  const nav = useMemo(() => resolve(navSource, pageUi), [navSource, pageUi]);
+  const searchPlaceholder = resolve(placeholderSource, pageUi);
 
   const flat = useMemo<FlatLesson<L>[]>(
     () => modules.flatMap((module) => module.lessons.map((lesson) => ({ ...lesson, module }))),
@@ -149,7 +157,7 @@ export function CourseApp<L extends CourseLesson>({
   return (
     <div
       className={cn("ds-app", fontClassName, drawer && "is-drawer")}
-      lang={i18n ? locale : undefined}
+      lang={i18n ? (bundle ? locale : "en") : undefined}
       data-theme={theme}
       data-variant={variant}
       // The site's own dark shell and this page's light theme are switched by this attribute.

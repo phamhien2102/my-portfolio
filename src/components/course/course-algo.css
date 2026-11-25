@@ -120,7 +120,8 @@
 }
 
 .ds-app[data-variant="algo"] .ds-nav {
-  gap: 6px;
+  gap: 14px 6px;
+  height: 45px;
 }
 
 .ds-app[data-variant="algo"] .ds-nav-item {
@@ -938,13 +939,6 @@
 
   /* The short code is enough on a phone: the globe says what it is. */
   .ds-app[data-variant="algo"] .ds-lang-chev {
-    display: none;
-  }
-}
-
-/* On a narrow screen the language picker needs the room, so the brand keeps only "Algo Lab". */
-@media (max-width: 480px) {
-  .ds-app[data-variant="algo"] .ds-brand-owner {
     display: none;
   }
 }

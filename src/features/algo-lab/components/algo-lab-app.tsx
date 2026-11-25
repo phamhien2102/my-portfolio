@@ -2,12 +2,11 @@
 
 import { CourseApp, type NavItem } from "@/components/course/course-app";
 import { BarChart, BookIcon, CodeIcon, FileText, Trophy } from "@/components/course/icons";
-import { LOCALES, type Locale } from "@/components/course/i18n";
 import type { Change, SceneEngine } from "@/components/course/types";
 
 import { MODULES } from "../data";
 import { ALGO_I18N } from "../i18n";
-import { ALGO_UI, type AlgoUi } from "../i18n/ui";
+import type { AlgoUi } from "../i18n/types";
 import type { AlgoLesson, Item } from "../lib/types";
 import { AlgoDiagram } from "./algo-diagram";
 
@@ -99,33 +98,18 @@ function makeEngine(ui: AlgoUi): SceneEngine<AlgoLesson> {
   };
 }
 
-// Built once per language, so the shell is handed the same engine and nav on every render.
-const ENGINES = Object.fromEntries(
-  LOCALES.map(({ code }) => [code, makeEngine(ALGO_UI[code])]),
-) as Record<Locale, SceneEngine<AlgoLesson>>;
-const NAVS = Object.fromEntries(LOCALES.map(({ code }) => [code, navFor(ALGO_UI[code])])) as Record<
-  Locale,
-  readonly NavItem[]
->;
-const engineFor = (locale: Locale) => ENGINES[locale];
-const navFrom = (locale: Locale) => NAVS[locale];
-const placeholderFor = (locale: Locale) => ALGO_UI[locale].searchPlaceholder;
+const placeholderFor = (ui: AlgoUi) => ui.searchPlaceholder;
 
 export function AlgoLabApp({ fontClassName }: { fontClassName: string }) {
   return (
     <CourseApp
       modules={MODULES}
-      engine={engineFor}
+      engine={makeEngine}
       fontClassName={fontClassName}
       storageKey="algo-lab"
       variant="algo"
-      brand={
-        <>
-          <span className="ds-brand-owner">Raymond&rsquo;s </span>
-          <span>Algo Lab</span>
-        </>
-      }
-      nav={navFrom}
+      brand={<span>Algo Lab</span>}
+      nav={navFor}
       searchPlaceholder={placeholderFor}
       i18n={ALGO_I18N}
     />

@@ -250,12 +250,17 @@ export function LessonView<L extends CourseLesson>({
                 </li>
               </ul>
             </div>
+            {untranslated && (
+              <p className="ds-i18n-note" role="note">
+                {ui.untranslated}
+              </p>
+            )}
           </header>
         )}
 
         <div className="ds-stage">
           {!algo && (
-            <div className="ds-hud" aria-label="Numbers for this step">
+            <div className="ds-hud" aria-label={ui.numbersForStep}>
               {lesson.hud.map((slot) => {
                 const metric = step.metrics?.find((m) => m.label === slot.label);
                 return (
@@ -280,7 +285,7 @@ export function LessonView<L extends CourseLesson>({
             <div className="ds-tools">
               <button type="button" className="ds-tool" onClick={() => setReplays((r) => r + 1)}>
                 <Replay />
-                <span>Replay</span>
+                <span>{ui.replay}</span>
               </button>
               <button
                 type="button"
@@ -292,7 +297,7 @@ export function LessonView<L extends CourseLesson>({
                 }}
               >
                 {playing ? <Pause /> : <Play />}
-                <span>{playing ? "Pause" : "Play"}</span>
+                <span>{playing ? ui.pause : ui.play}</span>
               </button>
             </div>
           )}
