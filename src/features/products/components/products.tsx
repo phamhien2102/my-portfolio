@@ -39,7 +39,13 @@ export function Products() {
         <ul className="pr-grid">
           {PRODUCTS.map((product) => (
             <li key={product.path} className="pr-card" data-tone={product.tone}>
-              <Link href={product.path} className="pr-card-link" aria-label={product.cta}>
+              <Link
+                href={product.path}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pr-card-link"
+                aria-label={`${product.cta} (opens in a new tab)`}
+              >
                 <span className="pr-path">{product.path}</span>
                 <h2>{product.name}</h2>
                 <p className="pr-tagline">{product.tagline}</p>

@@ -7,24 +7,24 @@
 
 .alg-app {
   color-scheme: light;
-  --paper: #f4ebe0;
-  --paper-2: #f7efe4;
-  --sheet: #f9f2e8;
-  --card: #f8f0e6;
-  --tile: #efe5d6;
-  --line: #ddd3c5;
-  --line-strong: #c6bbac;
-  --edge: #46413b;
-  --ink: #1d1b18;
-  --muted: #6f6961;
-  --green: #cfe3b2;
-  --green-2: #b2d491;
-  --green-tile: #e8efd9;
-  --violet: #e7ddf5;
-  --yellow: #f7e2a8;
+  --paper: #edf3f8;
+  --paper-2: #f1f6fa;
+  --sheet: #f4f8fb;
+  --card: #f2f7fb;
+  --tile: #e1ebf4;
+  --line: #d3dfea;
+  --line-strong: #b6c8da;
+  --edge: #334556;
+  --ink: #12202c;
+  --muted: #5b6f82;
+  --green: #bddcf6;
+  --green-2: #86bfe8;
+  --green-tile: #e1effb;
+  --violet: #c9ece6;
+  --yellow: #cfe0f1;
   --red: #f4b3a8;
   --rust: #b8432f;
-  --link: #1f63a0;
+  --link: #1f68b8;
   --pop: 1.5px 2.5px 0 var(--ink);
 
   min-height: 100svh;
@@ -108,7 +108,7 @@
   border-radius: 14px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 10px 22px -14px rgba(70, 65, 59, 0.35);
+    0 10px 22px -14px rgba(50, 70, 90, 0.35);
 }
 
 /* ---- type ------------------------------------------------------------------------- */
@@ -148,7 +148,7 @@
 }
 
 .alg-app .alg-h2[data-level="advanced"] {
-  border-left-color: #b9a6dc;
+  border-left-color: #8fc9c0;
 }
 
 .alg-app .alg-h2 small {
@@ -348,7 +348,7 @@
 
 .alg-app .alg-search input:focus {
   outline: 0;
-  background: #fff9f0;
+  background: #fbfdff;
 }
 
 .alg-app .alg-search .glyph {
@@ -865,8 +865,8 @@
 .alg-app .alg-code {
   min-width: 0;
   overflow: hidden;
-  color: #e9e2d6;
-  background: #26231f;
+  color: #e4eef7;
+  background: #16222d;
   border: 1.5px solid var(--ink);
   border-radius: 12px;
   box-shadow: var(--pop);
@@ -877,7 +877,7 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.6rem 1rem;
-  border-bottom: 1px solid #3d3832;
+  border-bottom: 1px solid #2c3d4c;
 }
 
 .alg-app .alg-code header i {
@@ -889,7 +889,7 @@
 .alg-app .alg-code header span {
   margin-left: 0.4rem;
   font-size: 0.7rem;
-  color: #9b9388;
+  color: #8a9db0;
 }
 
 .alg-app .alg-code pre {
@@ -904,7 +904,7 @@
 .alg-app .alg-code .ln {
   display: flex;
   padding: 0 1rem;
-  color: #b4ab9e;
+  color: #a3b5c6;
   border-left: 3px solid transparent;
 }
 
@@ -918,7 +918,7 @@
   width: 1.4rem;
   margin-right: 1rem;
   text-align: right;
-  color: #6f675c;
+  color: #6a7f92;
   user-select: none;
 }
 
@@ -967,7 +967,7 @@
 }
 
 .alg-app .alg-cell.is-dim {
-  color: #b3a998;
+  color: #a0b2c4;
   background: transparent;
   border-color: var(--line-strong);
 }
@@ -1027,7 +1027,7 @@
 
 .alg-app .alg-bucket .none {
   font-size: 0.72rem;
-  color: #a39a8c;
+  color: #91a4b7;
 }
 
 .alg-app .alg-item {
@@ -1121,9 +1121,9 @@
 }
 
 .alg-app .alg-land {
-  color: #6b5530;
-  background: #ead9b7;
-  border-color: #b79a64;
+  color: #12447a;
+  background: #cfe3f6;
+  border-color: #86bfe8;
 }
 
 .alg-app .alg-ring {
