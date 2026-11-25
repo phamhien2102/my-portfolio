@@ -17,6 +17,7 @@ import {
   type HighlightColor,
   type Note,
 } from "../lib/study-store";
+import { ModalBackdrop } from "./modal-backdrop";
 import { NoteCount } from "./note-count";
 
 interface Props {
@@ -314,10 +315,7 @@ function FlashcardDialog({
   }, [onClose]);
 
   return (
-    <div
-      className="fc-backdrop"
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
-    >
+    <ModalBackdrop>
       <form
         className="fc-dialog"
         role="dialog"
@@ -361,7 +359,7 @@ function FlashcardDialog({
           </button>
         </div>
       </form>
-    </div>
+    </ModalBackdrop>
   );
 }
 
@@ -388,10 +386,7 @@ function NoteDialog({
   }, [onClose]);
 
   return (
-    <div
-      className="fc-backdrop"
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
-    >
+    <ModalBackdrop>
       <form
         className="fc-dialog"
         role="dialog"
@@ -441,7 +436,7 @@ function NoteDialog({
           </button>
         </div>
       </form>
-    </div>
+    </ModalBackdrop>
   );
 }
 
