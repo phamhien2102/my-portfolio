@@ -1,0 +1,1226 @@
+/* /algorithms: dressed like /ielts. A warm-paper reader in monospace type, with firm dark edges, a
+   small hard shadow and colour-coded chips. Every selector is scoped to .alg-app so nothing leaks
+   into the dark site. The tokens are the same values as in features/ielts/ielts.css.
+
+   Each pattern has a neon accent made for a dark page. Here it is only ever used as a FILL (a chip,
+   a cell, a button) with dark ink on top and a dark edge around it, never as text on the paper. */
+
+.alg-app {
+  color-scheme: light;
+  --paper: #f4ebe0;
+  --paper-2: #f7efe4;
+  --sheet: #f9f2e8;
+  --card: #f8f0e6;
+  --tile: #efe5d6;
+  --line: #ddd3c5;
+  --line-strong: #c6bbac;
+  --edge: #46413b;
+  --ink: #1d1b18;
+  --muted: #6f6961;
+  --green: #cfe3b2;
+  --green-2: #b2d491;
+  --green-tile: #e8efd9;
+  --violet: #e7ddf5;
+  --yellow: #f7e2a8;
+  --red: #f4b3a8;
+  --rust: #b8432f;
+  --link: #1f63a0;
+  --pop: 1.5px 2.5px 0 var(--ink);
+
+  min-height: 100svh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-jbm), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+}
+
+.alg-app,
+.alg-app *,
+.alg-app *::before,
+.alg-app *::after {
+  box-sizing: border-box;
+}
+
+.alg-app ul,
+.alg-app ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.alg-app :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---- top bar and sheet ------------------------------------------------------------ */
+
+.alg-app .alg-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.alg-app .alg-brand {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.alg-app .alg-brand > span {
+  background: linear-gradient(transparent 62%, var(--green-2) 62%);
+}
+
+.alg-app .alg-home {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.alg-app .alg-home:hover {
+  color: var(--ink);
+}
+
+.alg-app .alg-shell {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2.5rem;
+}
+
+.alg-app .alg-sheet {
+  padding: 1.5rem 1.6rem 1.7rem;
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 10px 22px -14px rgba(70, 65, 59, 0.35);
+}
+
+/* ---- type ------------------------------------------------------------------------- */
+
+.alg-app .alg-eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.alg-app h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 3.4vw, 1.9rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.alg-app .alg-sub {
+  max-width: 44rem;
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+}
+
+/* A section heading, with a bar in the margin as in the /ielts chapters. */
+.alg-app .alg-h2 {
+  margin: 2.2rem 0 0.9rem;
+  padding-left: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-left: 4px solid var(--green-2);
+}
+
+.alg-app .alg-h2[data-level="advanced"] {
+  border-left-color: #b9a6dc;
+}
+
+.alg-app .alg-h2 small {
+  margin-left: 0.6rem;
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+}
+
+.alg-app .alg-label {
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.alg-app .alg-banner {
+  padding-bottom: 1.1rem;
+  border-bottom: 1px dashed var(--line-strong);
+}
+
+/* ---- chips, buttons ----------------------------------------------------------------- */
+
+.alg-app .alg-chip {
+  display: inline-block;
+  padding: 0.12rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--pop);
+}
+
+.alg-app .alg-chip.y {
+  background: var(--yellow);
+}
+
+.alg-app .alg-chip.g {
+  background: var(--green);
+}
+
+.alg-app .alg-chip.v {
+  background: var(--violet);
+}
+
+.alg-app .alg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.alg-app .alg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+  cursor: pointer;
+}
+
+.alg-app .alg-btn:hover {
+  background: var(--tile);
+}
+
+.alg-app .alg-btn.is-on {
+  background: var(--green);
+}
+
+.alg-app .alg-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.alg-app .alg-tick {
+  display: inline-grid;
+  place-items: center;
+  width: 1rem;
+  height: 1rem;
+  font-size: 0.7rem;
+  line-height: 1;
+  background: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+}
+
+.alg-app .alg-btn.is-on .alg-tick {
+  background: var(--ink);
+  color: var(--green);
+}
+
+/* ---- difficulty and "learned" ----------------------------------------------------- */
+
+.alg-app .alg-diff {
+  display: inline-block;
+  padding: 0 0.55rem;
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+}
+
+.alg-app .alg-diff[data-level="Easy"] {
+  background: var(--green);
+}
+
+.alg-app .alg-diff[data-level="Medium"] {
+  background: var(--yellow);
+}
+
+.alg-app .alg-diff[data-level="Hard"] {
+  background: var(--red);
+}
+
+.alg-app .alg-learned {
+  display: inline-block;
+  padding: 0 0.5rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  background: var(--green);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+}
+
+.alg-app .alg-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 22rem;
+  margin-top: 1.1rem;
+}
+
+.alg-app .alg-bar {
+  flex: 1;
+  height: 0.7rem;
+  overflow: hidden;
+  background: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+}
+
+.alg-app .alg-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--green-2);
+  transition: width 0.5s ease;
+}
+
+.alg-app .alg-progress output {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- search and filter ---------------------------------------------------------------- */
+
+.alg-app .alg-search {
+  position: relative;
+  max-width: 34rem;
+  margin-top: 1.4rem;
+}
+
+.alg-app .alg-search input {
+  width: 100%;
+  padding: 0.6rem 2.6rem 0.6rem 2.2rem;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+}
+
+.alg-app .alg-search input::placeholder {
+  color: var(--muted);
+}
+
+.alg-app .alg-search input:focus {
+  outline: 0;
+  background: #fff9f0;
+}
+
+.alg-app .alg-search .glyph {
+  position: absolute;
+  top: 50%;
+  left: 0.8rem;
+  color: var(--muted);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.alg-app .alg-search kbd {
+  position: absolute;
+  top: 50%;
+  right: 0.7rem;
+  padding: 0 0.4rem;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--tile);
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.alg-app .alg-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin-top: 1rem;
+}
+
+.alg-app .alg-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.alg-app .alg-seg button {
+  padding: 0.12rem 0.75rem;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--pop);
+  cursor: pointer;
+}
+
+.alg-app .alg-seg button:hover {
+  background: var(--tile);
+}
+
+.alg-app .alg-seg button[aria-pressed="true"] {
+  background: var(--green);
+}
+
+.alg-app .alg-seg button small {
+  margin-left: 0.35rem;
+  font-size: inherit;
+  font-weight: 500;
+  opacity: 0.65;
+}
+
+.alg-app .alg-count {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.alg-app .alg-empty {
+  margin-top: 1.6rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 12px;
+}
+
+.alg-app .alg-empty strong {
+  font-size: 1rem;
+}
+
+.alg-app .alg-empty p {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+}
+
+.alg-app .alg-empty .alg-btn {
+  margin-top: 1rem;
+}
+
+/* ---- pattern cards ---------------------------------------------------------------- */
+
+.alg-app .alg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr));
+  gap: 1rem;
+}
+
+.alg-app .alg-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  padding: 1rem 1.1rem 1.05rem;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--pop);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background 0.12s ease;
+}
+
+.alg-app .alg-card:hover {
+  background: var(--tile);
+  box-shadow: 2.5px 3.5px 0 var(--ink);
+  transform: translate(-1px, -1px);
+}
+
+.alg-app .alg-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.alg-app .alg-card-no {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+/* The pattern's glyph, on its own neon, with ink on top. */
+.alg-app .alg-glyph {
+  padding: 0.05rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: var(--pop);
+}
+
+.alg-app .alg-card h3 {
+  margin: 0.9rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.alg-app .alg-card .alg-tagline {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+}
+
+/* The footer is two rows: the example problem, then the complexity beside the difficulty. Side by
+   side, a long complexity ("O(n) here; O(states x choices) in general") squeezed the example to a
+   single letter per line. */
+.alg-app .alg-card-foot {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--line-strong);
+}
+
+.alg-app .alg-card-foot .eg {
+  min-width: 0;
+  font-size: 0.74rem;
+  overflow-wrap: anywhere;
+}
+
+.alg-app .alg-card-foot .meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.alg-app .alg-card-foot .meta > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.alg-app .alg-card-foot .meta .alg-diff {
+  flex: none;
+}
+
+.alg-app .alg-match {
+  margin: 0.8rem 0 0;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.72rem;
+  background: var(--yellow);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+}
+
+/* ---- pattern page ------------------------------------------------------------------ */
+
+.alg-app .alg-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.2rem;
+}
+
+.alg-app .alg-two {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.6rem;
+}
+
+@media (min-width: 52rem) {
+  .alg-app .alg-two {
+    grid-template-columns: 1.3fr 1fr;
+  }
+}
+
+.alg-app .alg-panel {
+  padding: 1rem 1.1rem 1.1rem;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--pop);
+}
+
+.alg-app .alg-panel p {
+  margin: 0.5rem 0 0;
+}
+
+.alg-app .alg-panel .alg-chips {
+  margin-top: 0.9rem;
+}
+
+.alg-app .alg-when li {
+  position: relative;
+  padding-left: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.alg-app .alg-when li::before {
+  content: "›";
+  position: absolute;
+  left: 0.2rem;
+  font-weight: 800;
+  color: var(--rust);
+}
+
+.alg-app .alg-run-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.alg-app .alg-run-head h3 {
+  margin: 0.2rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.alg-app .alg-run-head p {
+  max-width: 44rem;
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+}
+
+.alg-app .alg-run-head .actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.alg-app .alg-examples {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+}
+
+.alg-app .alg-example {
+  padding: 0.75rem 0.9rem;
+  font-size: 0.78rem;
+  background: var(--paper-2);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 10px;
+}
+
+.alg-app .alg-example > strong {
+  display: block;
+  font-size: 0.82rem;
+}
+
+.alg-app .alg-example div {
+  margin-top: 0.4rem;
+  padding-left: 0.7rem;
+  border-left: 3px solid var(--green-2);
+}
+
+.alg-app .alg-example p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.alg-app .alg-example p b {
+  font-weight: 800;
+}
+
+.alg-app .alg-input {
+  margin: 1.4rem 0 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.alg-app .alg-input b {
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+
+.alg-app .alg-practice {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+}
+
+.alg-app .alg-practice a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.9rem;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+}
+
+.alg-app .alg-practice a:hover {
+  background: var(--tile);
+}
+
+.alg-app .alg-practice .no {
+  color: var(--muted);
+}
+
+.alg-app .alg-pager {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.4rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--line-strong);
+}
+
+.alg-app .alg-pager a {
+  font-weight: 800;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.alg-app .alg-pager a:hover {
+  color: var(--ink);
+}
+
+/* ---- the lab (the step-by-step picture, its controls and the code) --------------------- */
+
+.alg-app .alg-lab {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 64rem) {
+  .alg-app .alg-lab {
+    grid-template-columns: 1.15fr 1fr;
+  }
+}
+
+.alg-app .alg-stage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1rem 1.1rem 1.1rem;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--pop);
+}
+
+.alg-app .alg-caption {
+  min-height: 3.25rem;
+  margin: 1.2rem 0 0;
+  padding: 0.6rem 0.9rem;
+  background: var(--paper-2);
+  border: 1.5px solid var(--line-strong);
+  border-left-width: 5px;
+  border-radius: 8px;
+}
+
+.alg-app .alg-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.alg-app .alg-round {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--pop);
+  cursor: pointer;
+}
+
+.alg-app .alg-round:hover:not(:disabled) {
+  background: var(--tile);
+}
+
+.alg-app .alg-round:disabled {
+  opacity: 0.4;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.alg-app .alg-play {
+  padding: 0.35rem 1.1rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--pop);
+  cursor: pointer;
+}
+
+.alg-app .alg-play:hover {
+  filter: brightness(0.96);
+}
+
+.alg-app .alg-speed {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.alg-app .alg-speed button {
+  padding: 0 0.6rem;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.7;
+  color: var(--ink);
+  background: transparent;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.alg-app .alg-speed button[aria-pressed="true"] {
+  background: var(--green);
+  border-color: var(--ink);
+}
+
+.alg-app .alg-scrub {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.alg-app .alg-scrub input {
+  flex: 1;
+}
+
+.alg-app .alg-scrub output {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The solution stays a dark panel: code reads best that way, and /algo-lab does the same. */
+.alg-app .alg-code {
+  min-width: 0;
+  overflow: hidden;
+  color: #e9e2d6;
+  background: #26231f;
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--pop);
+}
+
+.alg-app .alg-code header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #3d3832;
+}
+
+.alg-app .alg-code header i {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+}
+
+.alg-app .alg-code header span {
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  color: #9b9388;
+}
+
+.alg-app .alg-code pre {
+  margin: 0;
+  padding: 0.7rem 0;
+  overflow-x: auto;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.6rem;
+}
+
+.alg-app .alg-code .ln {
+  display: flex;
+  padding: 0 1rem;
+  color: #b4ab9e;
+  border-left: 3px solid transparent;
+}
+
+.alg-app .alg-code .ln.is-on {
+  color: #fff;
+  background: rgb(255 255 255 / 0.08);
+}
+
+.alg-app .alg-code .ln .no {
+  flex: none;
+  width: 1.4rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: #6f675c;
+  user-select: none;
+}
+
+.alg-app .alg-code code {
+  white-space: pre;
+}
+
+/* ---- the pictures ------------------------------------------------------------------ */
+
+.alg-app .alg-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  transition:
+    transform 0.3s,
+    background 0.3s,
+    border-color 0.3s,
+    color 0.3s;
+}
+
+@media (min-width: 400px) {
+  .alg-app .alg-cell {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .alg-app .alg-cell {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1rem;
+  }
+}
+
+.alg-app .alg-cell.is-range {
+  background: var(--tile);
+}
+
+.alg-app .alg-cell.is-dim {
+  color: #b3a998;
+  background: transparent;
+  border-color: var(--line-strong);
+}
+
+.alg-app .alg-cell.is-drop {
+  color: var(--rust);
+  text-decoration: line-through;
+  background: var(--red);
+  border-color: var(--rust);
+}
+
+.alg-app .alg-cell.is-active {
+  box-shadow: var(--pop);
+  transform: scale(1.1);
+}
+
+.alg-app .alg-cell.is-found {
+  background: var(--green-2);
+  box-shadow: var(--pop);
+  transform: scale(1.1);
+}
+
+.alg-app .alg-marker {
+  padding: 0 0.4rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-radius: 5px;
+}
+
+.alg-app .alg-index {
+  margin-top: 0.25rem;
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+
+.alg-app .alg-box {
+  background: var(--paper-2);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 10px;
+}
+
+.alg-app .alg-bucket {
+  padding: 0.7rem 0.8rem;
+}
+
+.alg-app .alg-bucket .items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  min-height: 1.75rem;
+  margin-top: 0.5rem;
+}
+
+.alg-app .alg-bucket .none {
+  font-size: 0.72rem;
+  color: #a39a8c;
+}
+
+.alg-app .alg-item {
+  padding: 0 0.5rem;
+  font-size: 0.72rem;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.alg-app .alg-item.is-hit {
+  font-weight: 800;
+  background: var(--green-2);
+}
+
+.alg-app .alg-readout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  font-size: 0.8rem;
+}
+
+.alg-app .alg-num {
+  margin-left: 0.3rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.alg-app .alg-num.is-pop {
+  color: var(--rust);
+}
+
+.alg-app .alg-note {
+  margin-left: 0.8rem;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.alg-app .alg-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.alg-app .alg-pills span {
+  padding: 0.05rem 0.75rem;
+  font-size: 0.74rem;
+  background: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+}
+
+.alg-app .alg-pills b {
+  font-weight: 800;
+}
+
+.alg-app .alg-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.25rem;
+  min-height: 7rem;
+  padding: 0.7rem 1rem;
+}
+
+.alg-app .alg-stack-item {
+  width: 5rem;
+  padding: 0 0.4rem;
+  font-size: 0.72rem;
+  text-align: center;
+  background: var(--card);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.alg-app .alg-stack-item.is-top {
+  font-weight: 800;
+  background: var(--green);
+  border-color: var(--ink);
+}
+
+.alg-app .alg-water {
+  color: #4c6fa8;
+  background: #dbe6f4;
+  border-color: #8fa9d0;
+}
+
+.alg-app .alg-land {
+  color: #6b5530;
+  background: #ead9b7;
+  border-color: #b79a64;
+}
+
+.alg-app .alg-ring {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.alg-app .alg-queued {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  background: var(--ink);
+  border: 2px solid var(--paper);
+  border-radius: 999px;
+}
+
+.alg-app .alg-heap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  min-height: 9rem;
+  padding: 1rem;
+}
+
+.alg-app .alg-node {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  transition: all 0.3s;
+}
+
+@media (min-width: 640px) {
+  .alg-app .alg-node {
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+.alg-app .alg-node.is-top {
+  box-shadow: var(--pop);
+}
+
+/* ---- loading ------------------------------------------------------------------------ */
+
+.alg-app .alg-skel {
+  background: var(--tile);
+  border-radius: 10px;
+}
+
+@media (max-width: 40rem) {
+  .alg-app .alg-topbar {
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  /* The name may shrink and truncate rather than push the link off the screen. */
+  .alg-app .alg-brand {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.95rem;
+    text-overflow: ellipsis;
+  }
+
+  .alg-app .alg-home {
+    flex: none;
+    font-size: 0.72rem;
+  }
+
+  .alg-app .alg-shell {
+    padding-inline: 0.75rem;
+  }
+
+  .alg-app .alg-sheet {
+    padding: 1.1rem 0.9rem 1.3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alg-app .alg-card,
+  .alg-app .alg-cell,
+  .alg-app .alg-node,
+  .alg-app .alg-bar > span {
+    transition: none;
+  }
+
+  .alg-app .alg-card:hover {
+    transform: none;
+  }
+}
