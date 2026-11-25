@@ -1,8 +1,8 @@
 import type { Viewport } from "next";
 
-// A light page, like /native: the phone browser chrome follows it.
+// A light page, like /ielts: the phone browser chrome follows it.
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
+  themeColor: "#edf3f8",
   colorScheme: "light",
 };
 
