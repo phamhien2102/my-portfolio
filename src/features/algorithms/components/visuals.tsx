@@ -98,7 +98,7 @@ export function Readout({ items }: { items: ReadonlyArray<[string, ReactNode]> }
   );
 }
 
-const ISLAND_COLORS = ["#00c4ff", "#ffb020", "#c44dff", "#00b96b", "#ff4d6d"];
+const ISLAND_COLORS = ["#2b9fe8", "#5a8fe0", "#7b6fe0", "#1f9d8f", "#4a6fd0"];
 
 /** The island grid: water, unvisited land, and land coloured by the island it joined. */
 export function GridView({

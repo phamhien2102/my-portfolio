@@ -74,7 +74,7 @@ export const PATTERNS: readonly Pattern[] = [
     level: "fundamental",
     name: "Two Pointers",
     tagline: "Walk in from both ends and let the data tell you which side to move.",
-    accent: "#00c4ff",
+    accent: "#2b9fe8",
     glyph: "← →",
     whenToUse: [
       "The array is sorted, or you can sort it without losing the answer.",
@@ -138,7 +138,7 @@ export const PATTERNS: readonly Pattern[] = [
     level: "fundamental",
     name: "Sliding Window",
     tagline: "Grow the window to the right, shrink it from the left, never look back.",
-    accent: "#00b96b",
+    accent: "#1f9d8f",
     glyph: "[ ▭ ]",
     whenToUse: [
       "The question is about a contiguous subarray or substring.",
@@ -220,7 +220,7 @@ export const PATTERNS: readonly Pattern[] = [
     level: "fundamental",
     name: "Binary Search",
     tagline: "Halve the search space every step until only the answer is left.",
-    accent: "#ffb020",
+    accent: "#5a8fe0",
     glyph: "½",
     whenToUse: [
       "The data is sorted, or the answer space is monotonic (false… false, true… true).",
@@ -288,7 +288,7 @@ export const PATTERNS: readonly Pattern[] = [
     level: "fundamental",
     name: "Hash Map",
     tagline: "Remember what you have seen so the answer is one lookup away.",
-    accent: "#c44dff",
+    accent: "#7b6fe0",
     glyph: "{ k: v }",
     whenToUse: [
       "You keep asking “have I seen this before?” or “where was it?”.",
@@ -342,7 +342,7 @@ export const PATTERNS: readonly Pattern[] = [
     level: "fundamental",
     name: "BFS / DFS",
     tagline: "Explore a grid or graph one neighbour at a time and mark where you have been.",
-    accent: "#ff4d6d",
+    accent: "#4a6fd0",
     glyph: "◉→◎",
     whenToUse: [
       "The input is a grid, a tree or a graph of connected things.",
@@ -395,7 +395,7 @@ export const PATTERNS: readonly Pattern[] = [
     level: "advanced",
     name: "Dynamic Programming",
     tagline: "Solve each small case once, then build the big answer from the small ones.",
-    accent: "#ff7a00",
+    accent: "#2f86ce",
     glyph: "dp[i]",
     whenToUse: [
       "The question asks for a maximum, minimum or number of ways.",
@@ -459,7 +459,7 @@ export const PATTERNS: readonly Pattern[] = [
     level: "advanced",
     name: "Backtracking",
     tagline: "Try a choice, explore everything after it, then undo it and try the next.",
-    accent: "#c6f000",
+    accent: "#3fb6c4",
     glyph: "↳ ↶",
     whenToUse: [
       "You must list every subset, permutation or combination.",
@@ -511,7 +511,7 @@ export const PATTERNS: readonly Pattern[] = [
     level: "advanced",
     name: "Heap / Priority Queue",
     tagline: "Keep only the k best so far; the weakest of them is always on top.",
-    accent: "#00d4a8",
+    accent: "#17a8a0",
     glyph: "△ top-k",
     whenToUse: [
       "You need the k largest, k smallest or k most frequent items.",
@@ -570,7 +570,7 @@ export const PATTERNS: readonly Pattern[] = [
     level: "advanced",
     name: "Monotonic Stack",
     tagline: "Keep a stack in sorted order; whatever gets popped has just found its answer.",
-    accent: "#7aa2ff",
+    accent: "#6a8fe0",
     glyph: "▁▃▅",
     whenToUse: [
       "For each item you need the next (or previous) greater or smaller item.",
@@ -637,7 +637,7 @@ export const PATTERNS: readonly Pattern[] = [
     level: "advanced",
     name: "Union-Find",
     tagline: "Every group has one leader; joining two groups means one leader follows the other.",
-    accent: "#ff2d95",
+    accent: "#5b5fcf",
     glyph: "◎⇄◎",
     whenToUse: [
       "Edges arrive one by one and you ask “are these two already connected?”.",
