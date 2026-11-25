@@ -5,18 +5,22 @@ import { BookIcon, Cheat, Frame, Gear } from "@/components/course/icons";
 import type { Change, SceneEngine } from "@/components/course/types";
 
 import { MODULES } from "../data";
+import { DESIGN_I18N } from "../i18n";
+import type { DesignUi } from "../i18n/types";
 import type { Lesson } from "../lib/types";
 import { LessonDiagram } from "./lesson-diagram";
 
-const NAV: readonly NavItem[] = [
-  { label: "Learn", Icon: BookIcon },
-  { label: "Practice", Icon: Gear, soon: true },
-  { label: "Design Lab", Icon: Frame, soon: true },
-  { label: "Cheatsheets", Icon: Cheat, soon: true },
+const navFor = (ui: DesignUi): readonly NavItem[] => [
+  { label: ui.nav.learn, Icon: BookIcon },
+  { label: ui.nav.practice, Icon: Gear, soon: true },
+  { label: ui.nav.designLab, Icon: Frame, soon: true },
+  { label: ui.nav.cheatsheets, Icon: Cheat, soon: true },
 ];
 
+const placeholderFor = (ui: DesignUi) => ui.searchPlaceholder;
+
 /** What this page's scene adds to "What changed": blocks, captions and traffic. */
-function diff(lesson: Lesson, index: number) {
+function diff(ui: DesignUi, lesson: Lesson, index: number) {
   const node = (id: string) => {
     const n = lesson.nodes.find((x) => x.id === id);
     return n ? (n.sub ? `${n.label} ${n.sub}` : n.label) : id;
@@ -33,9 +37,9 @@ function diff(lesson: Lesson, index: number) {
   for (const id of before?.show ?? [])
     if (!now.show.includes(id)) structure.push({ kind: "del", text: node(id) });
   for (const id of nowDown)
-    if (!prevDown.has(id)) structure.push({ kind: "mod", text: `${node(id)} goes down` });
+    if (!prevDown.has(id)) structure.push({ kind: "mod", text: ui.goesDown(node(id)) });
   for (const id of prevDown)
-    if (!nowDown.has(id)) structure.push({ kind: "mod", text: `${node(id)} is back` });
+    if (!nowDown.has(id)) structure.push({ kind: "mod", text: ui.isBack(node(id)) });
 
   const details: Change[] = [];
   for (const [id, text] of Object.entries(now.badges ?? {})) {
@@ -45,55 +49,58 @@ function diff(lesson: Lesson, index: number) {
   const oldLabels = new Set((before?.flows ?? []).map((f) => f.label).filter(Boolean));
   for (const f of now.flows ?? [])
     if (f.label && !oldLabels.has(f.label))
-      details.push({ kind: "add", text: `Traffic: ${f.label}` });
+      details.push({ kind: "add", text: ui.traffic(f.label) });
 
   const focus: Change[] = (now.hot ?? []).map((id) => ({
     kind: "mod" as const,
-    text: `Focus on ${node(id)}`,
+    text: ui.focusOn(node(id)),
   }));
   return { structure, details, focus };
 }
 
-const ENGINE: SceneEngine<Lesson> = {
-  render: (lesson, index, sceneKey) => (
-    <LessonDiagram
-      nodes={lesson.nodes}
-      links={lesson.links}
-      scene={lesson.steps[index].scene}
-      sceneKey={sceneKey}
-      title={`${lesson.title}: ${lesson.steps[index].title}`}
-    />
-  ),
-  diff,
-  isFailure: (lesson, index) => !!lesson.steps[index].scene.down?.length,
-  legend: (
-    <>
-      <span>
-        <i className="lg req" /> request
-      </span>
-      <span>
-        <i className="lg res" /> response
-      </span>
-      <span>
-        <i className="lg hand" /> handshake
-      </span>
-      <span>
-        <i className="lg warn" /> failed
-      </span>
-    </>
-  ),
-};
+function makeEngine(ui: DesignUi): SceneEngine<Lesson> {
+  return {
+    render: (lesson, index, sceneKey) => (
+      <LessonDiagram
+        nodes={lesson.nodes}
+        links={lesson.links}
+        scene={lesson.steps[index].scene}
+        sceneKey={sceneKey}
+        title={`${lesson.title}: ${lesson.steps[index].title}`}
+      />
+    ),
+    diff: (lesson, index) => diff(ui, lesson, index),
+    isFailure: (lesson, index) => !!lesson.steps[index].scene.down?.length,
+    legend: (
+      <>
+        <span>
+          <i className="lg req" /> {ui.legend.request}
+        </span>
+        <span>
+          <i className="lg res" /> {ui.legend.response}
+        </span>
+        <span>
+          <i className="lg hand" /> {ui.legend.handshake}
+        </span>
+        <span>
+          <i className="lg warn" /> {ui.legend.failed}
+        </span>
+      </>
+    ),
+  };
+}
 
 export function DesignSystemApp({ fontClassName }: { fontClassName: string }) {
   return (
     <CourseApp
       modules={MODULES}
-      engine={ENGINE}
+      engine={makeEngine}
       fontClassName={fontClassName}
       storageKey="design-system"
       brand={<span>Design System</span>}
-      nav={NAV}
-      searchPlaceholder="Search lessons & concepts…"
+      nav={navFor}
+      searchPlaceholder={placeholderFor}
+      i18n={DESIGN_I18N}
     />
   );
 }

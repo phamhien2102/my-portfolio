@@ -197,10 +197,21 @@
   padding: 0 1px;
   background: linear-gradient(transparent 56%, var(--green-2) 56%);
 }
+/* The nav takes whatever room the brand, the search box and the buttons leave. Items that do not
+   fit wrap onto a second row that is clipped away, so the top bar never grows past the window
+   (a longer language, such as French, has fewer items fit; the first, "Learn", always does).
+   Its height is one row of items plus the room for the active item's shadow. */
 .ds-app .ds-nav {
   display: flex;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: center;
   gap: 14px;
-  margin-inline: auto;
+  height: 40px;
+  min-width: 0;
+  padding: 0 4px 6px;
+  overflow: hidden;
 }
 .ds-app .ds-nav-item {
   display: inline-flex;
@@ -1548,5 +1559,157 @@
 @media (max-width: 819px) {
   .ds-app .ds-body {
     display: block;
+  }
+}
+
+/* ---- the language picker (the classic course page; Algo Lab restyles it in course-algo.css) ---- */
+
+.ds-app .ds-lang {
+  position: relative;
+  flex: none;
+}
+
+.ds-app .ds-lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 11px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--glass);
+  border: 1.3px solid var(--line-strong);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.ds-app .ds-lang-btn:hover,
+.ds-app .ds-lang-btn[aria-expanded="true"] {
+  border-color: var(--muted-2);
+}
+
+.ds-app .ds-lang-chev {
+  width: 12px;
+  height: 12px;
+  transform: rotate(90deg);
+  opacity: 0.7;
+}
+
+.ds-app .ds-lang-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  inset-inline-end: 0;
+  z-index: 60;
+  min-width: 180px;
+  padding: 5px;
+  background: var(--paper);
+  border: 1.3px solid var(--line-strong);
+  border-radius: 11px;
+  box-shadow: 0 16px 36px -18px rgba(0, 0, 0, 0.45);
+}
+
+.ds-app .ds-lang-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 9px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: start;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.ds-app .ds-lang-item > span {
+  flex: 1;
+}
+
+.ds-app .ds-lang-item > b {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.ds-app .ds-lang-item:hover,
+.ds-app .ds-lang-item:focus-visible {
+  background: var(--paper-2);
+  outline: 0;
+}
+
+.ds-app .ds-lang-item.is-on {
+  font-weight: 700;
+  background: var(--green-tile);
+}
+
+@media (max-width: 819px) {
+  .ds-app .ds-lang-btn {
+    gap: 5px;
+    height: 36px;
+    padding: 0 9px;
+  }
+
+  .ds-app .ds-lang-chev {
+    display: none;
+  }
+}
+
+/* A lesson with no translation yet is shown in English; this says why. */
+.ds-app .ds-i18n-note {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  background: var(--paper-2);
+  border: 1.3px dashed var(--line-strong);
+  border-radius: 9px;
+}
+
+/* A longer label in another language ("Design-Labor") stays on one line instead of breaking at the hyphen. */
+.ds-app .ds-nav-item {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* On a wide window the search box may give up some of its width to a longer nav. */
+@media (min-width: 1180px) {
+  .ds-app .ds-search {
+    flex-shrink: 1;
+    min-width: 150px;
+  }
+}
+
+/* On a phone the language picker needs room, so the brand may shrink and truncate. */
+@media (max-width: 480px) {
+  .ds-app .ds-topbar {
+    gap: 8px;
+    padding-inline: 10px;
+  }
+
+  .ds-app .ds-brand {
+    flex: 0 1 auto;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .ds-app .ds-brand-name {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 16px;
+    text-overflow: ellipsis;
+  }
+}
+
+/* The tags above a lesson (time, level, steps) are `flex: none`; capped to their row they can wrap
+   instead of pushing the page wide when a language gives them longer words ("10 Schritte"). */
+@media (max-width: 819px) {
+  .ds-app .ds-tags {
+    max-width: 100%;
   }
 }
