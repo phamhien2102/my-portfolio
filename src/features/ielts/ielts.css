@@ -1347,6 +1347,24 @@ html:has(.ielts-app) {
   line-clamp: 2;
 }
 
+/* The dates are a side detail: small, muted, nothing to look at. */
+.ielts-app .nt-meta {
+  font-size: 0.58rem;
+  color: var(--muted);
+}
+
+/* The length counter under a note's text box. */
+.ielts-app .nt-count {
+  justify-self: end;
+  font-size: 0.62rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ielts-app .nt-count.is-near {
+  color: var(--rust);
+}
+
 .ielts-app .nt-item p {
   margin: 0;
   font-size: 0.88rem;

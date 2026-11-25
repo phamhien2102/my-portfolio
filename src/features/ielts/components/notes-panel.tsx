@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { useNotes, type Note } from "../lib/study-store";
+import { MAX_NOTE, noteDates, useNotes, withText, type Note } from "../lib/study-store";
+import { NoteCount } from "./note-count";
 
 interface Props {
   /** Chapter id to its title, for the headings. */
@@ -55,7 +56,7 @@ export function NotesPanel({ labels, order, onOpen, onClose }: Props) {
   const saveEdit = (id: string) => {
     const text = draft.trim();
     if (!text) return;
-    update((all) => all.map((n) => (n.id === id ? { ...n, text } : n)));
+    update((all) => all.map((n) => (n.id === id ? withText(n, text) : n)));
     setEditing(null);
   };
 
@@ -101,7 +102,7 @@ export function NotesPanel({ labels, order, onOpen, onClose }: Props) {
                             autoFocus
                             rows={4}
                             value={draft}
-                            maxLength={2000}
+                            maxLength={MAX_NOTE}
                             aria-label="Note text"
                             onChange={(e) => setDraft(e.target.value)}
                             onKeyDown={(e) => {
@@ -111,6 +112,7 @@ export function NotesPanel({ labels, order, onOpen, onClose }: Props) {
                               }
                             }}
                           />
+                          <NoteCount length={draft.length} />
                           <div className="nt-actions">
                             <button
                               type="button"
@@ -127,6 +129,7 @@ export function NotesPanel({ labels, order, onOpen, onClose }: Props) {
                       ) : (
                         <>
                           <p>{note.text}</p>
+                          <small className="nt-meta">{noteDates(note)}</small>
                           <div className="nt-actions">
                             <button type="button" onClick={() => onOpen(note)}>
                               Open
