@@ -1,0 +1,353 @@
+/* /hide-pages: dressed like /ielts. A warm-paper index in monospace type, with firm dark edges, a
+   small hard shadow and colour-coded chips. Every selector is scoped to .hide-app so nothing leaks
+   into the dark site. The tokens are the same values as in features/ielts/ielts.css. */
+
+.hide-app {
+  color-scheme: light;
+  --paper: #f4ebe0;
+  --paper-2: #f7efe4;
+  --sheet: #f9f2e8;
+  --card: #f8f0e6;
+  --tile: #efe5d6;
+  --line: #ddd3c5;
+  --line-strong: #c6bbac;
+  --ink: #1d1b18;
+  --muted: #6f6961;
+  --green: #cfe3b2;
+  --green-2: #b2d491;
+  --violet: #e7ddf5;
+  --yellow: #f7e2a8;
+  --rust: #b8432f;
+  --link: #1f63a0;
+  --pop: 1.5px 2.5px 0 var(--ink);
+
+  min-height: 100svh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-jbm), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+}
+
+.hide-app,
+.hide-app *,
+.hide-app *::before,
+.hide-app *::after {
+  box-sizing: border-box;
+}
+
+.hide-app ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hide-app :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---- top bar ---------------------------------------------------------------------- */
+
+.hide-app .hp-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.hide-app .hp-brand {
+  font-size: 1.05rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.hide-app .hp-brand > span {
+  background: linear-gradient(transparent 62%, var(--green-2) 62%);
+}
+
+.hide-app .hp-home {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.hide-app .hp-home:hover {
+  color: var(--ink);
+}
+
+/* ---- the sheet -------------------------------------------------------------------- */
+
+.hide-app .hp-shell {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2.5rem;
+}
+
+.hide-app .hp-sheet {
+  padding: 1.4rem 1.5rem 1.5rem;
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 10px 22px -14px rgba(70, 65, 59, 0.35);
+}
+
+.hide-app .hp-banner {
+  padding-bottom: 1.1rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px dashed var(--line-strong);
+}
+
+.hide-app .hp-eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hide-app h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 3.4vw, 1.9rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.hide-app .hp-sub {
+  max-width: 44rem;
+  margin: 0.55rem 0 0.9rem;
+  color: var(--muted);
+}
+
+/* ---- chips ------------------------------------------------------------------------ */
+
+.hide-app .hp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hide-app .hp-chip {
+  padding: 0.12rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--pop);
+}
+
+.hide-app .hp-chip.y {
+  background: var(--yellow);
+}
+
+.hide-app .hp-chip.g {
+  background: var(--green);
+}
+
+.hide-app .hp-chip.v {
+  background: var(--violet);
+}
+
+/* ---- groups ----------------------------------------------------------------------- */
+
+.hide-app .hp-group {
+  --bar: var(--green-2);
+}
+
+.hide-app .hp-group[data-group="Personal"] {
+  --bar: #b9a6dc;
+}
+
+.hide-app .hp-group[data-group="Play"] {
+  --bar: #e8c660;
+}
+
+.hide-app .hp-group h2 {
+  margin: 2rem 0 0.9rem;
+  padding-left: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-left: 4px solid var(--bar);
+}
+
+.hide-app .hp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 1rem;
+}
+
+/* ---- a card ----------------------------------------------------------------------- */
+
+.hide-app .hp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 1rem 1.1rem 1.05rem;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--pop);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background 0.12s ease;
+}
+
+.hide-app .hp-card:hover {
+  background: var(--tile);
+  box-shadow: 2.5px 3.5px 0 var(--ink);
+  transform: translate(-1px, -1px);
+}
+
+/* The path is the link, and it stretches over the whole card. */
+.hide-app .hp-path {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--link);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.hide-app .hp-path::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+}
+
+.hide-app .hp-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.hide-app .hp-blurb {
+  margin: 0;
+  color: var(--muted);
+}
+
+.hide-app .hp-meta {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--line-strong);
+}
+
+.hide-app .hp-meta > div {
+  display: grid;
+  grid-template-columns: 4.6rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.hide-app .hp-meta dt {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hide-app .hp-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.hide-app .hp-tag {
+  display: inline-block;
+  padding: 0 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.6;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+}
+
+.hide-app .hp-tag.g {
+  background: var(--green);
+}
+
+.hide-app .hp-tag.y {
+  background: var(--yellow);
+}
+
+/* Extra ways in sit above the stretched link, so they stay clickable. */
+.hide-app .hp-links {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.hide-app .hp-links a {
+  display: inline-block;
+  padding: 0.1rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--pop);
+}
+
+.hide-app .hp-links a:hover {
+  background: var(--green);
+}
+
+.hide-app .hp-foot {
+  margin: 2.2rem 0 0;
+  padding-top: 1rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  border-top: 1px dashed var(--line-strong);
+}
+
+@media (max-width: 40rem) {
+  .hide-app .hp-topbar {
+    padding-inline: 0.75rem;
+  }
+
+  .hide-app .hp-shell {
+    padding-inline: 0.75rem;
+  }
+
+  .hide-app .hp-sheet {
+    padding: 1.1rem 1rem 1.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hide-app .hp-card {
+    transition: none;
+  }
+
+  .hide-app .hp-card:hover {
+    transform: none;
+  }
+}

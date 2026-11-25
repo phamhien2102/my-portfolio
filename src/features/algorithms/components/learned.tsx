@@ -14,20 +14,9 @@ export function LearnedToggle({ slug }: { slug: PatternSlug }) {
       type="button"
       onClick={() => toggle(slug)}
       aria-pressed={learned}
-      className={cn(
-        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition",
-        learned
-          ? "border-[#5cff9d] bg-[#5cff9d]/15 text-[#b8ffd6]"
-          : "border-white/20 text-zinc-200 hover:border-white/50",
-      )}
+      className={cn("alg-btn", learned && "is-on")}
     >
-      <span
-        aria-hidden="true"
-        className={cn(
-          "flex size-4 items-center justify-center rounded border text-[11px] leading-none",
-          learned ? "border-[#5cff9d] bg-[#5cff9d] text-black" : "border-white/40",
-        )}
-      >
+      <span aria-hidden="true" className="alg-tick">
         {learned ? "✓" : ""}
       </span>
       {learned ? "Learned" : "Mark as learned"}
@@ -39,11 +28,7 @@ export function LearnedToggle({ slug }: { slug: PatternSlug }) {
 export function LearnedCheck({ slug }: { slug: PatternSlug }) {
   const { isLearned } = useLearned();
   if (!isLearned(slug)) return null;
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-[#5cff9d]/50 bg-[#5cff9d]/15 px-2 py-0.5 font-mono text-[10px] tracking-wider text-[#b8ffd6]">
-      ✓ LEARNED
-    </span>
-  );
+  return <span className="alg-learned">✓ LEARNED</span>;
 }
 
 /** "n / 5 learned" with a progress bar, for the pattern list. */
@@ -51,16 +36,13 @@ export function LearnedProgress() {
   const { count } = useLearned();
   const total = PATTERNS.length;
   return (
-    <div className="mt-8 flex max-w-sm items-center gap-3">
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-        <div
-          className="h-full rounded-full bg-[#5cff9d] transition-[width] duration-500"
-          style={{ width: `${(count / total) * 100}%` }}
-        />
+    <div className="alg-progress">
+      <div className="alg-bar">
+        <span style={{ width: `${(count / total) * 100}%` }} />
       </div>
-      <span className="font-mono text-xs text-zinc-400 tabular-nums">
+      <output>
         {count} / {total} learned
-      </span>
+      </output>
     </div>
   );
 }

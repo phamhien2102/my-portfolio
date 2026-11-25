@@ -33,31 +33,20 @@ export function ArrayView({
               {here.length > 0 && (
                 <div className="absolute -top-7 flex gap-0.5">
                   {here.map((m) => (
-                    <span
-                      key={m.label}
-                      className="rounded px-1.5 py-0.5 font-mono text-[10px] font-bold whitespace-nowrap text-black transition-all duration-300"
-                      style={{ background: m.color }}
-                    >
+                    <span key={m.label} className="alg-marker" style={{ background: m.color }}>
                       {m.label}
                     </span>
                   ))}
                 </div>
               )}
+              {/* The pattern's neon is the fill of the active cell, with dark ink and edge. */}
               <div
-                className={cn(
-                  "flex size-8 items-center justify-center rounded-lg border font-mono text-xs font-bold transition-all duration-300 min-[400px]:size-10 min-[400px]:text-sm sm:size-12 sm:text-base",
-                  t === "normal" && "border-white/15 bg-white/5 text-zinc-200",
-                  t === "range" && "border-white/30 bg-white/10 text-white",
-                  t === "dim" && "border-white/5 bg-white/[0.02] text-zinc-600",
-                  t === "drop" && "border-[#ff4d6d] bg-[#ff4d6d]/20 text-[#ffb3c0] line-through",
-                  t === "active" && "scale-110 text-black",
-                  t === "found" && "scale-110 border-[#5cff9d] bg-[#5cff9d] text-black",
-                )}
-                style={t === "active" ? { background: accent, borderColor: accent } : undefined}
+                className={cn("alg-cell", t !== "normal" && `is-${t}`)}
+                style={t === "active" ? { background: accent } : undefined}
               >
                 {value}
               </div>
-              <span className="mt-1 font-mono text-[10px] text-zinc-500">{index}</span>
+              <span className="alg-index">{index}</span>
             </div>
           );
         })}
@@ -79,22 +68,14 @@ export function Bucket({
   highlight?: number;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-black/30 p-3">
-      <p className="font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">{label}</p>
-      <div className="mt-2 flex min-h-7 flex-wrap gap-1.5">
+    <div className="alg-box alg-bucket">
+      <p className="alg-label">{label}</p>
+      <div className="items">
         {items.length === 0 ? (
-          <span className="font-mono text-xs text-zinc-600">{empty}</span>
+          <span className="none">{empty}</span>
         ) : (
           items.map((item, index) => (
-            <span
-              key={index}
-              className={cn(
-                "rounded-md border px-2 py-0.5 font-mono text-xs transition-colors duration-300",
-                index === highlight
-                  ? "border-[#5cff9d] bg-[#5cff9d]/20 text-[#b8ffd6]"
-                  : "border-white/15 bg-white/5 text-zinc-200",
-              )}
-            >
+            <span key={index} className={cn("alg-item", index === highlight && "is-hit")}>
               {item}
             </span>
           ))
@@ -107,13 +88,10 @@ export function Bucket({
 /** A small "name = value" readout. */
 export function Readout({ items }: { items: ReadonlyArray<[string, ReactNode]> }) {
   return (
-    <div className="flex flex-wrap justify-center gap-2">
+    <div className="alg-pills">
       {items.map(([name, value]) => (
-        <span
-          key={name}
-          className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-xs text-zinc-300"
-        >
-          {name} = <span className="font-bold text-white">{value}</span>
+        <span key={name}>
+          {name} = <b>{value}</b>
         </span>
       ))}
     </div>
@@ -149,20 +127,16 @@ export function GridView({
             <div
               key={`${r}-${c}`}
               className={cn(
-                "relative flex size-10 items-center justify-center rounded-lg border font-mono text-xs font-bold transition-all duration-300 sm:size-12",
-                cell === 0 && "border-[#1f5bff]/30 bg-[#1f5bff]/10 text-[#7fa6ff]",
-                cell === -1 && "border-[#c9a46a]/50 bg-[#c9a46a]/25 text-[#f3dcb0]",
-                isCurrent && "scale-110",
-                isScan && "ring-2 ring-white ring-offset-2 ring-offset-[#09090e]",
+                "alg-cell relative",
+                cell === 0 && "alg-water",
+                cell === -1 && "alg-land",
+                isCurrent && "is-active",
+                isScan && "alg-ring",
               )}
-              style={
-                island ? { background: island, borderColor: island, color: "#000" } : undefined
-              }
+              style={island ? { background: island } : undefined}
             >
               {cell === 0 ? "~" : cell === -1 ? "1" : `#${cell}`}
-              {isQueued(r, c) && (
-                <span className="absolute -top-1.5 -right-1.5 size-3 rounded-full border-2 border-[#09090e] bg-white" />
-              )}
+              {isQueued(r, c) && <span className="alg-queued" />}
             </div>
           );
         }),
@@ -178,20 +152,17 @@ export function HeapView({ values, accent }: { values: number[]; accent: string 
     levels.push(values.slice(start, start + size));
   }
   return (
-    <div className="flex min-h-36 flex-col items-center justify-center gap-3 rounded-xl border border-white/10 bg-black/30 p-4">
+    <div className="alg-box alg-heap">
       {values.length === 0 ? (
-        <span className="font-mono text-xs text-zinc-600">heap is empty</span>
+        <span className="alg-note">heap is empty</span>
       ) : (
         levels.map((level, depth) => (
           <div key={depth} className="flex gap-6">
             {level.map((value, index) => (
               <span
                 key={index}
-                className={cn(
-                  "flex size-10 items-center justify-center rounded-full border font-mono text-sm font-bold transition-all duration-300 sm:size-12",
-                  depth === 0 ? "text-black" : "border-white/20 bg-white/5 text-zinc-200",
-                )}
-                style={depth === 0 ? { background: accent, borderColor: accent } : undefined}
+                className={cn("alg-node", depth === 0 && "is-top")}
+                style={depth === 0 ? { background: accent } : undefined}
               >
                 {value}
               </span>
@@ -199,11 +170,7 @@ export function HeapView({ values, accent }: { values: number[]; accent: string 
           </div>
         ))
       )}
-      {values.length > 0 && (
-        <span className="font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">
-          top = smallest
-        </span>
-      )}
+      {values.length > 0 && <span className="alg-label">top = smallest</span>}
     </div>
   );
 }

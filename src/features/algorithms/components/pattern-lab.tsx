@@ -104,8 +104,8 @@ function useFrames(pattern: Pattern): Frame[] {
               />
               <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
                 <Bucket label="seen (in window)" items={s.seen.map((ch) => `"${ch}"`)} />
-                <div className="flex items-center justify-center rounded-xl border border-white/10 bg-black/30 px-4 py-3 font-mono text-sm text-zinc-300">
-                  best = <span className="ml-1 text-lg font-bold text-white">{s.best}</span>
+                <div className="alg-box alg-readout">
+                  best = <span className="alg-num">{s.best}</span>
                 </div>
               </div>
             </div>
@@ -165,9 +165,9 @@ function useFrames(pattern: Pattern): Frame[] {
               }
             />
             <div className="grid gap-3 sm:grid-cols-[auto_1fr]">
-              <div className="flex items-center justify-center rounded-xl border border-white/10 bg-black/30 px-4 py-3 font-mono text-sm text-zinc-300">
-                need = <span className="ml-1 text-lg font-bold text-white">{s.need ?? "–"}</span>
-                <span className="ml-3 text-xs text-zinc-500">target {target}</span>
+              <div className="alg-box alg-readout">
+                need = <span className="alg-num">{s.need ?? "–"}</span>
+                <span className="alg-note">target {target}</span>
               </div>
               <Bucket
                 label="seen: value → index"
@@ -186,8 +186,8 @@ function useFrames(pattern: Pattern): Frame[] {
             <GridView cells={s.cells} scan={s.scan} current={s.current} queued={s.queue} />
             <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
               <Bucket label="queue" items={s.queue.map(([y, x]) => `(${y}, ${x})`)} />
-              <div className="flex items-center justify-center rounded-xl border border-white/10 bg-black/30 px-4 py-3 font-mono text-sm text-zinc-300">
-                islands = <span className="ml-1 text-lg font-bold text-white">{s.count}</span>
+              <div className="alg-box alg-readout">
+                islands = <span className="alg-num">{s.count}</span>
               </div>
             </div>
           </div>
@@ -197,9 +197,7 @@ function useFrames(pattern: Pattern): Frame[] {
         return frames(dpSteps(), (s) => (
           <div className="space-y-4">
             <div>
-              <p className="mb-1 font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">
-                houses (nums)
-              </p>
+              <p className="alg-label mb-1">houses (nums)</p>
               <ArrayView
                 values={DP_INPUT}
                 accent={accent}
@@ -210,9 +208,7 @@ function useFrames(pattern: Pattern): Frame[] {
               />
             </div>
             <div>
-              <p className="mb-1 font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">
-                dp table
-              </p>
+              <p className="alg-label mb-1">dp table</p>
               <ArrayView
                 values={s.dp.map((v) => v ?? "·")}
                 accent={accent}
@@ -269,11 +265,8 @@ function useFrames(pattern: Pattern): Frame[] {
               }
             />
             <div className="grid gap-3 sm:grid-cols-[auto_1fr]">
-              <div className="flex items-center justify-center rounded-xl border border-white/10 bg-black/30 px-4 py-3 font-mono text-sm text-zinc-300">
-                path ={" "}
-                <span className="ml-1 text-lg font-bold text-white">
-                  [{s.path.map((i) => nums[i]).join(", ")}]
-                </span>
+              <div className="alg-box alg-readout">
+                path = <span className="alg-num">[{s.path.map((i) => nums[i]).join(", ")}]</span>
               </div>
               <Bucket
                 label={`result (${s.result.length})`}
@@ -304,13 +297,12 @@ function useFrames(pattern: Pattern): Frame[] {
             />
             <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
               <HeapView values={s.heap} accent={accent} />
-              <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 px-4 py-3 font-mono text-sm text-zinc-300">
+              <div className="alg-box alg-readout flex-col gap-2">
                 <span>
-                  k = <span className="text-lg font-bold text-white">{k}</span>
+                  k = <span className="alg-num">{k}</span>
                 </span>
                 <span>
-                  popped ={" "}
-                  <span className="text-lg font-bold text-[#ff8da1]">{s.popped ?? "–"}</span>
+                  popped = <span className="alg-num is-pop">{s.popped ?? "–"}</span>
                 </span>
               </div>
             </div>
@@ -322,9 +314,7 @@ function useFrames(pattern: Pattern): Frame[] {
         return frames(monoStackSteps(), (s) => (
           <div className="space-y-4">
             <div>
-              <p className="mb-1 font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">
-                temperatures
-              </p>
+              <p className="alg-label mb-1">temperatures</p>
               <ArrayView
                 values={temps}
                 accent={accent}
@@ -341,28 +331,19 @@ function useFrames(pattern: Pattern): Frame[] {
               />
             </div>
             <div className="grid gap-3 sm:grid-cols-[auto_1fr]">
-              <div className="flex min-h-28 flex-col-reverse items-center justify-start gap-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3">
-                <span className="font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">
-                  stack
-                </span>
+              <div className="alg-box alg-stack">
+                <span className="alg-label">stack</span>
                 {s.stack.map((j, depth) => (
                   <span
                     key={j}
-                    className={cn(
-                      "w-20 rounded-md border px-2 py-0.5 text-center font-mono text-xs transition-all duration-300",
-                      depth === s.stack.length - 1
-                        ? "border-white/40 bg-white/15 text-white"
-                        : "border-white/15 bg-white/5 text-zinc-300",
-                    )}
+                    className={cn("alg-stack-item", depth === s.stack.length - 1 && "is-top")}
                   >
                     {temps[j]} · d{j}
                   </span>
                 ))}
               </div>
               <div>
-                <p className="mb-1 font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">
-                  answer (days to wait)
-                </p>
+                <p className="alg-label mb-1">answer (days to wait)</p>
                 <ArrayView
                   values={s.answer.map((v) => v ?? "·")}
                   accent={accent}
@@ -389,9 +370,7 @@ function useFrames(pattern: Pattern): Frame[] {
                 highlight={s.edge >= 0 ? s.edge : undefined}
               />
               <div>
-                <p className="mb-1 font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">
-                  parent[x] (x below)
-                </p>
+                <p className="alg-label mb-1">parent[x] (x below)</p>
                 <ArrayView
                   values={s.parent}
                   accent={accent}
@@ -454,24 +433,20 @@ export function PatternLab({ pattern }: { pattern: Pattern }) {
 
   return (
     <div
-      className="grid gap-4 lg:grid-cols-[1.15fr_1fr]"
+      className="alg-lab"
       onKeyDown={(event) => {
         if (event.key === "ArrowRight") go(index + 1);
         if (event.key === "ArrowLeft") go(index - 1);
       }}
     >
-      <div className="flex min-w-0 flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+      <div className="alg-stage">
         <div className="flex-1">{frame.view}</div>
 
-        <p
-          aria-live="polite"
-          className="mt-5 min-h-[3.25rem] rounded-xl border-l-4 bg-black/30 px-4 py-3 text-sm text-zinc-200"
-          style={{ borderColor: pattern.accent }}
-        >
+        <p aria-live="polite" className="alg-caption" style={{ borderLeftColor: pattern.accent }}>
           {frame.caption}
         </p>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="alg-controls">
           <ControlButton label="Restart" onClick={() => go(0)} disabled={index === 0}>
             ⏮
           </ControlButton>
@@ -481,7 +456,7 @@ export function PatternLab({ pattern }: { pattern: Pattern }) {
           <button
             type="button"
             onClick={togglePlay}
-            className="rounded-full px-5 py-2 text-sm font-bold text-black transition hover:brightness-110"
+            className="alg-play"
             style={{ background: pattern.accent }}
           >
             {playing ? "❚❚ Pause" : index >= last ? "↻ Replay" : "▶ Play"}
@@ -489,17 +464,13 @@ export function PatternLab({ pattern }: { pattern: Pattern }) {
           <ControlButton label="Next step" onClick={() => go(index + 1)} disabled={index >= last}>
             ▶
           </ControlButton>
-          <div className="ml-auto flex items-center gap-1 rounded-full border border-white/10 p-0.5">
+          <div className="alg-speed">
             {SPEEDS.map((option, i) => (
               <button
                 key={option.label}
                 type="button"
                 onClick={() => setSpeed(i)}
                 aria-pressed={speed === i}
-                className={cn(
-                  "rounded-full px-2.5 py-1 font-mono text-[11px] transition",
-                  speed === i ? "bg-white text-black" : "text-zinc-400 hover:text-white",
-                )}
               >
                 {option.label}
               </button>
@@ -507,7 +478,7 @@ export function PatternLab({ pattern }: { pattern: Pattern }) {
           </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-3">
+        <div className="alg-scrub">
           <input
             type="range"
             min={0}
@@ -515,38 +486,30 @@ export function PatternLab({ pattern }: { pattern: Pattern }) {
             value={index}
             onChange={(event) => go(Number(event.target.value))}
             aria-label="Step"
-            className="flex-1"
             style={{ accentColor: pattern.accent }}
           />
-          <span className="font-mono text-xs text-zinc-500 tabular-nums">
+          <output>
             {index + 1} / {frames.length}
-          </span>
+          </output>
         </div>
       </div>
 
-      <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-black/50">
-        <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5">
-          <span className="size-2.5 rounded-full bg-[#ff5f57]" />
-          <span className="size-2.5 rounded-full bg-[#febc2e]" />
-          <span className="size-2.5 rounded-full bg-[#28c840]" />
-          <span className="ml-2 font-mono text-[11px] text-zinc-500">solution.ts</span>
-        </div>
-        <pre className="overflow-x-auto py-3 font-mono text-[12px] leading-6 sm:text-[13px]">
+      <div className="alg-code">
+        <header>
+          <i style={{ background: "#ff5f57" }} />
+          <i style={{ background: "#febc2e" }} />
+          <i style={{ background: "#28c840" }} />
+          <span>solution.ts</span>
+        </header>
+        <pre>
           {pattern.code.map((code, line) => (
             <div
               key={line}
-              className={cn(
-                "flex border-l-2 px-4 transition-colors duration-200",
-                line === frame.line
-                  ? "bg-white/[0.07] text-white"
-                  : "border-transparent text-zinc-400",
-              )}
-              style={line === frame.line ? { borderColor: pattern.accent } : undefined}
+              className={cn("ln", line === frame.line && "is-on")}
+              style={line === frame.line ? { borderLeftColor: pattern.accent } : undefined}
             >
-              <span className="mr-4 w-5 shrink-0 text-right text-zinc-600 select-none">
-                {line + 1}
-              </span>
-              <code className="whitespace-pre">{code}</code>
+              <span className="no">{line + 1}</span>
+              <code>{code}</code>
             </div>
           ))}
         </pre>
@@ -573,7 +536,7 @@ function ControlButton({
       title={label}
       onClick={onClick}
       disabled={disabled}
-      className="flex size-9 items-center justify-center rounded-full border border-white/15 text-sm text-zinc-200 transition hover:border-white/40 disabled:opacity-30"
+      className="alg-round"
     >
       {children}
     </button>
