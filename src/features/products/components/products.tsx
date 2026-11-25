@@ -1,7 +1,9 @@
 import { JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 import { PRODUCTS } from "../data";
+import { TiltCard } from "./tilt-card";
 import "../products.css";
 
 const mono = JetBrains_Mono({
@@ -26,10 +28,27 @@ export function Products() {
         </Link>
       </header>
 
+      <div className="pr-deco" aria-hidden="true">
+        <i className="pr-ring" />
+        <i className="pr-tile" />
+        <i className="pr-dots" />
+      </div>
+
       <main className="pr-shell">
         <div className="pr-hero">
-          <p className="pr-eyebrow">Now live</p>
-          <h1>Three things to learn from.</h1>
+          <p className="pr-eyebrow">
+            <i className="pr-ping" aria-hidden="true" />
+            Now live
+          </p>
+          <h1 aria-label="Three things to learn from.">
+            {["Three", "things", "to", "learn", "from."].map((word, i) => (
+              <span key={word} aria-hidden="true">
+                <span className="pr-word">
+                  <span style={{ "--i": i } as CSSProperties}>{word}</span>
+                </span>{" "}
+              </span>
+            ))}
+          </h1>
           <p className="pr-sub">
             Small, hands-on courses I built and run myself. Pick one to start; each remembers where
             you stopped.
@@ -38,7 +57,7 @@ export function Products() {
 
         <ul className="pr-grid">
           {PRODUCTS.map((product) => (
-            <li key={product.path} className="pr-card" data-tone={product.tone}>
+            <TiltCard key={product.path} tone={product.tone}>
               <Link
                 href={product.path}
                 target="_blank"
@@ -65,9 +84,11 @@ export function Products() {
                   ))}
                 </ul>
 
-                <span className="pr-cta">{product.cta} →</span>
+                <span className="pr-cta">
+                  {product.cta} <span className="pr-cta-arrow">→</span>
+                </span>
               </Link>
-            </li>
+            </TiltCard>
           ))}
         </ul>
       </main>
