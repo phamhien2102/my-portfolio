@@ -38,15 +38,18 @@ const heroBlock = Bungee_Shade({
 
 export const metadata: Metadata = {
   // The base that turns the share-image paths into the absolute URLs a link preview needs.
-  metadataBase: new URL(SITE.website),
+  metadataBase: new URL(SITE.origin),
   title: {
     default: SITE.title,
     template: `%s | ${SITE.name}`,
   },
   description: SITE.description,
+  // The canonical address of each page, built from the page's own path and the base above.
+  alternates: { canonical: "./" },
   openGraph: {
     type: "website",
     siteName: SITE.name,
+    url: "./",
   },
   twitter: { card: "summary_large_image" },
 };

@@ -6,6 +6,11 @@ export const SITE = {
     "Portfolio of Raymond Pham, a senior mobile developer building mobile and web products.",
   email: "phamhien2102@gmail.com",
   website: "https://hienpt.dev",
+  /**
+   * The address the site is actually served from. hienpt.dev redirects to it, so share previews must
+   * use it: a link-preview crawler that is sent from the image address to a redirect often gives up.
+   */
+  origin: "https://www.hienpt.dev",
   availability: "Available for new projects",
   socials: [
     { label: "GitHub", href: "https://github.com/phamhien2102" },
