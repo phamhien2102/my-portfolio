@@ -12,6 +12,7 @@ import { cn } from "@/lib/cn";
 
 import { exportFlashcards, importFlashcards, MAX_FILE_BYTES } from "../lib/flashcards-xlsx";
 import { MAX_CARDS, MAX_MEANING, MAX_WORD, useFlashcards } from "../lib/study-store";
+import { ModalBackdrop } from "./modal-backdrop";
 
 type Mode = "review" | "list";
 
@@ -152,10 +153,7 @@ export function FlashcardsPanel({ onClose }: { onClose: () => void }) {
   const remove = (id: string) => update((all) => all.filter((c) => c.id !== id));
 
   return (
-    <div
-      className="fc-backdrop"
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
-    >
+    <ModalBackdrop onClose={onClose} closeOnBackdrop>
       <div
         className="fc-dialog fc-panel"
         role="dialog"
@@ -286,7 +284,7 @@ export function FlashcardsPanel({ onClose }: { onClose: () => void }) {
           )}
         </div>
       </div>
-    </div>
+    </ModalBackdrop>
   );
 }
 

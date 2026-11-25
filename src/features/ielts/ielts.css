@@ -861,16 +861,30 @@ html:has(.ielts-app) {
 }
 
 .ielts-app .fc-backdrop {
+  /* Pinned to the part of the screen that can be seen: ModalBackdrop sets --vv-h and --vv-top from the
+     visual viewport, so with a phone keyboard up the dialog stays above it instead of behind it. */
   position: fixed;
-  inset: 0;
+  top: var(--vv-top, 0px);
+  left: 0;
+  right: 0;
+  height: var(--vv-h, 100dvh);
   z-index: 70;
   display: grid;
+  grid-template-rows: minmax(0, 1fr);
   place-items: center;
   padding: 1rem;
-  background: rgb(29 27 24 / 0.35);
+  background: rgb(18 32 44 / 0.45);
+  /* The layer behind a dialog is not for touching: no scrolling, no scroll chaining to the page. */
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .ielts-app .fc-dialog {
+  /* Taller than the visible area (a keyboard is up): scroll inside the dialog, never the page. */
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   display: grid;
   gap: 0.85rem;
   width: min(26rem, 100%);
@@ -953,7 +967,7 @@ html:has(.ielts-app) {
 
 .ielts-app .fc-panel {
   width: min(34rem, 100%);
-  max-height: min(36rem, 90svh);
+  max-height: min(36rem, 100%);
   grid-template-rows: auto minmax(0, 1fr) auto auto;
 }
 
@@ -1674,5 +1688,14 @@ html:has(.ielts-app) {
   .ielts-app .shell.is-collapsed .stage,
   .ielts-app .shell.is-collapsed .lesson-foot {
     max-width: none;
+  }
+}
+
+/* iOS zooms the page in when a field under 16px gets focus, and leaves it zoomed: the dialog then
+   no longer fits the screen. Fields are 16px on touch screens, so there is nothing to zoom. */
+@media (max-width: 62rem) {
+  .ielts-app .fc-dialog input,
+  .ielts-app .fc-dialog textarea {
+    font-size: 16px;
   }
 }

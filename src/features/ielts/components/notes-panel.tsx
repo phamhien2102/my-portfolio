@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { MAX_NOTE, noteDates, useNotes, withText, type Note } from "../lib/study-store";
+import { ModalBackdrop } from "./modal-backdrop";
 import { NoteCount } from "./note-count";
 
 interface Props {
@@ -66,10 +67,7 @@ export function NotesPanel({ labels, order, onOpen, onClose }: Props) {
   };
 
   return (
-    <div
-      className="fc-backdrop"
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
-    >
+    <ModalBackdrop onClose={onClose} closeOnBackdrop>
       <div
         className="fc-dialog fc-panel nt-panel"
         role="dialog"
@@ -155,6 +153,6 @@ export function NotesPanel({ labels, order, onOpen, onClose }: Props) {
           </div>
         )}
       </div>
-    </div>
+    </ModalBackdrop>
   );
 }
