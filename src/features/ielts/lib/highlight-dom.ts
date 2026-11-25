@@ -1,6 +1,7 @@
-import type { Highlight } from "./study-store";
+import type { Highlight, Note } from "./study-store";
 
-const CLASS = "user-hl";
+const HIGHLIGHT = "user-hl";
+const NOTE = "user-note";
 
 function textNodes(root: Node): Text[] {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -25,32 +26,55 @@ export function selectionOffsets(root: HTMLElement, range: Range) {
   return end > start ? { start, end } : null;
 }
 
-/** Remove every highlight span from `root` and merge the split text nodes back together. */
+/** Remove every highlight and note span from `root` and merge the split text nodes back together. */
 function clear(root: HTMLElement) {
-  for (const el of root.querySelectorAll(`span.${CLASS}`)) {
+  for (const el of root.querySelectorAll(`span.${HIGHLIGHT}, span.${NOTE}`)) {
     el.replaceWith(...Array.from(el.childNodes));
   }
   root.normalize();
 }
 
-/** Redraw all highlights of one chapter. Idempotent, so it is safe to call on every change. */
-export function paintHighlights(root: HTMLElement, highlights: readonly Highlight[]) {
+interface Mark {
+  start: number;
+  end: number;
+  className: string;
+  noteId?: string;
+}
+
+/**
+ * Redraw all highlights and notes of one chapter. Idempotent, so it is safe to call on every change.
+ * A note is a span of its own with the note's id on it, so a click on the text can find the note.
+ */
+export function paintHighlights(
+  root: HTMLElement,
+  highlights: readonly Highlight[],
+  notes: readonly Note[] = [],
+) {
   clear(root);
-  for (const hl of highlights) {
+  const marks: Mark[] = [
+    ...highlights.map((h) => ({
+      start: h.start,
+      end: h.end,
+      className: `${HIGHLIGHT} hl-${h.color ?? "yellow"}`,
+    })),
+    ...notes.map((n) => ({ start: n.start, end: n.end, className: NOTE, noteId: n.id })),
+  ];
+  for (const mark of marks) {
     let pos = 0;
     // Collect first: wrapping replaces nodes, which would upset a live walk.
     for (const node of textNodes(root)) {
       const from = pos;
       pos += node.length;
-      const a = Math.max(hl.start, from) - from;
-      const b = Math.min(hl.end, pos) - from;
+      const a = Math.max(mark.start, from) - from;
+      const b = Math.min(mark.end, pos) - from;
       if (b <= a) continue;
       // Skip the whitespace-only gaps between blocks.
       if (!node.data.slice(a, b).trim()) continue;
       const target = node.splitText(a);
       target.splitText(b - a);
       const span = document.createElement("span");
-      span.className = `${CLASS} hl-${hl.color ?? "yellow"}`;
+      span.className = mark.className;
+      if (mark.noteId) span.dataset.noteId = mark.noteId;
       target.replaceWith(span);
       span.append(target);
     }

@@ -28,6 +28,8 @@
   --link: #1f63a0;
   --radius: 12px;
   --pop: 1.5px 2.5px 0 var(--ink);
+  /* The phone top bar's height, which the course drawer hangs from. */
+  --topbar-h: 3.5rem;
 
   min-height: 100svh;
   background: var(--paper);
@@ -95,14 +97,8 @@ html:has(.ielts-app) {
   font-weight: 800;
 }
 
-.ielts-app .brand,
-.ielts-app .home-link {
+.ielts-app .brand {
   white-space: nowrap;
-}
-
-.ielts-app .brand-icon {
-  width: 1.7rem;
-  height: 1.7rem;
 }
 
 .ielts-app .brand-name > span {
@@ -115,29 +111,34 @@ html:has(.ielts-app) {
   gap: 0.75rem;
 }
 
-.ielts-app .home-link {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-decoration: none;
+.ielts-app .topbar-left {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
 }
 
-.ielts-app .home-link:hover {
-  color: var(--ink);
-}
-
+/* The hamburger in the top-left corner. Phones only: on a wide screen the course menu is folded away
+   with the arrows in its header and brought back from the chapter's header. */
 .ielts-app .menu-btn {
   display: none;
-  padding: 0.3rem 0.8rem;
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 700;
+  flex: none;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
   color: var(--ink);
   background: var(--green);
   border: 1.5px solid var(--ink);
   border-radius: 10px;
   box-shadow: var(--pop);
   cursor: pointer;
+}
+
+.ielts-app .menu-icon {
+  width: 1.35rem;
+  height: 1.35rem;
 }
 
 /* ---- shell: course tree + chapter -------------------------------------------------- */
@@ -408,12 +409,6 @@ html:has(.ielts-app) {
   border-color: var(--line-strong);
   box-shadow: none;
   cursor: default;
-}
-
-.ielts-app .hint {
-  margin: 0.8rem 0 0;
-  font-size: 0.68rem;
-  color: var(--muted);
 }
 
 .ielts-app .colophon {
@@ -687,7 +682,7 @@ html:has(.ielts-app) {
 
 @media (max-width: 62rem) {
   .ielts-app .menu-btn {
-    display: inline-block;
+    display: grid;
   }
 
   .ielts-app .shell {
@@ -695,14 +690,44 @@ html:has(.ielts-app) {
     padding-inline: 0.75rem;
   }
 
+  /* The tree is a drawer under the top bar. It used to open inline above the chapter, so a reader
+     deep in a chapter who tapped "Course" saw nothing happen: the tree appeared off screen at the
+     top of the page. Fixed to the viewport, it opens where the reader is. */
   .ielts-app .side {
-    position: static;
-    display: none;
+    position: fixed;
+    top: var(--topbar-h);
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    width: min(21rem, 88vw);
     max-height: none;
+    padding: 0.9rem 0.8rem 1.2rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-width: 0 1px 0 0;
+    border-radius: 0 14px 14px 0;
+    box-shadow: 10px 0 30px -18px rgba(29, 27, 24, 0.55);
+    visibility: hidden;
+    transform: translateX(-105%);
+    transition:
+      transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1),
+      visibility 0s linear 0.28s;
   }
 
   .ielts-app .side.is-open {
-    display: block;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  .ielts-app .side-backdrop {
+    position: fixed;
+    inset: var(--topbar-h) 0 0;
+    z-index: 35;
+    padding: 0;
+    background: rgba(29, 27, 24, 0.35);
+    border: 0;
+    cursor: pointer;
   }
 
   .ielts-app .lesson {
@@ -710,15 +735,61 @@ html:has(.ielts-app) {
   }
 
   .ielts-app .topbar {
+    box-sizing: border-box;
+    height: var(--topbar-h);
+    gap: 0.5rem;
+    padding-block: 0;
     padding-inline: 0.75rem;
   }
 
+  /* The brand may shrink and truncate rather than push the buttons off the screen. */
   .ielts-app .brand {
+    flex: 0 1 auto;
+    min-width: 0;
     font-size: 0.95rem;
   }
 
-  .ielts-app .home-link {
-    font-size: 0.7rem;
+  .ielts-app .brand-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ielts-app .topbar-right {
+    flex: none;
+    gap: 0.4rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .ielts-app .cards-btn {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.72rem;
+  }
+
+  .ielts-app .menu-btn {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .ielts-app .topbar-left {
+    gap: 0.7rem;
+  }
+
+  .ielts-app .brand {
+    gap: 0.4rem;
+    font-size: 0.88rem;
+  }
+}
+
+/* The backdrop only exists for the drawer. */
+.ielts-app .side-backdrop {
+  display: none;
+}
+
+@media (max-width: 62rem) {
+  .ielts-app .side-backdrop {
+    display: block;
   }
 }
 
@@ -1017,8 +1088,7 @@ html:has(.ielts-app) {
   }
 }
 
-.ielts-app .fc-card-label,
-.ielts-app .fc-card-hint {
+.ielts-app .fc-card-label {
   font-size: 0.68rem;
   color: var(--muted);
   text-transform: uppercase;
@@ -1085,17 +1155,43 @@ html:has(.ielts-app) {
   }
 }
 
+/* Export and Import are side jobs, so they are quiet: small, no frame, muted until hovered. */
 .ielts-app .fc-io {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  padding-top: 0.75rem;
+  gap: 0.25rem 1rem;
+  padding-top: 0.6rem;
   border-top: 1px solid var(--line);
 }
 
-.ielts-app .fc-io .btn:disabled {
-  opacity: 0.5;
+.ielts-app .fc-io-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.ielts-app .fc-io-btn svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.ielts-app .fc-io-btn:hover:not(:disabled) {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ielts-app .fc-io-btn:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -1140,4 +1236,288 @@ html:has(.ielts-app) {
   height: 1.4rem;
   margin: 0 0.15rem;
   background: var(--line-strong);
+}
+
+/* ---- notes ------------------------------------------------------------------------------ */
+
+/* A passage that carries a note: a dotted rule under it, and a click reopens the note. */
+.ielts-app .user-note {
+  cursor: pointer;
+  background: rgb(231 221 245 / 0.75);
+  border-bottom: 2px dotted var(--rust);
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.ielts-app .user-note:hover {
+  background: var(--violet);
+}
+
+/* "Open" in the notes list scrolls here and flashes the passage once. */
+@keyframes ielts-note-flash {
+  0%,
+  60% {
+    box-shadow: 0 0 0 4px var(--mark);
+    background: var(--mark);
+  }
+  100% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+
+.ielts-app .user-note.note-flash {
+  animation: ielts-note-flash 1.6s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ielts-app .user-note.note-flash {
+    animation: none;
+    background: var(--mark);
+  }
+}
+
+.ielts-app .nt-quote {
+  max-height: 6rem;
+  margin: 0;
+  padding: 0.45rem 0.75rem;
+  overflow: auto;
+  font-size: 0.82rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  background: var(--tile);
+  border-left: 3px solid var(--rust);
+  border-radius: 0 8px 8px 0;
+}
+
+/* Delete sits at the far left of the dialog's buttons, away from Save. */
+.ielts-app .fc-actions .nt-delete {
+  margin-right: auto;
+  color: var(--rust);
+}
+
+.ielts-app .nt-panel {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.ielts-app .nt-list {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.ielts-app .nt-group h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.ielts-app .nt-group ul {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ielts-app .nt-item {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.65rem 0.8rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.ielts-app .nt-item blockquote {
+  display: -webkit-box;
+  margin: 0;
+  padding-left: 0.6rem;
+  overflow: hidden;
+  font-size: 0.78rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  border-left: 3px solid var(--rust);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.ielts-app .nt-item p {
+  margin: 0;
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.ielts-app .nt-actions {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.ielts-app .nt-actions button {
+  padding: 0;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--link);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.ielts-app .nt-actions button.is-danger {
+  margin-left: auto;
+  color: var(--rust);
+}
+
+.ielts-app .nt-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* The Notes button in the top bar: a pencil, the word, and a count. */
+.ielts-app .notes-btn .notes-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.ielts-app .notes-btn .btn-label {
+  font-weight: inherit;
+}
+
+/* On a phone the top bar is short of room, so the button keeps just the pencil and the count. */
+@media (max-width: 40rem) {
+  .ielts-app .notes-btn .btn-label {
+    display: none;
+  }
+}
+
+/* ---- folding the course menu away on a wide screen ------------------------------------------ */
+
+/* One tab on the left edge of the screen. It is narrower than the page's side padding, so it sits
+   beside the menu and the chapter rather than over them. Its height at rest is the arrows alone;
+   on hover or focus it grows upward by a grip, which is what the reader drags to move it. The
+   arrows stay where they are while it grows, so the pointer never slips off them. */
+.ielts-app .side-float {
+  --grip: 1.75rem;
+  position: fixed;
+  /* --float-y is a share of the window height and marks the centre of the arrows; the clamp keeps
+     the tab (grip included) clear of the top bar and the bottom edge at any size. */
+  top: clamp(
+    calc(var(--topbar-h) + 3.8rem),
+    calc(var(--float-y, 0.5) * 100svh),
+    calc(100svh - 2.4rem)
+  );
+  left: 0;
+  z-index: 25;
+  display: none;
+  flex-direction: column;
+  width: 1.15rem;
+  overflow: hidden;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 2px 2px 0 var(--ink);
+  /* Pin the bottom of the tab, so a longer tab grows upward: half of the arrows (1.8rem) and the
+     bottom border stay below `top`. */
+  transform: translateY(calc(-100% + 1.8rem + 1.5px));
+}
+
+.ielts-app .side-float button {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  padding: 0;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.ielts-app .side-float-toggle {
+  height: 3.6rem;
+}
+
+.ielts-app .side-float-toggle:hover {
+  background: var(--green);
+}
+
+/* The grip is folded away until the tab is hovered, focused or being dragged. */
+.ielts-app .side-float-grip {
+  height: 0;
+  color: var(--muted);
+  cursor: grab;
+  opacity: 0;
+  border-bottom: 0 solid var(--line-strong);
+  touch-action: none;
+  transition:
+    height 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.ielts-app .side-float:hover .side-float-grip,
+.ielts-app .side-float:focus-within .side-float-grip,
+.ielts-app .side-float.is-dragging .side-float-grip {
+  height: var(--grip);
+  opacity: 1;
+  border-bottom-width: 1px;
+}
+
+.ielts-app .side-float-grip:hover {
+  color: var(--ink);
+}
+
+.ielts-app .side-float.is-dragging {
+  user-select: none;
+}
+
+.ielts-app .side-float.is-dragging .side-float-grip {
+  cursor: grabbing;
+}
+
+.ielts-app .side-float svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.ielts-app .side-float-toggle svg {
+  transition: transform 0.2s;
+}
+
+.ielts-app .side-float-toggle svg[data-flipped="true"] {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ielts-app .side-float-grip,
+  .ielts-app .side-float-toggle svg {
+    transition: none;
+  }
+}
+
+@media (min-width: 62.01rem) {
+  .ielts-app .side-float {
+    display: flex;
+  }
+
+  /* With the menu gone the chapter takes the whole row. */
+  .ielts-app .shell.is-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ielts-app .shell.is-collapsed .side {
+    display: none;
+  }
+
+  /* The chapter and its page controls fill that row too, instead of stopping at a reading width. */
+  .ielts-app .shell.is-collapsed .stage,
+  .ielts-app .shell.is-collapsed .lesson-foot {
+    max-width: none;
+  }
 }

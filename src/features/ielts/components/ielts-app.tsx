@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   useEffect,
   useLayoutEffect,
@@ -14,9 +13,12 @@ import {
 import { cn } from "@/lib/cn";
 
 import type { OutlineChapter, OutlinePart } from "../lib/outline";
+import { useSideCollapsed } from "../lib/layout-store";
 import { useProgress } from "../lib/progress";
-import { useFlashcards } from "../lib/study-store";
+import { useFlashcards, useNotes, type Note } from "../lib/study-store";
 import { FlashcardsPanel } from "./flashcards-panel";
+import { NotesPanel } from "./notes-panel";
+import { SideFloat } from "./side-float";
 import { StudyTools } from "./study-tools";
 
 interface Props {
@@ -80,8 +82,14 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
   // A part is open when the reader opened it, or by default when it holds the chapter being read.
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [menuOpen, setMenuOpen] = useState(false);
+  // Wide screens fold the menu away and back (the arrows); narrow ones open it as a drawer.
+  const { collapsed, toggle: toggleSide } = useSideCollapsed();
   const [cardsOpen, setCardsOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
   const cardCount = useFlashcards().items.length;
+  const noteCount = useNotes().items.length;
+  const chapterLabels = useMemo(() => Object.fromEntries(flat.map((c) => [c.id, c.label])), [flat]);
+  const chapterOrder = useMemo(() => flat.map((c) => c.id), [flat]);
   const progress = useProgress();
 
   // Show only the active chapter. Before paint, so a deep link never flashes the first one.
@@ -115,6 +123,30 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [next, previous]);
 
+  // On a phone the course tree is a drawer: Escape closes it, as does a tap on the backdrop.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+  // From the notes list: go to the note's chapter, scroll to its passage and flash it once.
+  const openNote = (note: Note) => {
+    setNotesOpen(false);
+    if (window.location.hash !== `#${note.chapterId}`) window.location.hash = note.chapterId;
+    // After the chapter has been shown and the page has been reset to the top.
+    window.setTimeout(() => {
+      const el = document.querySelector<HTMLElement>(`[data-note-id="${CSS.escape(note.id)}"]`);
+      if (!el) return;
+      el.scrollIntoView({ block: "center" });
+      el.classList.add("note-flash");
+      window.setTimeout(() => el.classList.remove("note-flash"), 1800);
+    }, 250);
+  };
+
   const total = flat.length;
   const doneTotal = progress.countOf(flat.map((c) => c.id));
   const isDone = progress.isDone(active.id);
@@ -122,32 +154,56 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
   return (
     <div data-page-theme="light" className={cn("ielts-app", fontClassName)}>
       <header className="topbar">
-        <a className="brand" href="#">
-          <BrandIcon />
-          <span className="brand-name">
-            <span>{title}</span>
-          </span>
-        </a>
-        <div className="topbar-right">
+        <div className="topbar-left">
+          {/* The menu button sits in the top-left corner, where a phone reader looks for it. It is
+              only shown below 62rem, where the course menu folds into a drawer; on a wide screen
+              the arrows in the menu's header fold it instead. */}
           <button
             type="button"
             className="menu-btn"
+            aria-label={menuOpen ? "Close course menu" : "Open course menu"}
             aria-expanded={menuOpen}
             aria-controls="course-tree"
             onClick={() => setMenuOpen((open) => !open)}
           >
-            Course
+            <MenuIcon open={menuOpen} />
+          </button>
+          <a className="brand" href="#">
+            <span className="brand-name">
+              <span>{title}</span>
+            </span>
+          </a>
+        </div>
+        <div className="topbar-right">
+          <button
+            type="button"
+            className="cards-btn notes-btn"
+            aria-label={noteCount > 0 ? `Notes, ${noteCount}` : "Notes"}
+            onClick={() => setNotesOpen(true)}
+          >
+            <NotesIcon />
+            <b className="btn-label">Notes</b>
+            {noteCount > 0 && <span>{noteCount}</span>}
           </button>
           <button type="button" className="cards-btn" onClick={() => setCardsOpen(true)}>
             Flashcards{cardCount > 0 && <span>{cardCount}</span>}
           </button>
-          <Link href="/" className="home-link">
-            ← Raymond Pham
-          </Link>
         </div>
       </header>
 
-      <div className="shell">
+      {/* Wide screens: a tab on the left edge folds the course menu away and brings it back. Phones
+          use the hamburger and the drawer instead. */}
+      <SideFloat collapsed={collapsed} onToggle={toggleSide} />
+
+      <div className={cn("shell", collapsed && "is-collapsed")}>
+        {menuOpen && (
+          <button
+            type="button"
+            className="side-backdrop"
+            aria-label="Close menu"
+            onClick={() => setMenuOpen(false)}
+          />
+        )}
         <aside id="course-tree" className={cn("side", menuOpen && "is-open")} aria-label="Course">
           <div className="side-head">
             <FolderIcon color="var(--ink)" />
@@ -257,34 +313,48 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
               </span>
             )}
           </nav>
-          <p className="hint">← → turn the page</p>
         </main>
       </div>
 
       {cardsOpen && <FlashcardsPanel onClose={() => setCardsOpen(false)} />}
+      {notesOpen && (
+        <NotesPanel
+          labels={chapterLabels}
+          order={chapterOrder}
+          onOpen={openNote}
+          onClose={() => setNotesOpen(false)}
+        />
+      )}
 
       <p className="colophon">Links to practice websites open third-party pages.</p>
     </div>
   );
 }
 
-function BrandIcon() {
+function NotesIcon() {
   return (
-    <svg className="brand-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <rect
-        x="3"
-        y="4"
-        width="18"
-        height="16"
-        rx="3"
-        fill="#cfe3b2"
-        stroke="#1d1b18"
-        strokeWidth="1.6"
-      />
+    <svg className="notes-icon" viewBox="0 0 24 24" aria-hidden="true">
       <path
-        d="M7.5 9h9M7.5 12.5h9M7.5 16h5"
-        stroke="#1d1b18"
-        strokeWidth="1.6"
+        d="M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** Three lines that turn into a cross while the drawer is open. */
+function MenuIcon({ open }: { open: boolean }) {
+  return (
+    <svg className="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d={open ? "M6 6l12 12M18 6L6 18" : "M4 7h16M4 12h16M4 17h16"}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
         strokeLinecap="round"
       />
     </svg>
