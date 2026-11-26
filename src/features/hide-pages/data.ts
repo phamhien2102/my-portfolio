@@ -65,7 +65,7 @@ export const HIDDEN_PAGES: readonly HiddenPage[] = [
       "An interactive system design course: animated diagrams you step through, from one server to a URL shortener.",
     group: "Learning",
     access: "Direct URL only",
-    noindex: true,
+    noindex: false,
   },
   {
     path: "/algo-lab",
@@ -74,7 +74,7 @@ export const HIDDEN_PAGES: readonly HiddenPage[] = [
       "An interactive data structures and algorithms course: animated, step-by-step diagrams from arrays to graphs.",
     group: "Learning",
     access: "Direct URL only",
-    noindex: true,
+    noindex: false,
   },
   {
     path: "/custom-resume",
@@ -110,7 +110,7 @@ export const HIDDEN_PAGES: readonly HiddenPage[] = [
       "A four-week IELTS course as a reader: a course tree, one chapter at a time, audio, and a mock exam.",
     group: "Learning",
     access: "Direct URL only",
-    noindex: true,
+    noindex: false,
   },
   {
     path: "/ai-workflow",
