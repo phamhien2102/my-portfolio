@@ -954,3 +954,69 @@
   justify-content: flex-end;
   margin-top: 1.2rem;
 }
+
+/* official tests list */
+.mx-app .mx-official-list {
+  list-style: none;
+  padding: 0 !important;
+}
+
+.mx-app .mx-official-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.1rem 0.8rem;
+  padding: 0.6rem 0;
+  border-top: 1px dashed var(--line-strong);
+}
+
+.mx-app .mx-official-list a {
+  font-weight: 800;
+}
+
+.mx-app .mx-official-note {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.mx-app .mx-cost {
+  align-self: start;
+  padding: 0 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+}
+
+.mx-app .mx-cost.free {
+  background: #dff3e6;
+}
+
+.mx-app .mx-cost.paid {
+  background: #f6e9b2;
+}
+
+/* not while a test is running */
+.mx-app:has(.mx-run) .mx-official {
+  display: none;
+}
+
+/* choosing between several tests of one skill */
+.mx-app .mx-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.mx-app .mx-picker button {
+  padding: 0.4rem 0.85rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--ink);
+  cursor: pointer;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+}

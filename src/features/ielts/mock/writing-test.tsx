@@ -67,8 +67,8 @@ function Checklist({ items, name }: { items: string[]; name: string }) {
   );
 }
 
-export function WritingTest({ test }: { test: WritingData }) {
-  const [run, setRun] = usePersisted(`ielts.mock.writing.${test.band}`, EMPTY);
+export function WritingTest({ test, slot = "" }: { test: WritingData; slot?: string }) {
+  const [run, setRun] = usePersisted(`ielts.mock.writing.${test.band}${slot}`, EMPTY);
   const now = useNow();
   const [tab, setTab] = useState<1 | 2>(1);
   const [ideas, setIdeas] = useState(false);

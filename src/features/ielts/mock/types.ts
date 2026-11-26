@@ -138,3 +138,15 @@ export function bandFromRaw(raw: number): number {
   for (const [min, band] of CONVERSION) if (raw >= min) return band;
   return 2;
 }
+
+/**
+ * A test on the page. `official` is for tests the course owner supplies; `practice` for the ones
+ * written for this app. The label is what the reader sees on the tab ("Mock test 1 (official)").
+ */
+export interface MockEntry<T> {
+  /** Stable, used in the saved-progress key. The first entry of a skill keeps the old key. */
+  id: string;
+  label: string;
+  kind: "practice" | "official";
+  test: T;
+}
