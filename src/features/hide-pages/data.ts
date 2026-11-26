@@ -53,7 +53,7 @@ export const HIDDEN_PAGES: readonly HiddenPage[] = [
     path: "/products",
     title: "Products",
     blurb:
-      "The entry point of the three pages that are going live: IELTS, Design System, Algo Lab.",
+      "The entry point of the four pages that are live: IELTS, Design System, Algo Lab, Custom Resume.",
     group: "Learning",
     access: "Direct URL only",
     noindex: false,
@@ -74,6 +74,15 @@ export const HIDDEN_PAGES: readonly HiddenPage[] = [
       "An interactive data structures and algorithms course: animated, step-by-step diagrams from arrays to graphs.",
     group: "Learning",
     access: "Direct URL only",
+    noindex: true,
+  },
+  {
+    path: "/custom-resume",
+    title: "Custom Resume",
+    blurb:
+      "A CV builder: six templates, live A4 preview, drag-to-reorder sections, PDF export that can be imported back.",
+    group: "Personal",
+    access: "Card on /products (desktop only)",
     noindex: true,
   },
   {

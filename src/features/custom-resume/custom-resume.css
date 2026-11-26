@@ -1,0 +1,180 @@
+/* The resume fonts. The same TTF files are measured for the layout and embedded in the PDF, so the
+   preview has to draw with exactly these files. */
+@font-face {
+  font-family: "CV Be Vietnam Pro";
+  src: url("/fonts/resume/BeVietnamPro-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV Be Vietnam Pro";
+  src: url("/fonts/resume/BeVietnamPro-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV Be Vietnam Pro";
+  src: url("/fonts/resume/BeVietnamPro-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV IBM Plex Serif";
+  src: url("/fonts/resume/IBMPlexSerif-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV IBM Plex Serif";
+  src: url("/fonts/resume/IBMPlexSerif-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV IBM Plex Serif";
+  src: url("/fonts/resume/IBMPlexSerif-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV Tinos";
+  src: url("/fonts/resume/Tinos-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV Tinos";
+  src: url("/fonts/resume/Tinos-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV Tinos";
+  src: url("/fonts/resume/Tinos-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV IBM Plex Mono";
+  src: url("/fonts/resume/IBMPlexMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV IBM Plex Mono";
+  src: url("/fonts/resume/IBMPlexMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "CV IBM Plex Mono";
+  src: url("/fonts/resume/IBMPlexMono-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+
+/* No kerning or ligatures: the PDF has none, so widths must agree. */
+.cv-page text {
+  font-kerning: none;
+  font-variant-ligatures: none;
+  text-rendering: geometricPrecision;
+  white-space: pre;
+}
+.cv-page a text {
+  cursor: pointer;
+}
+
+/* Scroll areas that keep the page chrome still. */
+.cv-scroll {
+  scrollbar-width: thin;
+}
+
+/* ---- app chrome: the same warm-blue paper look as /ielts (see ielts.css) ------------------ */
+
+.resume-app {
+  color-scheme: light;
+  --paper: #edf3f8;
+  --paper-2: #f1f6fa;
+  --card: #f2f7fb;
+  --tile: #e1ebf4;
+  --line: #d3dfea;
+  --line-strong: #b6c8da;
+  --edge: #334556;
+  --ink: #12202c;
+  --muted: #5b6f82;
+  --green: #bddcf6;
+  --green-2: #86bfe8;
+  --green-tile: #e1effb;
+  --pop: 1.5px 2.5px 0 var(--ink);
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-jbm), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+}
+
+.resume-app :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.resume-app .brand-name > span {
+  background: linear-gradient(transparent 62%, var(--green-2) 62%);
+}
+
+.resume-app .ra-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.2rem;
+  padding: 0 0.9rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+  cursor: pointer;
+}
+
+.resume-app .ra-btn:hover {
+  background: var(--tile);
+}
+
+.resume-app .ra-btn.primary {
+  background: var(--green);
+}
+
+.resume-app .ra-btn.primary:hover {
+  background: var(--green-2);
+}
+
+.resume-app .ra-btn:disabled {
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--line-strong);
+  box-shadow: none;
+  cursor: default;
+}
+
+/* The A4 sheets keep their own white and ink; only the chrome around them is themed. */
+.resume-app .cv-page {
+  background: #fff;
+}
