@@ -392,6 +392,10 @@ function MobileNotice({ fontClassName }: { fontClassName: string }) {
           The CV editor needs a wider screen than a phone or small tablet has. Open this page on a
           computer (a window at least 1024 px wide) to build and export your CV.
         </p>
+        <p className="mt-3 text-xs leading-relaxed text-[var(--muted)]">
+          Six templates, a live A4 preview, drag-to-reorder sections, PDF and Word export, and a PDF
+          you can import back to keep editing.
+        </p>
         <Link href="/" className="ra-btn primary mt-5 justify-center no-underline">
           Back to the site
         </Link>

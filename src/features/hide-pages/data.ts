@@ -83,7 +83,7 @@ export const HIDDEN_PAGES: readonly HiddenPage[] = [
       "A CV builder: six templates, live A4 preview, drag-to-reorder sections, PDF export that can be imported back.",
     group: "Personal",
     access: "Card on /products (desktop only)",
-    noindex: true,
+    noindex: false,
   },
   {
     path: "/algorithms",
