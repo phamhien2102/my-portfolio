@@ -43,7 +43,7 @@ function upgradeOldSample(doc: ResumeDoc): ResumeDoc {
   const b = doc.data.basics;
   const e = doc.data.experience[0];
   const untouched =
-    b.name === "Trần Minh Anh" &&
+    (b.name === "Trần Minh Anh" || b.name === "Minh Anh Tran") &&
     e?.company === "Lumen Commerce" &&
     (b.title === "Senior Software Engineer" || b.title === "Kỹ sư phần mềm cao cấp");
   if (!untouched) return doc;

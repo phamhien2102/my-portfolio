@@ -154,14 +154,14 @@ export const EMPTY_DATA: ResumeData = {
 /** A software engineer, so every template has realistic content to show. */
 export const SAMPLE_DATA: ResumeData = {
   basics: {
-    name: "Minh Anh Tran",
+    name: "Raymond Pham",
     title: "Senior Software Engineer",
-    email: "minhanh.tran@example.com",
+    email: "raymond.pham@example.com",
     phone: "+84 90 123 4567",
     location: "Ho Chi Minh City, Vietnam",
-    website: "minhanh.dev",
-    linkedin: "linkedin.com/in/minhanh-tran",
-    github: "github.com/minhanh-tran",
+    website: "raymondpham.dev",
+    linkedin: "linkedin.com/in/raymond-pham",
+    github: "github.com/raymond-pham",
     avatar: "",
     extras: [],
   },
@@ -233,7 +233,7 @@ export const SAMPLE_DATA: ResumeData = {
     {
       id: "pr-1",
       name: "Tracewell",
-      link: "github.com/minhanh-tran/tracewell",
+      link: "github.com/raymond-pham/tracewell",
       tech: "Go, OpenTelemetry, ClickHouse",
       bullets: [
         "Open-source tracing viewer with 1.8k GitHub stars; ingests 50k spans per second on a single node.",
