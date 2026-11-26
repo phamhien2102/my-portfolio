@@ -48,6 +48,8 @@ in their `metadata`. Follow both halves when adding another one.
 Also add the page to `features/hide-pages/data.ts`, which is a hand-kept list that `/hide-pages` renders.
 Leave secret-bypassing shortcuts (`/dating?jump=`) off it: that page is a public URL.
 
+**Indexable pages** are listed in `src/app/sitemap.ts` (and `robots.ts` announces it). Add a path there when a page becomes public; leave `noindex` pages out.
+
 ### Feature boundaries are enforced by ESLint
 
 `src/features/<name>/` holds `index.ts` (public API), `data.ts`, optional `config.ts`,
