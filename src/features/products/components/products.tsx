@@ -12,11 +12,30 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
+const COUNT_WORDS = [
+  "Zero",
+  "One",
+  "Two",
+  "Three",
+  "Four",
+  "Five",
+  "Six",
+  "Seven",
+  "Eight",
+  "Nine",
+  "Ten",
+];
+const countWord = (n: number) => COUNT_WORDS[n] ?? String(n);
+
 /**
- * /products: the front door of the four pages that are live. A light page in the same cool
+ * /products: the front door of the pages that are live. A light page in the same cool
  * blue and teal as the courses it points to, and, like them, it opts out of the dark shell.
  */
 export function Products() {
+  // The headline counts the products, so adding one to data.ts needs no edit here.
+  const title = `${countWord(PRODUCTS.length)} things to try.`;
+  const words = title.split(" ");
+
   return (
     <div data-page-theme="light" className={`pr-app ${mono.variable}`}>
       <header className="pr-topbar">
@@ -40,8 +59,8 @@ export function Products() {
             <i className="pr-ping" aria-hidden="true" />
             Now live
           </p>
-          <h1 aria-label="Four things to try.">
-            {["Four", "things", "to", "try."].map((word, i) => (
+          <h1 aria-label={title}>
+            {words.map((word, i) => (
               <span key={word} aria-hidden="true">
                 <span className="pr-word">
                   <span style={{ "--i": i } as CSSProperties}>{word}</span>
@@ -56,8 +75,8 @@ export function Products() {
         </div>
 
         <ul className="pr-grid">
-          {PRODUCTS.map((product) => (
-            <TiltCard key={product.path} tone={product.tone}>
+          {PRODUCTS.map((product, index) => (
+            <TiltCard key={product.path} tone={product.tone} index={index}>
               <Link
                 href={product.path}
                 target="_blank"
@@ -71,8 +90,8 @@ export function Products() {
                 <p className="pr-blurb">{product.blurb}</p>
 
                 <ul className="pr-facts" aria-label="Facts">
-                  {product.facts.map((fact) => (
-                    <li key={fact} className="pr-chip">
+                  {product.facts.map((fact, i) => (
+                    <li key={fact} className="pr-chip" style={{ "--c": i } as CSSProperties}>
                       {fact}
                     </li>
                   ))}

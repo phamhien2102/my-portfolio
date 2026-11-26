@@ -124,7 +124,19 @@
 .pr-app .pr-grid {
   display: grid;
   gap: 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* One column on a phone, then two across, however many cards there are. */
+@media (min-width: 48rem) {
+  .pr-app .pr-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* An odd number of cards: the last one takes the whole row instead of sitting alone on the left. */
+  .pr-app .pr-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }
 
 .pr-app .pr-card {
@@ -517,16 +529,9 @@
     transform-origin: 50% 100%;
   }
 
-  .pr-app .pr-card:nth-child(1) {
-    animation-delay: 0.8s;
-  }
-
-  .pr-app .pr-card:nth-child(2) {
-    animation-delay: 1s;
-  }
-
-  .pr-app .pr-card:nth-child(3) {
-    animation-delay: 1.2s;
+  /* Each card gets its place in the list as --i (see products.tsx), so a new card needs no CSS. */
+  .pr-app .pr-card {
+    animation-delay: calc(0.8s + var(--i, 0) * 0.2s);
   }
 
   .pr-app .pr-card h2 {
@@ -534,16 +539,8 @@
     animation: pr-draw 0.8s ease-out backwards;
   }
 
-  .pr-app .pr-card:nth-child(1) h2 {
-    animation-delay: 1.65s;
-  }
-
-  .pr-app .pr-card:nth-child(2) h2 {
-    animation-delay: 1.85s;
-  }
-
-  .pr-app .pr-card:nth-child(3) h2 {
-    animation-delay: 2.05s;
+  .pr-app .pr-card h2 {
+    animation-delay: calc(1.65s + var(--i, 0) * 0.2s);
   }
 
   /* Idle: the chips ripple in a wave, so the cards never sit completely still. */
@@ -551,12 +548,8 @@
     animation: pr-wave 2.8s ease-in-out infinite;
   }
 
-  .pr-app .pr-chip:nth-child(2) {
-    animation-delay: 0.25s;
-  }
-
-  .pr-app .pr-chip:nth-child(3) {
-    animation-delay: 0.5s;
+  .pr-app .pr-chip {
+    animation-delay: calc(var(--c, 0) * 0.25s);
   }
 
   /* Hover: the card leans towards the pointer (TiltCard sets --rx, --ry) and a light follows it. */
