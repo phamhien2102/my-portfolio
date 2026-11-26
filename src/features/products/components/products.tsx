@@ -42,9 +42,6 @@ export function Products() {
         <span className="pr-brand">
           <span>Raymond&rsquo;s Products</span>
         </span>
-        <Link href="/" className="pr-home">
-          Raymond Pham
-        </Link>
       </header>
 
       <div className="pr-deco" aria-hidden="true">
