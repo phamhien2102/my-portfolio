@@ -1,0 +1,956 @@
+/* The mock tests (/ielts/mock/<band>). Same paper, ink and pop-shadow look as the course reader; the
+   variables come from .ielts-app in ../ielts.css. Everything is scoped under .mx-app. */
+
+.mx-app .mx-main {
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.mx-app h1 {
+  margin: 0.2rem 0 1rem;
+  font-size: 1.8rem;
+}
+
+.mx-app .mx-eyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.mx-app .mx-bands,
+.mx-app .mx-skills,
+.mx-app .mx-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mx-app .mx-bands {
+  margin-bottom: 0.9rem;
+}
+
+.mx-app .mx-bands a,
+.mx-app .mx-skills button,
+.mx-app .mx-tabs button,
+.mx-app .mx-mode button {
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+}
+
+.mx-app [aria-selected="true"],
+.mx-app .mx-mode [aria-pressed="true"] {
+  background: var(--green);
+  box-shadow: var(--pop);
+}
+
+.mx-app .mx-skills {
+  margin-bottom: 1.2rem;
+}
+
+.mx-app .mx-skills button {
+  display: grid;
+  gap: 0;
+  text-align: left;
+}
+
+.mx-app .mx-skills small {
+  font-size: 0.66rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* cards, buttons */
+
+.mx-app .mx-card {
+  margin: 0 0 1.2rem;
+  padding: 1.1rem 1.3rem;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--pop);
+}
+
+.mx-app .mx-card h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.15rem;
+}
+
+.mx-app .mx-card h3 {
+  margin: 1rem 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.mx-app .mx-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ink);
+  cursor: pointer;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+}
+
+.mx-app .mx-btn:hover {
+  background: var(--tile);
+}
+
+.mx-app .mx-btn.primary {
+  background: var(--green);
+}
+
+.mx-app .mx-btn.primary:hover {
+  background: var(--green-2);
+}
+
+.mx-app .mx-intro ul,
+.mx-app .mx-card ul,
+.mx-app .mx-card ol {
+  margin: 0.4rem 0 0.9rem;
+  padding-left: 1.2rem;
+}
+
+.mx-app .mx-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.mx-app .mx-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.mx-app .mx-links {
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
+}
+
+.mx-app .mx-links span {
+  color: var(--muted);
+}
+
+/* the running test: a bar, then passage | questions */
+
+.mx-app .mx-bar {
+  position: sticky;
+  top: calc(var(--topbar-h) + 0.4rem);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.9rem;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--pop);
+}
+
+.mx-app .mx-bar .mx-tabs {
+  margin-right: auto;
+}
+
+.mx-app .mx-clock {
+  min-width: 4.2rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  background: var(--tile);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+}
+
+.mx-app .mx-clock.is-low {
+  color: #fff;
+  background: var(--rust);
+}
+
+.mx-app .mx-count {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.mx-app .mx-split {
+  display: grid;
+  grid-template-columns: var(--mx-left, 50%) 12px minmax(0, 1fr);
+  gap: 0;
+}
+
+/* The writing test has no divider: two plain columns. */
+.mx-app .mx-writing .mx-split {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.mx-app .mx-gutter {
+  position: relative;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.mx-app .mx-gutter::after {
+  content: "";
+  position: absolute;
+  inset: 0 3px;
+  background: var(--line-strong);
+  border-radius: 3px;
+}
+
+.mx-app .mx-gutter:hover::after,
+.mx-app .mx-gutter:focus-visible::after {
+  background: var(--ink);
+}
+
+.mx-app .mx-passage,
+.mx-app .mx-questions {
+  max-height: calc(100svh - 13.5rem);
+  padding: 1rem 1.2rem;
+  overflow-y: auto;
+  background: #fbfdff;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+
+.mx-app .mx-passage h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.15rem;
+}
+
+.mx-app .mx-passage p {
+  margin: 0 0 0.8rem;
+  line-height: 1.75;
+}
+
+.mx-app .mx-label {
+  display: inline-block;
+  min-width: 1.6rem;
+  margin-right: 0.3rem;
+  padding: 0 0.35rem;
+  color: #fff;
+  text-align: center;
+  background: var(--ink);
+  border-radius: 4px;
+}
+
+.mx-app .mx-sub,
+.mx-app .mx-instructions,
+.mx-app .mx-limit {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.mx-app .mx-limit {
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* questions */
+
+.mx-app .mx-group {
+  margin-bottom: 1.6rem;
+}
+
+.mx-app .mx-group h3 {
+  margin: 0 0 0.3rem;
+  padding-bottom: 0.3rem;
+  font-size: 0.95rem;
+  border-bottom: 1.5px solid var(--ink);
+}
+
+.mx-app .mx-choices {
+  padding-left: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.mx-app .mx-choices li {
+  margin: 0.2rem 0;
+}
+
+.mx-app .mx-questions-list {
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mx-app .mx-q {
+  display: flex;
+  gap: 0.7rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.mx-app .mx-n {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: var(--tile);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+}
+
+.mx-app .mx-q-body {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.88rem;
+}
+
+.mx-app .mx-q-body p {
+  margin: 0 0 0.4rem;
+}
+
+.mx-app .mx-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.mx-app .mx-options.stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.mx-app .mx-opt {
+  padding: 0.3rem 0.7rem;
+  font: inherit;
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+  background: var(--card);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 8px;
+}
+
+.mx-app .mx-opt:hover {
+  border-color: var(--ink);
+}
+
+.mx-app .mx-opt[aria-checked="true"] {
+  font-weight: 800;
+  background: var(--green);
+  border-color: var(--ink);
+}
+
+.mx-app .mx-gap,
+.mx-app .mx-select,
+.mx-app .mx-sheet input,
+.mx-app .mx-manual input {
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+}
+
+.mx-app .mx-gap {
+  width: 9rem;
+  margin: 0 0.3rem;
+}
+
+.mx-app .mx-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.9rem;
+}
+
+.mx-app .mx-nav button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+}
+
+.mx-app .mx-nav button.is-done {
+  background: var(--green);
+}
+
+/* writing */
+
+.mx-app .mx-prompt {
+  font-weight: 700;
+}
+
+.mx-app .mx-textarea {
+  width: 100%;
+  min-height: 24rem;
+  padding: 0.8rem 1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  resize: vertical;
+}
+
+.mx-app .mx-textarea.short {
+  min-height: 9rem;
+}
+
+.mx-app .mx-words {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.mx-app .mx-words.is-ok {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.mx-app .mx-figure {
+  margin: 1rem 0;
+}
+
+.mx-app .mx-figure figcaption {
+  margin-bottom: 0.4rem;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.mx-app .mx-chart {
+  width: 100%;
+  height: auto;
+  background: #fff;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+
+.mx-app .mx-table-wrap {
+  overflow-x: auto;
+}
+
+.mx-app .mx-data,
+.mx-app .mx-review {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.mx-app .mx-data th,
+.mx-app .mx-data td,
+.mx-app .mx-review th,
+.mx-app .mx-review td {
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid var(--line-strong);
+}
+
+.mx-app .mx-data th,
+.mx-app .mx-review th {
+  background: var(--tile);
+}
+
+.mx-app .mx-ideas {
+  font-size: 0.85rem;
+}
+
+.mx-app .mx-two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.mx-app .mx-essay {
+  padding: 0.8rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  background: #fbfdff;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+
+.mx-app .mx-check {
+  list-style: none;
+  padding-left: 0 !important;
+}
+
+.mx-app .mx-check li {
+  margin: 0.3rem 0;
+  font-size: 0.85rem;
+}
+
+.mx-app .mx-check input {
+  margin-right: 0.5rem;
+  accent-color: var(--ink);
+}
+
+/* results */
+
+.mx-app .mx-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 0.8rem 0;
+}
+
+.mx-app .mx-stat {
+  display: grid;
+  min-width: 7rem;
+  padding: 0.5rem 0.9rem;
+  background: var(--tile);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+}
+
+.mx-app .mx-stat span {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.mx-app .mx-stat b {
+  font-size: 1.3rem;
+}
+
+.mx-app .mx-review tr.is-right td:first-child {
+  background: #dff3e6;
+}
+
+.mx-app .mx-review tr.is-wrong td:first-child {
+  background: #f9dcd6;
+}
+
+.mx-app .mx-manual {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.8rem 0;
+  font-size: 0.85rem;
+}
+
+.mx-app .mx-manual input {
+  width: 5rem;
+}
+
+/* listening sheet */
+
+.mx-app .mx-sheet-wrap {
+  display: grid;
+  gap: 1rem;
+}
+
+.mx-app .mx-sheet {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.5rem 1rem;
+  padding: 0.8rem 1rem 1rem;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+}
+
+.mx-app .mx-sheet legend {
+  padding: 0 0.4rem;
+  font-weight: 800;
+}
+
+.mx-app .mx-sheet label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mx-app .mx-sheet label span {
+  width: 1.8rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.mx-app .mx-sheet input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* speaking */
+
+.mx-app .mx-cue {
+  padding: 0.8rem 1.1rem;
+  background: var(--card);
+  border: 1.5px dashed var(--ink);
+  border-radius: var(--radius);
+}
+
+.mx-app .mx-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.mx-app .mx-recorder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+
+.mx-app .mx-rec {
+  color: var(--rust);
+  font-weight: 800;
+}
+
+@media (max-width: 62rem) {
+  .mx-app .mx-split,
+  .mx-app .mx-writing .mx-split,
+  .mx-app .mx-two {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .mx-app .mx-gutter {
+    display: none;
+  }
+
+  .mx-app .mx-passage,
+  .mx-app .mx-questions {
+    max-height: none;
+  }
+}
+
+/* ---- the exam screen: tools, flags, palette, review, marking text ---------------------------- */
+
+/* While a test is running the course chrome steps aside, like the real exam screen. */
+.mx-app:has(.mx-run) > .topbar,
+.mx-app:has(.mx-run) .mx-eyebrow,
+.mx-app:has(.mx-run) h1,
+.mx-app:has(.mx-run) .mx-bands,
+.mx-app:has(.mx-run) .mx-skills {
+  display: none;
+}
+
+.mx-app:has(.mx-run) .mx-main {
+  padding-top: 0.6rem;
+  max-width: none;
+}
+
+.mx-app:has(.mx-run) .mx-bar {
+  top: 0.4rem;
+}
+
+.mx-app .mx-title {
+  font-size: 0.95rem;
+}
+
+.mx-app .mx-tools,
+.mx-app .mx-clockbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.mx-app .mx-tool {
+  padding: 0.3rem 0.6rem;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+}
+
+.mx-app .mx-tool:hover:not(:disabled) {
+  background: var(--tile);
+}
+
+.mx-app .mx-tool:disabled {
+  color: var(--muted);
+  cursor: default;
+  border-color: var(--line-strong);
+}
+
+.mx-app .mx-tool[aria-pressed="true"] {
+  background: var(--green);
+}
+
+.mx-app .mx-clock.is-hidden {
+  min-width: 6.5rem;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+/* text size: scales the passage and the questions together */
+.mx-app .mx-passage,
+.mx-app .mx-questions {
+  zoom: var(--mx-zoom, 1);
+}
+
+.mx-app .mx-hint {
+  margin: 0 0 0.8rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* highlights and notes in the passage */
+.mx-app .mx-hl {
+  padding: 0.05em 0;
+  color: inherit;
+  cursor: pointer;
+  background: var(--mark);
+  border-radius: 3px;
+}
+
+.mx-app .mx-hl.has-note {
+  border-bottom: 2px solid var(--rust);
+}
+
+.mx-app .mx-tip {
+  position: fixed;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.35rem;
+  transform: translate(-50%, calc(-100% - 8px));
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: var(--pop);
+}
+
+.mx-app .mx-tip:not(.mx-note-pop) {
+  flex-direction: row;
+}
+
+.mx-app .mx-tip button {
+  padding: 0.25rem 0.6rem;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+}
+
+.mx-app .mx-tip button:hover {
+  background: var(--mark);
+}
+
+.mx-app .mx-note-pop {
+  width: 16rem;
+}
+
+.mx-app .mx-note-pop textarea {
+  min-height: 5rem;
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.mx-app .mx-note-pop div {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: space-between;
+}
+
+/* a flag on every question */
+.mx-app .mx-n-col {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.mx-app .mx-flag {
+  padding: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--line-strong);
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.mx-app .mx-flag:hover {
+  color: var(--muted);
+}
+
+.mx-app .mx-flag[aria-pressed="true"] {
+  color: var(--rust);
+}
+
+/* the question palette along the bottom */
+.mx-app .mx-palette {
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.4rem;
+  padding: 0.55rem 0.9rem;
+  margin-top: 0.9rem;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--pop);
+}
+
+.mx-app .mx-part {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mx-app .mx-part-name {
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.mx-app .mx-part-name small {
+  display: block;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.mx-app .mx-part-nums {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.mx-app .mx-palette .mx-part-nums button {
+  position: relative;
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: var(--card);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 6px;
+}
+
+.mx-app .mx-palette .mx-part-nums button.is-done {
+  background: var(--green);
+  border-color: var(--ink);
+}
+
+.mx-app .mx-palette .mx-part-nums button.is-current {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.mx-app .mx-palette .mx-part-nums button.is-flagged::after {
+  content: "⚑";
+  position: absolute;
+  top: -0.45rem;
+  right: -0.3rem;
+  font-size: 0.7rem;
+  color: var(--rust);
+}
+
+.mx-app .mx-arrows {
+  display: inline-flex;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+/* the review dialog */
+.mx-app .mx-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(18, 32, 44, 0.45);
+}
+
+.mx-app .mx-dialog {
+  width: min(34rem, 100%);
+  max-height: 88svh;
+  padding: 1.1rem 1.3rem;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 3px 5px 0 var(--ink);
+}
+
+.mx-app .mx-dialog h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+}
+
+.mx-app .mx-dialog h3 {
+  margin: 0.9rem 0 0.4rem;
+  font-size: 0.85rem;
+}
+
+.mx-app .mx-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.mx-app .mx-chips button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+}
+
+.mx-app .mx-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 1.2rem;
+}
