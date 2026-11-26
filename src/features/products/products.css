@@ -74,17 +74,6 @@
   background: linear-gradient(transparent 62%, var(--blue-2) 62%);
 }
 
-.pr-app .pr-home {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--muted);
-  text-decoration: none;
-}
-
-.pr-app .pr-home:hover {
-  color: var(--ink);
-}
-
 /* ---- hero ------------------------------------------------------------------------- */
 
 .pr-app .pr-shell {
@@ -434,14 +423,16 @@
     animation-delay: -4.5s;
   }
 
-  .pr-app .pr-topbar,
   .pr-app .pr-shell {
     position: relative;
     z-index: 2;
   }
 
+  /* The header has to stay above the page content it sticks over: it was sharing z-index 2 with
+     the content (which comes later in the DOM), so cards painted over it while scrolling. */
   .pr-app .pr-topbar {
     position: sticky;
+    z-index: 30;
   }
 
   /* Shapes that float and turn behind the cards. */
