@@ -84,7 +84,6 @@ export function Products() {
                 className="pr-card-link"
                 aria-label={`${product.cta} (opens in a new tab)`}
               >
-                <span className="pr-path">{product.path}</span>
                 <h2>{product.name}</h2>
                 <p className="pr-tagline">{product.tagline}</p>
                 <p className="pr-blurb">{product.blurb}</p>

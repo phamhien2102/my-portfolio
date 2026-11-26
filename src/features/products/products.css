@@ -180,19 +180,8 @@
   box-shadow: 4px 6px 0 var(--ink);
 }
 
-.pr-app .pr-path {
-  align-self: flex-start;
-  padding: 0 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--tint-ink);
-  background: var(--tint);
-  border: 1px solid var(--tint-2);
-  border-radius: 999px;
-}
-
 .pr-app .pr-card h2 {
-  margin: 0.8rem 0 0;
+  margin: 0;
   font-size: 1.45rem;
   line-height: 1.2;
   font-weight: 800;
