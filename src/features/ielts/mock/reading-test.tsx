@@ -153,8 +153,8 @@ function Group({
   );
 }
 
-export function ReadingTest({ test }: { test: ReadingTestData }) {
-  const [run, setRun] = usePersisted(`ielts.mock.reading.${test.band}`, EMPTY_RUN);
+export function ReadingTest({ test, slot = "" }: { test: ReadingTestData; slot?: string }) {
+  const [run, setRun] = usePersisted(`ielts.mock.reading.${test.band}${slot}`, EMPTY_RUN);
   const [ui, setUi] = useUi();
   const now = useNow();
   const [tab, setTab] = useState(0);

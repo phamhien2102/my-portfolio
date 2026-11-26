@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { READING, SPEAKING, WRITING } from "./data";
 import { ListeningTest } from "./listening-test";
+import { OfficialTests } from "./official-tests";
 import { usePersisted } from "./store";
+import type { MockEntry } from "./types";
 import { ReadingTest } from "./reading-test";
 import { SpeakingTest } from "./speaking-test";
 import { BANDS, type Band } from "./types";
@@ -71,11 +74,72 @@ export function MockExamApp({ band, fontClassName }: { band: Band; fontClassName
           ))}
         </div>
 
-        {skill === "reading" && <ReadingTest key={band} test={READING[band]} />}
-        {skill === "writing" && <WritingTest key={band} test={WRITING[band]} />}
+        {skill === "reading" && (
+          <Picked
+            key={band}
+            list={READING[band]}
+            render={(e, slot) => <ReadingTest key={e.id} test={e.test} slot={slot} />}
+          />
+        )}
+        {skill === "writing" && (
+          <Picked
+            key={band}
+            list={WRITING[band]}
+            render={(e, slot) => <WritingTest key={e.id} test={e.test} slot={slot} />}
+          />
+        )}
         {skill === "listening" && <ListeningTest key={band} band={band} />}
-        {skill === "speaking" && <SpeakingTest key={band} test={SPEAKING[band]} />}
+        {skill === "speaking" && (
+          <Picked
+            key={band}
+            list={SPEAKING[band]}
+            render={(e) => <SpeakingTest key={e.id} test={e.test} />}
+          />
+        )}
+
+        <OfficialTests
+          skill={skill}
+          title={`Real ${SKILLS.find((x) => x.id === skill)?.label} tests`}
+        />
       </main>
     </div>
+  );
+}
+
+/**
+ * Shows the tests of one skill. With more than one (for example a supplied official test next to the
+ * practice test) a row of buttons picks which one to take; with one there is nothing to pick.
+ */
+function Picked<T>({
+  list,
+  render,
+}: {
+  list: MockEntry<T>[];
+  render: (entry: MockEntry<T>, slot: string) => React.ReactNode;
+}) {
+  const [index, setIndex] = useState(0);
+  const entry = list[Math.min(index, list.length - 1)];
+  // The first test keeps the original saved-progress key; later ones get their own.
+  const slot = entry === list[0] ? "" : `.${entry.id}`;
+  return (
+    <>
+      {list.length > 1 && (
+        <div className="mx-picker" role="tablist" aria-label="Which test">
+          {list.map((e, i) => (
+            <button
+              key={e.id}
+              role="tab"
+              type="button"
+              aria-selected={e === entry}
+              onClick={() => setIndex(i)}
+            >
+              {e.label}
+              {e.kind === "official" ? " (official)" : ""}
+            </button>
+          ))}
+        </div>
+      )}
+      {render(entry, slot)}
+    </>
   );
 }

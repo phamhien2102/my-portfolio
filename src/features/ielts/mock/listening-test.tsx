@@ -5,28 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import { normalise } from "./marking";
 import { Countdown, ExamTools, Intro, Stat } from "./exam-parts";
 import { clock, useNow, usePersisted } from "./store";
+import { OFFICIAL_TESTS } from "./official";
 import { bandFromRaw } from "./types";
 
 const MINUTES = 40; // 30 listening + 10 to copy answers
 
-/** Free, official full tests: the recordings are theirs, so the test is taken on their site. */
-const SOURCES = [
-  {
-    name: "IELTS.org · Academic sample tests",
-    url: "https://ielts.org/take-a-test/preparation-resources/sample-test-questions/academic-test",
-    note: "Official sample questions with audio.",
-  },
-  {
-    name: "British Council · IELTS Ready",
-    url: "https://takeielts.britishcouncil.org/prepare/ielts-ready",
-    note: "Free practice material from an official IELTS partner.",
-  },
-  {
-    name: "Cambridge · IELTS practice tests (book series)",
-    url: "https://www.cambridge.org/cambridgeenglish/catalog/cambridge-english-exams-ielts/ielts-21-practice-tests",
-    note: "Real past papers with audio; buy or borrow the book.",
-  },
-];
+const SOURCES = OFFICIAL_TESTS.filter((t) => t.skills.includes("listening"));
 
 interface ListeningRun {
   phase: "intro" | "running" | "done";
@@ -113,7 +97,10 @@ export function ListeningTest({ band }: { band: string }) {
                 <a href={s.url} target="_blank" rel="noopener noreferrer">
                   {s.name}
                 </a>
-                <span> — {s.note}</span>
+                <span>
+                  {" "}
+                  · {s.cost} — {s.note}
+                </span>
               </li>
             ))}
           </ul>
