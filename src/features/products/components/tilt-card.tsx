@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type PointerEvent, type ReactNode } from "react";
+import { useRef, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 
 /**
  * A card that leans towards the pointer and carries a soft light under it. It only sets CSS
@@ -9,9 +9,12 @@ import { useRef, type PointerEvent, type ReactNode } from "react";
  */
 export function TiltCard({
   tone,
+  index,
   children,
 }: {
   tone: "blue" | "teal" | "indigo";
+  /** Position in the list; the entrance animation is staggered by it. */
+  index: number;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLLIElement>(null);
@@ -35,7 +38,14 @@ export function TiltCard({
   }
 
   return (
-    <li ref={ref} className="pr-card" data-tone={tone} onPointerMove={move} onPointerLeave={leave}>
+    <li
+      ref={ref}
+      className="pr-card"
+      data-tone={tone}
+      style={{ "--i": index } as CSSProperties}
+      onPointerMove={move}
+      onPointerLeave={leave}
+    >
       {children}
     </li>
   );
