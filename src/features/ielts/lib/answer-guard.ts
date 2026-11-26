@@ -129,7 +129,20 @@ const FOLD_ALL =
   '<button type="button" data-fold-all="open">Expand all exercises</button>' +
   '<button type="button" data-fold-all="close">Collapse all</button></div>';
 
+/**
+ * The three Mock Exam chapters only describe the test. Put a button at the top of each that opens the
+ * test itself (/ielts/mock/<band>), where it can actually be taken.
+ */
+const MOCK_CHAPTER = /^p-mock-exam-1-band-(56|67|78)-overview$/;
+
+const takeTheTest = (band: string) =>
+  '<aside class="note take-test"><p><strong>Take this test in the app</strong></p>' +
+  "<p>Timed Reading and Writing, an answer sheet for Listening, and Speaking practice with a recorder. " +
+  `Reading is marked for you and converted to a band.</p><p><a class="btn primary" href="/ielts/mock/${band}">Start the mock test</a></p></aside>`;
+
 export function guardChapterHtml(html: string, chapterId: string): string {
+  const mock = MOCK_CHAPTER.exec(chapterId);
+  if (mock) return html.replace(/(<\/header>)/, `$1${takeTheTest(mock[1])}`);
   if (!hasAnswers(chapterId)) return html;
   html = labelExercises(html);
 
