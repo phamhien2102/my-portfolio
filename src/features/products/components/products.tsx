@@ -13,7 +13,7 @@ const mono = JetBrains_Mono({
 });
 
 /**
- * /products: the front door of the three pages that are going live. A light page in the same cool
+ * /products: the front door of the four pages that are live. A light page in the same cool
  * blue and teal as the courses it points to, and, like them, it opts out of the dark shell.
  */
 export function Products() {
@@ -40,8 +40,8 @@ export function Products() {
             <i className="pr-ping" aria-hidden="true" />
             Now live
           </p>
-          <h1 aria-label="Three things to learn from.">
-            {["Three", "things", "to", "learn", "from."].map((word, i) => (
+          <h1 aria-label="Four things to try.">
+            {["Four", "things", "to", "try."].map((word, i) => (
               <span key={word} aria-hidden="true">
                 <span className="pr-word">
                   <span style={{ "--i": i } as CSSProperties}>{word}</span>
@@ -50,8 +50,8 @@ export function Products() {
             ))}
           </h1>
           <p className="pr-sub">
-            Small, hands-on courses I built and run myself. Pick one to start; each remembers where
-            you stopped.
+            Small, hands-on courses and tools I built and run myself. Pick one to start; each
+            remembers where you stopped.
           </p>
         </div>
 

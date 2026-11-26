@@ -64,4 +64,19 @@ export const PRODUCTS: readonly Product[] = [
     tone: "indigo",
     cta: "Open Algo Lab",
   },
+  {
+    path: "/custom-resume",
+    name: "Custom Resume",
+    tagline: "A CV you can edit, preview and re-import.",
+    blurb:
+      "Pick one of six templates, fill in your details with a live A4 preview beside you, then export a PDF or a Word file. A PDF exported here can be imported back to keep editing.",
+    facts: ["6 templates", "PDF + Word", "Desktop only"],
+    highlights: [
+      "Drag sections and entries into the order you want",
+      "Add a photo, icons, custom sections and a watermark",
+      "Your draft is saved in this browser",
+    ],
+    tone: "blue",
+    cta: "Open Custom Resume",
+  },
 ];
