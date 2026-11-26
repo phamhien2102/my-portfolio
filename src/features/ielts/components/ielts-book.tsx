@@ -1,6 +1,7 @@
 import { JetBrains_Mono } from "next/font/google";
 
 import { BOOK } from "../data";
+import { guardChapterHtml } from "../lib/answer-guard";
 import { buildOutline } from "../lib/outline";
 import "../ielts.css";
 import { IeltsApp } from "./ielts-app";
@@ -31,7 +32,7 @@ export function IeltsBook() {
             id={chapter.id}
             className="chapter"
             hidden={chapter.id !== first}
-            dangerouslySetInnerHTML={{ __html: chapter.html }}
+            dangerouslySetInnerHTML={{ __html: guardChapterHtml(chapter.html, chapter.id) }}
           />
         )),
       )}
