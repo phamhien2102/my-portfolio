@@ -18,6 +18,10 @@ import { useProgress } from "../lib/progress";
 import { useFlashcards, useNotes, type Note } from "../lib/study-store";
 import { FlashcardsPanel } from "./flashcards-panel";
 import { NotesPanel } from "./notes-panel";
+import { AnswersPopover } from "./answers-popover";
+import { AudioDock } from "./audio-dock";
+import { FoldAll } from "./fold-all";
+import { TranscriptMode } from "./transcript-mode";
 import { ChevronsIcon, SideFloat } from "./side-float";
 import { StudyTools } from "./study-tools";
 
@@ -294,6 +298,11 @@ export function IeltsApp({ title, outline, fontClassName, children }: Props) {
           </div>
           {/* Keyed so a new chapter starts with no tooltip or dialog. */}
           <StudyTools key={active.id} stageRef={stageRef} chapterId={active.id} />
+          {/* Keyed too: a recording stops when the chapter changes. */}
+          <AudioDock key={`audio-${active.id}`} stageRef={stageRef} />
+          <TranscriptMode stageRef={stageRef} />
+          <FoldAll stageRef={stageRef} />
+          <AnswersPopover key={`pop-${active.id}`} stageRef={stageRef} />
 
           <nav className="lesson-foot" aria-label="Chapters">
             {previous ? (
