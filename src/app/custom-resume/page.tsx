@@ -5,9 +5,7 @@ import { CustomResume } from "@/features/custom-resume";
 export const metadata: Metadata = {
   title: "Custom Resume",
   description:
-    "Build a CV from three templates, preview it live and export a PDF you can re-import.",
-  // A personal tool that stores CV details in the browser: keep it out of search results.
-  robots: { index: false, follow: false },
+    "Build a CV from six templates with a live A4 preview, then export a PDF with selectable text or a Word file. A PDF exported here can be imported back to keep editing.",
 };
 
 export default function CustomResumePage() {
