@@ -127,15 +127,15 @@ export const latencyThroughput: Lesson = {
         { label: "Throughput", value: "6  vs  100 per min" },
       ],
       scene: {
-        show: ["you", "web", "w1", "w2"],
-        labels: { you: "cars", web: "junction", w1: "One lane", w2: "100 lanes" },
+        show: ["you", "web", "w1", "w3"],
+        labels: { you: "cars", web: "junction", w1: "One lane", w3: "100 lanes" },
         badges: {
           w1: "10 s per car · 6 per min",
-          w2: "60 s per car · 100 per min",
+          w3: "60 s per car · 100 per min",
         },
         flows: [
           { link: "a", label: "fast, but narrow" },
-          { link: "b", delay: 0.3, label: "slow, but wide" },
+          { link: "c", delay: 0.3, label: "slow, but wide" },
         ],
       },
     },

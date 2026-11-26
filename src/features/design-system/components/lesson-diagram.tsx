@@ -258,6 +258,26 @@ export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
     const reach = Math.abs(nx) * (w * 0.3) + Math.abs(ny) * 13 + 6;
     return [{ x: (a.x + b.x) / 2 + nx * reach, y: (a.y + b.y) / 2 + ny * reach, w, h: 21 }];
   });
+  // The caption under a block sits at the block's own x. Two blocks side by side can have captions
+  // that run into each other, so a caption that would overlap one already placed drops a row.
+  const badgeSpots = new Map<string, { x: number; y: number }>();
+  const placedBadges: Box[] = [];
+  for (const n of [...nodes].sort((p, q) => p.y - q.y || p.x - q.x)) {
+    const text = scene.badges?.[n.id];
+    if (!shown.has(n.id) || !text) continue;
+    const w = text.length * 6 + 16;
+    const x = Math.min(Math.max(n.x, w / 2 + 4), VIEW_W - w / 2 - 4);
+    let y = (n.kind === "user" ? n.y + 118 : n.y + 66) + 8.5;
+    for (
+      let row = 0;
+      row < 3 && placedBadges.some((q) => overlaps({ x, y, w, h: 17 }, q, 3));
+      row++
+    )
+      y += 20;
+    placedBadges.push({ x, y, w, h: 17 });
+    badgeSpots.set(n.id, { x, y: y - 8.5 });
+  }
+
   const flowSpots = settleTags(
     flows.map((flow) => {
       const link = links.find((l) => l.id === flow.link);
@@ -265,6 +285,31 @@ export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
       return { flow, geometry: geometry(link, flow.reverse) };
     }),
     pillBoxes,
+    nodes
+      .filter((n) => shown.has(n.id))
+      .flatMap((n) => {
+        const user = n.kind === "user";
+        const boxes: Box[] = [
+          user ? { x: n.x, y: n.y + 40, w: 190, h: 120 } : { x: n.x, y: n.y + 6, w: 96, h: 100 },
+        ];
+        // What is written around the block is in the way too: its caption, its bubble and its name.
+        const label = scene.labels?.[n.id] ?? n.label;
+        const badge = scene.badges?.[n.id];
+        const spot = badgeSpots.get(n.id);
+        if (badge && spot)
+          boxes.push({ x: spot.x, y: spot.y + 8.5, w: badge.length * 6 + 16, h: 17 });
+        const bubble = scene.bubbles?.[n.id];
+        if (bubble) {
+          boxes.push({
+            x: user ? n.x - 32 : n.x,
+            y: user ? n.y - 98 : n.y - 66,
+            w: tagBox(asTag(bubble)),
+            h: 21,
+          });
+        }
+        if (user) boxes.push({ x: n.x, y: n.y + 98, w: label.length * 6.2 + 38, h: 22 });
+        return boxes;
+      }),
   );
 
   const camera = fitCamera(
@@ -401,6 +446,7 @@ export function LessonDiagram({ nodes, links, scene, sceneKey, title }: Props) {
               <BlockNotes
                 key={n.id}
                 node={n}
+                badgeSpot={badgeSpots.get(n.id)}
                 badge={scene.badges?.[n.id]}
                 bubble={scene.bubbles?.[n.id] ? asTag(scene.bubbles[n.id]) : undefined}
                 label={scene.labels?.[n.id]}
@@ -808,8 +854,11 @@ function BlockNotes({
   badge,
   bubble,
   label,
+  badgeSpot,
 }: {
   node: DiagramNode;
+  /** Where the caption goes (its centre x and top y), after captions have been kept apart. */
+  badgeSpot?: { x: number; y: number };
   badge?: string;
   bubble?: Tag;
   label?: string;
@@ -820,8 +869,8 @@ function BlockNotes({
   const cube = !isUser;
   const youW = node.label.length * 6.2 + 38;
   const badgeW = badge ? badge.length * 6 + 16 : 0;
-  const badgeX = Math.min(Math.max(x, badgeW / 2 + 4), VIEW_W - badgeW / 2 - 4);
-  const badgeY = cube ? y + 66 : y + 118;
+  const badgeX = badgeSpot?.x ?? Math.min(Math.max(x, badgeW / 2 + 4), VIEW_W - badgeW / 2 - 4);
+  const badgeY = badgeSpot?.y ?? (cube ? y + 66 : y + 118);
   return (
     <g className="ds-notes" data-drop={`note:${node.id}`}>
       {bubble && (
@@ -895,47 +944,57 @@ interface Box {
 const overlaps = (p: Box, q: Box, gap = 4) =>
   Math.abs(p.x - q.x) < (p.w + q.w) / 2 + gap && Math.abs(p.y - q.y) < (p.h + q.h) / 2 + gap;
 
+/** Candidate offsets around a tag's default spot, nearest first. */
+const SEARCH: Array<[number, number]> = (() => {
+  const out: Array<[number, number]> = [[0, 0]];
+  for (let r = 18; r <= 108; r += 18) {
+    const steps = Math.round((2 * Math.PI * r) / 22);
+    for (let i = 0; i < steps; i++) {
+      const t = (2 * Math.PI * i) / steps;
+      out.push([Math.round(Math.cos(t) * r), Math.round(Math.sin(t) * r * 0.8)]);
+    }
+  }
+  return out;
+})();
+
 /**
- * Settles the tags of a step's flows so no two of them (nor a pill that sits on a link) cover each
- * other: each tag takes its default spot, and if that is taken it slides along its link, then out
- * from it, to the nearest free one. Tags come in the order the step lists them, so the first keeps
- * its place.
+ * Settles the tags of a step's flows so none covers another tag, a pill that sits on a link, or a
+ * block: each tag takes its default spot, and if that is taken it moves to the nearest free spot
+ * around it. If nothing near is free it takes the spot with the least overlap. Tags come in the
+ * order the step lists them, so the first keeps its place.
  */
 function settleTags(
   items: Array<{ flow: Flow; geometry: { a: Point; b: Point } } | null>,
   taken: Box[],
+  blocks: Box[],
 ): Array<{ x: number; y: number } | null> {
   const placed = [...taken];
+  const overlapArea = (p: Box, q: Box) =>
+    Math.max(0, Math.min(p.x + p.w / 2, q.x + q.w / 2) - Math.max(p.x - p.w / 2, q.x - q.w / 2)) *
+    Math.max(0, Math.min(p.y + p.h / 2, q.y + q.h / 2) - Math.max(p.y - p.h / 2, q.y - q.h / 2));
   return items.map((item) => {
     if (!item || !item.flow.label) return null;
     const base = flowTagSpot(item.flow, item.geometry);
     const h = 22;
-    const tries: Array<[number, number]> = [[0, 0]];
-    for (const out of [0, 1, 2]) {
-      for (const along of [0, 1, -1, 2, -2, 3, -3]) {
-        if (out === 0 && along === 0) continue;
-        tries.push([along * 24, out * 22]);
+    let best = { x: base.x, y: base.y };
+    let bestCost = Infinity;
+    for (const [dx, dy] of SEARCH) {
+      const box = { x: base.x + dx, y: base.y + dy, w: base.w, h };
+      const clash = placed.some((q) => overlaps(box, q)) || blocks.some((q) => overlaps(box, q, 2));
+      // A free spot costs only its distance; a taken one costs its overlap, so the least bad wins.
+      const cost =
+        Math.hypot(dx, dy) +
+        (clash
+          ? 10000 + [...placed, ...blocks].reduce((sum, q) => sum + overlapArea(box, q), 0)
+          : 0);
+      if (cost < bestCost) {
+        bestCost = cost;
+        best = { x: box.x, y: box.y };
+        if (!clash) break;
       }
     }
-    // "Out" keeps the side the tag was on: along the same normal as its default spot.
-    const nx = base.ty;
-    const ny = -base.tx;
-    const sx =
-      Math.sign(
-        (base.x - (item.geometry.a.x + item.geometry.b.x) / 2) * nx +
-          (base.y - (item.geometry.a.y + item.geometry.b.y) / 2) * ny,
-      ) || 1;
-    let spot = { x: base.x, y: base.y };
-    for (const [along, out] of tries) {
-      const x = base.x + base.tx * along + nx * sx * out;
-      const y = base.y + base.ty * along + ny * sx * out;
-      if (!placed.some((q) => overlaps({ x, y, w: base.w, h }, q))) {
-        spot = { x, y };
-        break;
-      }
-    }
-    placed.push({ x: spot.x, y: spot.y, w: base.w, h });
-    return spot;
+    placed.push({ x: best.x, y: best.y, w: base.w, h });
+    return best;
   });
 }
 
